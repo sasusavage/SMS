@@ -8,9 +8,12 @@ class Config:
     """Base configuration."""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'nacca-sms-secret-key-change-in-production'
     
-    # PostgreSQL Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://postgres:nbaSavage123@localhost:5432/schooldb' 
+    # PostgreSQL Database - fix postgres:// -> postgresql:// for SQLAlchemy
+    _database_url = os.environ.get('DATABASE_URL', '')
+    if _database_url.startswith('postgres://'):
+        _database_url = _database_url.replace('postgres://', 'postgresql://', 1)
+    SQLALCHEMY_DATABASE_URI = _database_url or \
+        'postgresql://postgres:nbaSavage123@localhost:5432/schooldb'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,

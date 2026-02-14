@@ -84,7 +84,12 @@ class ProductionConfig(Config):
     
     # Override with environment variables in production
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    
+    # Fix for Coolify/Heroku: postgres:// -> postgresql://
+    _db_url = os.environ.get('DATABASE_URL', '')
+    if _db_url.startswith('postgres://'):
+        _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+    SQLALCHEMY_DATABASE_URI = _db_url
 
 
 class TestingConfig(Config):

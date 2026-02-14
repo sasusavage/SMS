@@ -1,0 +1,145 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Assign Subjects - {{ cls.name }} - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('classes.index') }}">Classes</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('classes.view', id=cls.id) }}">{{ cls.name }}</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Assign Subjects</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Assign Subjects</h1>
+    <p class="page-subtitle">Assign subjects and teachers to {{ cls.name }}</p>
+</div>
+
+<form method="POST" action="{{ url_for('classes.assign_subjects', id=cls.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="card" style="max-width: 800px;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="card-title">Subject Assignments</h3>
+            <button type="button" id="add-row" class="btn btn-ghost btn-sm">+ Add Subject</button>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div class="table-wrapper">
+                <table class="table" id="assignments-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Teacher</th>
+                            <th style="width: 60px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in current_assignments %}
+                        <tr class="assignment-row">
+                            <td>
+                                <select name="subjects[]" class="form-select">
+                                    <option value="">Select Subject</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}" {% if assignment.subject_id==subject.id
+                                        %}selected{% endif %}>{{ subject.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="teachers[]" class="form-select">
+                                    <option value="">No Teacher</option>
+                                    {% for teacher in teachers %}
+                                    <option value="{{ teacher.id }}" {% if assignment.teacher_id==teacher.id
+                                        %}selected{% endif %}>{{ teacher.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-ghost btn-sm remove-row"
+                                    style="color: var(--error-500);">&times;</button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr class="assignment-row">
+                            <td>
+                                <select name="subjects[]" class="form-select">
+                                    <option value="">Select Subject</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="teachers[]" class="form-select">
+                                    <option value="">No Teacher</option>
+                                    {% for teacher in teachers %}
+                                    <option value="{{ teacher.id }}">{{ teacher.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-ghost btn-sm remove-row"
+                                    style="color: var(--error-500);">&times;</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer" style="display: flex; justify-content: flex-end; gap: var(--space-3);">
+            <a href="{{ url_for('classes.view', id=cls.id) }}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Assignments</button>
+        </div>
+    </div>
+</form>
+
+<template id="row-template">
+    <tr class="assignment-row">
+        <td>
+            <select name="subjects[]" class="form-select">
+                <option value="">Select Subject</option>
+                {% for subject in subjects %}
+                <option value="{{ subject.id }}">{{ subject.name }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <select name="teachers[]" class="form-select">
+                <option value="">No Teacher</option>
+                {% for teacher in teachers %}
+                <option value="{{ teacher.id }}">{{ teacher.full_name }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <button type="button" class="btn btn-ghost btn-sm remove-row"
+                style="color: var(--error-500);">&times;</button>
+        </td>
+    </tr>
+</template>
+
+<script>
+    document.getElementById('add-row').addEventListener('click', function () {
+        const template = document.getElementById('row-template');
+        const tbody = document.querySelector('#assignments-table tbody');
+        const clone = template.content.cloneNode(true);
+        tbody.appendChild(clone);
+        attachRemoveHandlers();
+    });
+
+    function attachRemoveHandlers() {
+        document.querySelectorAll('.remove-row').forEach(btn => {
+            btn.onclick = function () {
+                this.closest('.assignment-row').remove();
+            };
+        });
+    }
+    attachRemoveHandlers();
+</script>
+{% endblock %}

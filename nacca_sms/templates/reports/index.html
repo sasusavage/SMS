@@ -1,0 +1,76 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Reports - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Reports</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Reports</h1>
+    <p class="page-subtitle">Generate and download various reports</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-6);">
+    <!-- Terminal Reports -->
+    <div class="card">
+        <div class="card-body" style="text-align: center; padding: var(--space-8);">
+            <div
+                style="width: 64px; height: 64px; background: rgba(99, 102, 241, 0.1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                    stroke="var(--primary-400)" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                </svg>
+            </div>
+            <h3 style="margin-bottom: var(--space-2);">Terminal Reports</h3>
+            <p style="color: var(--slate-400); margin-bottom: var(--space-5);">Generate end-of-term reports for students
+            </p>
+            <a href="{{ url_for('assessments.terminal_reports') }}" class="btn btn-primary">Generate Reports</a>
+        </div>
+    </div>
+
+    <!-- Fee Reports -->
+    <div class="card">
+        <div class="card-body" style="text-align: center; padding: var(--space-8);">
+            <div
+                style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                    stroke="var(--success-500)" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                </svg>
+            </div>
+            <h3 style="margin-bottom: var(--space-2);">Fee Reports</h3>
+            <p style="color: var(--slate-400); margin-bottom: var(--space-5);">View collection and outstanding balances
+            </p>
+            <a href="{{ url_for('fees.debtors') }}" class="btn btn-success">View Debtors</a>
+        </div>
+    </div>
+
+    <!-- Attendance Reports -->
+    <div class="card">
+        <div class="card-body" style="text-align: center; padding: var(--space-8);">
+            <div
+                style="width: 64px; height: 64px; background: rgba(245, 158, 11, 0.1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                    stroke="var(--warning-500)" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+            </div>
+            <h3 style="margin-bottom: var(--space-2);">Attendance Reports</h3>
+            <p style="color: var(--slate-400); margin-bottom: var(--space-5);">Student and staff attendance summaries
+            </p>
+            <button class="btn btn-secondary" disabled>Coming Soon</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

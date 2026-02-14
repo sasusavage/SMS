@@ -1,0 +1,101 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Debtors Report - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('fees.invoices') }}">Fees</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Debtors</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">Debtors Report</h1>
+        <p class="page-subtitle">Students with outstanding fees for {{ current_term.name if current_term else 'current
+            term' }}</p>
+    </div>
+    <button onclick="window.print()" class="btn btn-secondary">Print Report</button>
+</div>
+
+<!-- Summary -->
+<div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="stat-card">
+        <div class="stat-value">{{ debtors|length }}</div>
+        <div class="stat-label">Total Debtors</div>
+    </div>
+    <div class="stat-card error">
+        <div class="stat-value">GHS {{ "{:,.0f}".format(total_debt) }}</div>
+        <div class="stat-label">Total Outstanding</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value">GHS {{ "{:,.0f}".format(total_debt / (debtors|length) if debtors|length > 0 else 0) }}
+        </div>
+        <div class="stat-label">Average Debt</div>
+    </div>
+</div>
+
+<!-- Debtors Table -->
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Parent Phone</th>
+                        <th>Total Fee</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in debtors %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>
+                            <div>
+                                <div style="font-weight: 500;">{{ invoice.student.full_name }}</div>
+                                <div style="font-size: var(--font-size-xs); color: var(--slate-500);">{{
+                                    invoice.student.student_id }}</div>
+                            </div>
+                        </td>
+                        <td>{{ invoice.student.current_class.name if invoice.student.current_class else '-' }}</td>
+                        <td>{{ invoice.student.parent.father_phone or invoice.student.parent.mother_phone if
+                            invoice.student.parent else '-' }}</td>
+                        <td>GHS {{ "{:,.2f}".format(invoice.total_amount) }}</td>
+                        <td style="color: var(--success-500);">GHS {{ "{:,.2f}".format(invoice.amount_paid) }}</td>
+                        <td style="color: var(--error-500); font-weight: 600;">GHS {{ "{:,.2f}".format(invoice.balance)
+                            }}</td>
+                        <td>
+                            <a href="{{ url_for('fees.record_payment') }}?invoice_id={{ invoice.id }}"
+                                class="btn btn-primary btn-sm">Record Payment</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: var(--space-12); color: var(--slate-500);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1"
+                                style="margin: 0 auto var(--space-4); opacity: 0.5;">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="15" y1="9" x2="9" y2="15" />
+                                <line x1="9" y1="9" x2="15" y2="15" />
+                            </svg>
+                            <p>No outstanding fees! All students have paid in full.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

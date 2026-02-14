@@ -1,0 +1,191 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ student.full_name }} - Parent Portal - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('parent.dashboard') }}">Parent Portal</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ student.full_name }}</span>
+</nav>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .progress-bar-fill {
+        background: linear-gradient(90deg, var(--success-500), var(--success-600));
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+
+    .text-error {
+        color: var(--error-500);
+    }
+
+    .text-success {
+        color: var(--success-500);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.progress-bar-fill[data-width]').forEach(el => {
+        el.style.width = el.dataset.width + '%';
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div style="display: flex; align-items: center; gap: var(--space-4);">
+        <div class="user-avatar" style="width: 64px; height: 64px; font-size: var(--font-size-xl);">
+            {{ student.first_name[0] }}{{ student.last_name[0] }}
+        </div>
+        <div>
+            <h1 class="page-title">{{ student.full_name }}</h1>
+            <p class="page-subtitle">
+                {{ student.current_class.name if student.current_class else '-' }} |
+                <code style="color: var(--primary-400);">{{ student.student_id }}</code>
+            </p>
+        </div>
+    </div>
+    <a href="{{ url_for('parent.child_results', id=student.id) }}" class="btn btn-primary">View Results</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6);">
+    <!-- Student Info -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Student Information</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5);">
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Full Name</div>
+                    <div style="font-weight: 500;">{{ student.full_name }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Gender</div>
+                    <div style="font-weight: 500;">{{ student.gender.value|title }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Date of Birth</div>
+                    <div style="font-weight: 500;">{{ student.date_of_birth.strftime('%B %d, %Y') if
+                        student.date_of_birth else '-' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Class</div>
+                    <div style="font-weight: 500;">{{ student.current_class.name if student.current_class else '-' }}
+                    </div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Admission Date</div>
+                    <div style="font-weight: 500;">{{ student.admission_date.strftime('%B %d, %Y') if
+                        student.admission_date else '-' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Status</div>
+                    <span class="badge badge-success">{{ student.status.value|title }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fee Status -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Fee Status</h3>
+        </div>
+        <div class="card-body">
+            {% if latest_invoice %}
+            <div style="margin-bottom: var(--space-4);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                    <span style="font-size: var(--font-size-sm); color: var(--slate-400);">Paid</span>
+                    <span style="font-size: var(--font-size-sm); font-weight: 600;">
+                        {{ ((latest_invoice.amount_paid / latest_invoice.total_amount) * 100)|round(0) }}%
+                    </span>
+                </div>
+                <div
+                    style="background: var(--slate-800); height: 8px; border-radius: var(--radius-full); overflow: hidden;">
+                    {% set paid_percent = ((latest_invoice.amount_paid / latest_invoice.total_amount) * 100)|round(0) if
+                    latest_invoice.total_amount else 0 %}
+                    <div class="progress-bar-fill" data-width="{{ paid_percent }}"></div>
+                </div>
+            </div>
+
+            <div style="font-size: var(--font-size-sm);">
+                <div style="display: flex; justify-content: space-between; padding: var(--space-2) 0;">
+                    <span style="color: var(--slate-400);">Total Fee</span>
+                    <span style="font-weight: 600;">GHS {{ "{:,.2f}".format(latest_invoice.total_amount) }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: var(--space-2) 0;">
+                    <span style="color: var(--success-500);">Paid</span>
+                    <span style="font-weight: 600; color: var(--success-500);">GHS {{
+                        "{:,.2f}".format(latest_invoice.amount_paid) }}</span>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; padding: var(--space-2) 0; border-top: 1px solid var(--slate-800);">
+                    <span style="color: var(--error-500); font-weight: 500;">Balance</span>
+                    <span style="font-weight: 700; color: var(--error-500);">GHS {{
+                        "{:,.2f}".format(latest_invoice.balance) }}</span>
+                </div>
+            </div>
+            {% else %}
+            <p style="color: var(--slate-500);">No fee information available</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Results -->
+<div class="card" style="margin-top: var(--space-6);">
+    <div class="card-header">
+        <h3 class="card-title">Recent Term Results</h3>
+        <a href="{{ url_for('parent.child_results', id=student.id) }}" class="btn btn-ghost btn-sm">View All</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th style="text-align: center;">Total</th>
+                        <th style="text-align: center;">Grade</th>
+                        <th>Remark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assessment in recent_assessments %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ assessment.class_subject.subject.name }}</td>
+                        <td style="text-align: center; font-weight: 600;">{{ assessment.total_score }}</td>
+                        <td style="text-align: center; font-weight: 700; color: var(--primary-400);">{{ assessment.grade
+                            }}</td>
+                        <td>{{ assessment.grade_remark }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: var(--space-6); color: var(--slate-500);">
+                            No results available for this term
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

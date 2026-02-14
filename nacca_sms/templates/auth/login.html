@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}Login - NaCCA SMS{% endblock %}
+
+{% block body_class %}auth-page{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-page {
+        min-height: 100vh;
+        display: flex;
+        background: linear-gradient(135deg, var(--slate-950) 0%, var(--slate-900) 100%);
+    }
+
+    .auth-sidebar {
+        flex: 1;
+        display: none;
+        background: linear-gradient(135deg, var(--primary-900) 0%, var(--slate-950) 100%);
+        padding: var(--space-16);
+        position: relative;
+        overflow: hidden;
+    }
+
+    @media (min-width: 1024px) {
+        .auth-sidebar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    }
+
+    .auth-sidebar::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+        animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .auth-sidebar-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .auth-sidebar h1 {
+        font-size: var(--font-size-4xl);
+        font-weight: 700;
+        margin-bottom: var(--space-4);
+        background: linear-gradient(135deg, white 0%, var(--primary-300) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .auth-sidebar p {
+        font-size: var(--font-size-lg);
+        color: var(--slate-400);
+        max-width: 400px;
+        line-height: 1.7;
+    }
+
+    .auth-features {
+        margin-top: var(--space-12);
+    }
+
+    .auth-feature {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-4);
+        margin-bottom: var(--space-6);
+    }
+
+    .auth-feature-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-lg);
+        background: rgba(99, 102, 241, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .auth-feature-icon svg {
+        width: 24px;
+        height: 24px;
+        stroke: var(--primary-400);
+    }
+
+    .auth-feature h3 {
+        font-size: var(--font-size-base);
+        font-weight: 600;
+        margin-bottom: var(--space-1);
+    }
+
+    .auth-feature p {
+        font-size: var(--font-size-sm);
+        color: var(--slate-500);
+    }
+
+    .auth-main {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-8);
+    }
+
+    .auth-container {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .auth-logo {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-bottom: var(--space-8);
+    }
+
+    .auth-logo-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-logo-icon svg {
+        width: 28px;
+        height: 28px;
+        stroke: white;
+    }
+
+    .auth-logo-text {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+    }
+
+    .auth-logo-text span {
+        color: var(--primary-400);
+    }
+
+    .auth-card {
+        background: var(--slate-900);
+        border: 1px solid var(--slate-800);
+        border-radius: var(--radius-2xl);
+        padding: var(--space-8);
+    }
+
+    .auth-header {
+        margin-bottom: var(--space-6);
+    }
+
+    .auth-header h2 {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        margin-bottom: var(--space-2);
+    }
+
+    .auth-header p {
+        color: var(--slate-400);
+    }
+
+    .auth-form .form-group {
+        margin-bottom: var(--space-5);
+    }
+
+    .auth-form .form-input {
+        height: 48px;
+    }
+
+    .auth-options {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--space-6);
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        cursor: pointer;
+    }
+
+    .remember-me input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary-500);
+    }
+
+    .remember-me span {
+        font-size: var(--font-size-sm);
+        color: var(--slate-400);
+    }
+
+    .forgot-link {
+        font-size: var(--font-size-sm);
+        color: var(--primary-400);
+    }
+
+    .forgot-link:hover {
+        color: var(--primary-300);
+    }
+
+    .auth-submit {
+        width: 100%;
+        height: 48px;
+        font-size: var(--font-size-base);
+    }
+
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        margin: var(--space-6) 0;
+        color: var(--slate-500);
+        font-size: var(--font-size-sm);
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background-color: var(--slate-800);
+    }
+
+    .parent-login-btn {
+        width: 100%;
+        background-color: var(--slate-800);
+        border: 1px solid var(--slate-700);
+        color: var(--slate-100);
+        height: 48px;
+    }
+
+    .parent-login-btn:hover {
+        background-color: var(--slate-700);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-page">
+    <!-- Left Sidebar with Features -->
+    <div class="auth-sidebar">
+        <div class="auth-sidebar-content">
+            <h1>NaCCA School<br>Management System</h1>
+            <p>A comprehensive solution for Ghanaian schools following NaCCA standards. Manage students, staff,
+                assessments, and fees all in one place.</p>
+
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>NaCCA Grading</h3>
+                        <p>Automatic grade calculation based on Ghana Education Standards</p>
+                    </div>
+                </div>
+
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Fee Management</h3>
+                        <p>Track payments, generate invoices, and manage debts</p>
+                    </div>
+                </div>
+
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 21a8 8 0 0 0-16 0" />
+                            <circle cx="10" cy="8" r="5" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Parent Portal</h3>
+                        <p>Secure access for parents to track their children's progress</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="auth-main">
+        <div class="auth-container">
+            <div class="auth-logo">
+                <div class="auth-logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+                    </svg>
+                </div>
+                <span class="auth-logo-text">NaCCA <span>SMS</span></span>
+            </div>
+
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Welcome back</h2>
+                    <p>Sign in to your account to continue</p>
+                </div>
+
+                <form class="auth-form" method="POST" action="{{ url_for('auth.login') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="name@school.edu.gh"
+                            required autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-input"
+                            placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+
+                    <div class="auth-options">
+                        <label class="remember-me">
+                            <input type="checkbox" name="remember" value="1">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="{{ url_for('auth.forgot_password') }}" class="forgot-link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary auth-submit">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <span>or</span>
+                </div>
+
+                <a href="{{ url_for('auth.parent_login') }}" class="btn parent-login-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 21a8 8 0 0 0-16 0" />
+                        <circle cx="10" cy="8" r="5" />
+                    </svg>
+                    Parent Portal Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

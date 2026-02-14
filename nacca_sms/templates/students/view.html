@@ -1,0 +1,200 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ student.full_name }} - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('students.index') }}">Students</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ student.full_name }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div style="display: flex; align-items: center; gap: var(--space-4);">
+        <div class="user-avatar" style="width: 64px; height: 64px; font-size: var(--font-size-xl);">
+            {{ student.first_name[0] }}{{ student.last_name[0] }}
+        </div>
+        <div>
+            <h1 class="page-title">{{ student.full_name }}</h1>
+            <p class="page-subtitle">
+                <code style="color: var(--primary-400);">{{ student.student_id }}</code>
+                {% if student.current_class %}
+                <span class="badge badge-primary" style="margin-left: var(--space-2);">{{ student.current_class.name
+                    }}</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    <div style="display: flex; gap: var(--space-2);">
+        <a href="{{ url_for('students.edit', id=student.id) }}" class="btn btn-secondary">Edit</a>
+        <a href="{{ url_for('assessments.view_student', student_id=student.id) }}" class="btn btn-primary">View
+            Results</a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6);">
+    <!-- Main Info -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Personal Information</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5);">
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        First Name</div>
+                    <div style="font-weight: 500;">{{ student.first_name }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Last Name</div>
+                    <div style="font-weight: 500;">{{ student.last_name }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Other Names</div>
+                    <div style="font-weight: 500;">{{ student.other_names or '-' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Gender</div>
+                    <div style="font-weight: 500;">{{ student.gender.value|title }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Date of Birth</div>
+                    <div style="font-weight: 500;">{{ student.date_of_birth.strftime('%B %d, %Y') if
+                        student.date_of_birth else '-' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Nationality</div>
+                    <div style="font-weight: 500;">{{ student.nationality or 'Ghanaian' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Admission Date</div>
+                    <div style="font-weight: 500;">{{ student.admission_date.strftime('%B %d, %Y') if
+                        student.admission_date else '-' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Status</div>
+                    {% if student.status.value == 'active' %}
+                    <span class="badge badge-success">Active</span>
+                    {% elif student.status.value == 'graduated' %}
+                    <span class="badge badge-primary">Graduated</span>
+                    {% else %}
+                    <span class="badge badge-neutral">{{ student.status.value|title }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parent/Guardian Info -->
+    <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="card-title">Parent/Guardian</h3>
+            {% if student.parent %}
+            <a href="{{ url_for('students.parent_account', id=student.id) }}" class="btn btn-sm btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Portal Access
+            </a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if student.parent %}
+            <div style="margin-bottom: var(--space-4);">
+                <div style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                    Father's Name</div>
+                <div style="font-weight: 500;">{{ student.parent.father_name or '-' }}</div>
+                {% if student.parent.father_phone %}
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">{{ student.parent.father_phone }}
+                </div>
+                {% endif %}
+            </div>
+            <div style="margin-bottom: var(--space-4);">
+                <div style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                    Mother's Name</div>
+                <div style="font-weight: 500;">{{ student.parent.mother_name or '-' }}</div>
+                {% if student.parent.mother_phone %}
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">{{ student.parent.mother_phone }}
+                </div>
+                {% endif %}
+            </div>
+            <div>
+                <div style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                    Address</div>
+                <div style="font-weight: 500;">{{ student.parent.address or '-' }}</div>
+            </div>
+            {% else %}
+            <p style="color: var(--slate-500);">No parent information available</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Fee Status -->
+<div class="card" style="margin-top: var(--space-6);">
+    <div class="card-header">
+        <h3 class="card-title">Fee Status (Current Term)</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in student.invoices %}
+                    <tr>
+                        <td><code style="color: var(--primary-400);">{{ invoice.invoice_number }}</code></td>
+                        <td>GHS {{ "{:,.2f}".format(invoice.total_amount) }}</td>
+                        <td style="color: var(--success-500);">GHS {{ "{:,.2f}".format(invoice.amount_paid) }}</td>
+                        <td style="color: var(--error-500);">GHS {{ "{:,.2f}".format(invoice.balance) }}</td>
+                        <td>
+                            {% if invoice.status.value == 'paid' %}
+                            <span class="badge badge-success">Paid</span>
+                            {% elif invoice.status.value == 'partial' %}
+                            <span class="badge badge-warning">Partial</span>
+                            {% else %}
+                            <span class="badge badge-error">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: var(--space-6); color: var(--slate-500);">
+                            No invoices found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

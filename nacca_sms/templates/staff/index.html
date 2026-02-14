@@ -1,0 +1,87 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Staff - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Staff</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">Staff</h1>
+        <p class="page-subtitle">Manage school staff members</p>
+    </div>
+    <a href="{{ url_for('staff.add') }}" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Add Staff
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Staff ID</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for staff in staff_list %}
+                    <tr>
+                        <td><code style="color: var(--primary-400);">{{ staff.staff_id }}</code></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: var(--space-3);">
+                                <div class="user-avatar"
+                                    style="width: 32px; height: 32px; font-size: var(--font-size-xs);">
+                                    {{ staff.first_name[0] }}{{ staff.last_name[0] }}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500; color: var(--slate-100);">{{ staff.full_name }}</div>
+                                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">{{ staff.email
+                                        or '-' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ staff.position }}</td>
+                        <td>{{ staff.phone or '-' }}</td>
+                        <td>
+                            {% if staff.is_active %}
+                            <span class="badge badge-success">Active</span>
+                            {% else %}
+                            <span class="badge badge-neutral">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: var(--space-2);">
+                                <a href="{{ url_for('staff.view', id=staff.id) }}" class="btn btn-ghost btn-sm">View</a>
+                                <a href="{{ url_for('staff.edit', id=staff.id) }}" class="btn btn-ghost btn-sm">Edit</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: var(--space-12); color: var(--slate-500);">
+                            No staff members found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

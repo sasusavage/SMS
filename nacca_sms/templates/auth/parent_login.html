@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Parent Login - NaCCA SMS{% endblock %}
+
+{% block body_class %}auth-page{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-8);
+        background: linear-gradient(135deg, var(--slate-950) 0%, var(--slate-900) 100%);
+    }
+
+    .auth-container {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .auth-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+        margin-bottom: var(--space-8);
+    }
+
+    .auth-logo-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-logo-icon svg {
+        width: 28px;
+        height: 28px;
+        stroke: white;
+    }
+
+    .auth-logo-text {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+    }
+
+    .auth-card {
+        background: var(--slate-900);
+        border: 1px solid var(--slate-800);
+        border-radius: var(--radius-2xl);
+        padding: var(--space-8);
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: var(--space-6);
+    }
+
+    .auth-header h2 {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        margin-bottom: var(--space-2);
+    }
+
+    .auth-header p {
+        color: var(--slate-400);
+    }
+
+    .auth-form .form-input {
+        height: 48px;
+    }
+
+    .auth-submit {
+        width: 100%;
+        height: 48px;
+        font-size: var(--font-size-base);
+        background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
+    }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: var(--space-6);
+        color: var(--slate-400);
+        font-size: var(--font-size-sm);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M18 21a8 8 0 0 0-16 0" />
+                    <circle cx="10" cy="8" r="5" />
+                </svg>
+            </div>
+            <span class="auth-logo-text">Parent Portal</span>
+        </div>
+
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>Welcome, Parent</h2>
+                <p>Sign in with your registered phone number</p>
+            </div>
+
+            <form class="auth-form" method="POST" action="{{ url_for('auth.parent_login') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="0XX XXX XXXX" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input"
+                        placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn auth-submit">
+                    Sign In to Portal
+                </button>
+            </form>
+
+            <a href="{{ url_for('auth.login') }}" class="back-link">
+                Staff Login Instead
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

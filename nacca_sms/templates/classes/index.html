@@ -1,0 +1,77 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Classes - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Classes</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">Classes</h1>
+        <p class="page-subtitle">Manage classes and sections</p>
+    </div>
+    <a href="{{ url_for('classes.add') }}" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Add Class
+    </a>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-5);">
+    {% for cls in classes %}
+    <div class="card" style="overflow: hidden;">
+        <div style="height: 4px; background: linear-gradient(90deg, var(--primary-500), var(--primary-700));"></div>
+        <div class="card-body">
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4);">
+                <div>
+                    <h3 style="font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--space-1);">{{
+                        cls.name }}</h3>
+                    <span class="badge badge-primary">{{ cls.level }}</span>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--primary-400);">{{
+                        class_counts.get(cls.id, 0) }}</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">Students</div>
+                </div>
+            </div>
+
+            <div style="font-size: var(--font-size-sm); color: var(--slate-400); margin-bottom: var(--space-4);">
+                {% if cls.class_teacher %}
+                <div>Class Teacher: {{ cls.class_teacher.full_name }}</div>
+                {% else %}
+                <div>No class teacher assigned</div>
+                {% endif %}
+                <div>Room: {{ cls.room_number or 'Not assigned' }}</div>
+                <div>Capacity: {{ class_counts.get(cls.id, 0) }} / {{ cls.capacity }}</div>
+            </div>
+
+            <div style="display: flex; gap: var(--space-2);">
+                <a href="{{ url_for('classes.view', id=cls.id) }}" class="btn btn-secondary btn-sm"
+                    style="flex: 1;">View</a>
+                <a href="{{ url_for('classes.edit', id=cls.id) }}" class="btn btn-ghost btn-sm">Edit</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-body" style="text-align: center; padding: var(--space-12); color: var(--slate-500);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1" style="margin: 0 auto var(--space-4); opacity: 0.5;">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+            <p>No classes found. Add your first class to get started.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

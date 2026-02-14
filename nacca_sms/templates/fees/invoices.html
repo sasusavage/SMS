@@ -1,0 +1,146 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Fee Invoices - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Fee Invoices</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">Fee Invoices</h1>
+        <p class="page-subtitle">Manage student fee invoices</p>
+    </div>
+    <a href="{{ url_for('fees.record_payment') }}" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Record Payment
+    </a>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="stat-card">
+        <div class="stat-value">{{ invoices.total }}</div>
+        <div class="stat-label">Total Invoices</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-value">GHS {{ "{:,.2f}".format(total_expected or 0) }}</div>
+        <div class="stat-label">Total Expected</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">GHS {{ "{:,.2f}".format(total_collected or 0) }}</div>
+        <div class="stat-label">Collected</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value">GHS {{ "{:,.2f}".format(total_outstanding or 0) }}</div>
+        <div class="stat-label">Outstanding</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-bottom: var(--space-5);">
+    <div class="card-body">
+        <form method="GET" style="display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                <label class="form-label">Class</label>
+                <select name="class_id" class="form-select">
+                    <option value="">All Classes</option>
+                    {% for cls in classes %}
+                    <option value="{{ cls.id }}" {% if request.args.get('class_id')==cls.id|string %}selected{% endif
+                        %}>{{ cls.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="paid" {% if request.args.get('status')=='paid' %}selected{% endif %}>Paid</option>
+                    <option value="partial" {% if request.args.get('status')=='partial' %}selected{% endif %}>Partial
+                    </option>
+                    <option value="unpaid" {% if request.args.get('status')=='unpaid' %}selected{% endif %}>Unpaid
+                    </option>
+                    <option value="overdue" {% if request.args.get('status')=='overdue' %}selected{% endif %}>Overdue
+                    </option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-secondary">Apply Filter</button>
+        </form>
+    </div>
+</div>
+
+<!-- Invoices Table -->
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th style="text-align: right;">Total</th>
+                        <th style="text-align: right;">Paid</th>
+                        <th style="text-align: right;">Balance</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices.items %}
+                    <tr>
+                        <td><code style="color: var(--primary-400);">{{ invoice.invoice_number }}</code></td>
+                        <td style="font-weight: 500;">{{ invoice.student.full_name }}</td>
+                        <td>{{ invoice.student.current_class.name if invoice.student.current_class else '-' }}</td>
+                        <td style="text-align: right;">GHS {{ "{:,.2f}".format(invoice.total_amount) }}</td>
+                        <td style="text-align: right; color: var(--success-500);">GHS {{
+                            "{:,.2f}".format(invoice.amount_paid) }}</td>
+                        <td
+                            style="text-align: right; font-weight: 600; color: {% if invoice.balance > 0 %}var(--error-500){% else %}var(--success-500){% endif %};">
+                            GHS {{ "{:,.2f}".format(invoice.balance) }}
+                        </td>
+                        <td>
+                            {% if invoice.status.value == 'paid' %}
+                            <span class="badge badge-success">Paid</span>
+                            {% elif invoice.status.value == 'partial' %}
+                            <span class="badge badge-warning">Partial</span>
+                            {% elif invoice.status.value == 'overdue' %}
+                            <span class="badge badge-error">Overdue</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Unpaid</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ invoice.due_date.strftime('%b %d, %Y') if invoice.due_date else '-' }}</td>
+                        <td>
+                            <div style="display: flex; gap: var(--space-1);">
+                                <a href="{{ url_for('fees.view_invoice', id=invoice.id) }}"
+                                    class="btn btn-ghost btn-sm">View</a>
+                                {% if invoice.balance > 0 %}
+                                <a href="{{ url_for('fees.record_payment') }}?invoice_id={{ invoice.id }}"
+                                    class="btn btn-primary btn-sm">Pay</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: var(--space-8); color: var(--slate-500);">
+                            No invoices found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Add Staff - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('staff.index') }}">Staff</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Add Staff</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Add New Staff</h1>
+    <p class="page-subtitle">Register a new staff member</p>
+</div>
+
+<form method="POST" action="{{ url_for('staff.add') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+        <!-- Staff Information -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Staff Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="form-label" for="first_name">First Name *</label>
+                    <input type="text" id="first_name" name="first_name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="last_name">Last Name *</label>
+                    <input type="text" id="last_name" name="last_name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="gender">Gender *</label>
+                    <select id="gender" name="gender" class="form-select" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="position">Position *</label>
+                    <input type="text" id="position" name="position" class="form-input"
+                        placeholder="e.g. Class Teacher, Subject Teacher" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="date_employed">Date Employed</label>
+                    <input type="date" id="date_employed" name="date_employed" class="form-input">
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact & Account -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Contact & Account</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone *</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="024XXXXXXX" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email *</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="staff@school.edu.gh"
+                        required>
+                </div>
+
+                <div
+                    style="padding: var(--space-4); background: var(--slate-800); border-radius: var(--radius-lg); margin-top: var(--space-4);">
+                    <label style="display: flex; align-items: center; gap: var(--space-3); cursor: pointer;">
+                        <input type="checkbox" name="create_account" value="1" id="create_account"
+                            style="width: 18px; height: 18px;">
+                        <span>Create login account for this staff</span>
+                    </label>
+                </div>
+
+                <div id="account_fields" style="display: none; margin-top: var(--space-4);">
+                    <div class="form-group">
+                        <label class="form-label" for="role">Role *</label>
+                        <select id="role" name="role" class="form-select">
+                            <option value="teacher">Teacher</option>
+                            <option value="admin">Admin</option>
+                            <option value="accounts_officer">Accounts Officer</option>
+                            <option value="headteacher">Headteacher</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password *</label>
+                        <input type="password" id="password" name="password" class="form-input"
+                            placeholder="Min. 8 characters">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-6);">
+        <a href="{{ url_for('staff.index') }}" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary">Add Staff</button>
+    </div>
+</form>
+
+<script>
+    document.getElementById('create_account').addEventListener('change', function () {
+        document.getElementById('account_fields').style.display = this.checked ? 'block' : 'none';
+    });
+</script>
+{% endblock %}

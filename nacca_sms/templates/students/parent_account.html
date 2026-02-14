@@ -1,0 +1,215 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Parent Account - {{ student.full_name }} - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('students.index') }}">Students</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('students.view', id=student.id) }}">{{ student.full_name }}</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Parent Account</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Parent Portal Account</h1>
+    <p class="page-subtitle">Manage parent login access for {{ student.full_name }}</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+    <!-- Parent Info Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Parent/Guardian Information</h3>
+        </div>
+        <div class="card-body">
+            <div style="margin-bottom: var(--space-4);">
+                <div style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                    Student</div>
+                <div style="font-weight: 600; font-size: var(--font-size-lg);">{{ student.full_name }}</div>
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">{{ student.student_id }}</div>
+            </div>
+
+            <div
+                style="border-top: 1px solid var(--slate-800); padding-top: var(--space-4); margin-top: var(--space-4);">
+                {% if parent.father_name %}
+                <div style="margin-bottom: var(--space-3);">
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">Father</div>
+                    <div style="font-weight: 500;">{{ parent.father_name }}</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--primary-400);">{{ parent.father_phone or
+                        'No phone' }}</div>
+                </div>
+                {% endif %}
+
+                {% if parent.mother_name %}
+                <div style="margin-bottom: var(--space-3);">
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">Mother</div>
+                    <div style="font-weight: 500;">{{ parent.mother_name }}</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--primary-400);">{{ parent.mother_phone or
+                        'No phone' }}</div>
+                </div>
+                {% endif %}
+
+                {% if parent.guardian_name %}
+                <div style="margin-bottom: var(--space-3);">
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">Guardian ({{
+                        parent.guardian_relationship or 'Relationship not specified' }})</div>
+                    <div style="font-weight: 500;">{{ parent.guardian_name }}</div>
+                    <div style="font-size: var(--font-size-sm); color: var(--primary-400);">{{ parent.guardian_phone or
+                        'No phone' }}</div>
+                </div>
+                {% endif %}
+
+                {% if parent.primary_contact_phone %}
+                <div
+                    style="padding: var(--space-3); background: var(--slate-800); border-radius: var(--radius-lg); margin-top: var(--space-4);">
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">Primary Contact Phone</div>
+                    <div style="font-weight: 600; color: var(--success-500);">{{ parent.primary_contact_phone }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Management Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Portal Account Status</h3>
+        </div>
+        <div class="card-body">
+            {% if parent_user %}
+            <!-- Account Exists -->
+            <div
+                style="padding: var(--space-4); background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-lg); margin-bottom: var(--space-5);">
+                <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" style="color: var(--success-500);">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    <span style="font-weight: 600; color: var(--success-500);">Account Active</span>
+                </div>
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">
+                    Created: {{ parent_user.created_at.strftime('%b %d, %Y') }}
+                </div>
+                {% if parent_user.last_login %}
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">
+                    Last Login: {{ parent_user.last_login.strftime('%b %d, %Y at %H:%M') }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div
+                style="padding: var(--space-4); background: var(--slate-800); border-radius: var(--radius-lg); margin-bottom: var(--space-5);">
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400); margin-bottom: var(--space-2);">
+                    Login Phone Numbers</div>
+                <div style="font-size: var(--font-size-sm);">
+                    Parent can login using any of these phone numbers:
+                </div>
+                <ul
+                    style="margin-top: var(--space-2); padding-left: var(--space-4); font-size: var(--font-size-sm); color: var(--primary-400);">
+                    {% if parent.father_phone %}<li>{{ parent.father_phone }}</li>{% endif %}
+                    {% if parent.mother_phone %}<li>{{ parent.mother_phone }}</li>{% endif %}
+                    {% if parent.guardian_phone %}<li>{{ parent.guardian_phone }}</li>{% endif %}
+                    {% if parent.primary_contact_phone and parent.primary_contact_phone not in [parent.father_phone,
+                    parent.mother_phone, parent.guardian_phone] %}
+                    <li>{{ parent.primary_contact_phone }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <!-- Reset Password Form -->
+            <form method="POST" action="{{ url_for('students.parent_account', id=student.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="reset_password">
+
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" name="password" class="form-input"
+                        placeholder="Enter new password (min 6 characters)" minlength="6" required>
+                </div>
+
+                <button type="submit" class="btn btn-warning" style="width: 100%;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    Reset Password
+                </button>
+            </form>
+
+            <!-- Toggle Account Status -->
+            <form method="POST" action="{{ url_for('students.parent_account', id=student.id) }}"
+                style="margin-top: var(--space-4);">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="toggle_active">
+
+                {% if parent_user.is_active %}
+                <button type="submit" class="btn btn-error btn-outline" style="width: 100%;">
+                    Deactivate Account
+                </button>
+                {% else %}
+                <button type="submit" class="btn btn-success" style="width: 100%;">
+                    Activate Account
+                </button>
+                {% endif %}
+            </form>
+
+            {% else %}
+            <!-- No Account Yet -->
+            <div
+                style="padding: var(--space-4); background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-lg); margin-bottom: var(--space-5);">
+                <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" style="color: var(--error-500);">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="15" y1="9" x2="9" y2="15" />
+                        <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                    <span style="font-weight: 600; color: var(--error-500);">No Account</span>
+                </div>
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">
+                    Parent does not have portal access yet. Create an account below.
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('students.parent_account', id=student.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="create_account">
+
+                <div class="form-group">
+                    <label class="form-label">Set Password</label>
+                    <input type="password" name="password" class="form-input"
+                        placeholder="Enter password (min 6 characters)" minlength="6" required>
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-500); margin-top: var(--space-1);">
+                        Parent will login using their phone number and this password
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="8.5" cy="7" r="4" />
+                        <line x1="20" y1="8" x2="20" y2="14" />
+                        <line x1="23" y1="11" x2="17" y2="11" />
+                    </svg>
+                    Create Parent Account
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div style="margin-top: var(--space-4);">
+    <a href="{{ url_for('students.view', id=student.id) }}" class="btn btn-ghost">
+        ← Back to Student Profile
+    </a>
+</div>
+{% endblock %}

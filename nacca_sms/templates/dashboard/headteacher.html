@@ -1,0 +1,226 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Dashboard - NaCCA SMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Dashboard Overview</h1>
+    <p class="page-subtitle">Welcome back! Here's your school at a glance.</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 21a8 8 0 0 0-16 0" />
+                <circle cx="10" cy="8" r="5" />
+                <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
+            </svg>
+        </div>
+        <div class="stat-value">{{ stats.total_students }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            </svg>
+        </div>
+        <div class="stat-value">{{ stats.staff_present }}/{{ stats.total_staff }}</div>
+        <div class="stat-label">Staff Present Today</div>
+    </div>
+
+    <div class="stat-card warning">
+        <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+        </div>
+        <div class="stat-value">GHS {{ "{:,.0f}".format(stats.fees_collected) }}</div>
+        <div class="stat-label">Fees Collected This Term</div>
+    </div>
+
+    <div class="stat-card error">
+        <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                <polyline points="14 2 14 8 20 8" />
+            </svg>
+        </div>
+        <div class="stat-value">{{ stats.pending_reports }}</div>
+        <div class="stat-label">Pending Results</div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6); margin-bottom: var(--space-6);">
+    <!-- Attendance Bar Chart -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Weekly Attendance Summary</h3>
+        </div>
+        <div class="card-body">
+            <div class="bar-chart">
+                {% set days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] %}
+                {% set attendance = [92, 88, 95, 91, 89] %}
+                {% for i in range(5) %}
+                <div class="bar-item">
+                    <div class="bar-label">{{ days[i] }}</div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="height: {{ attendance[i] }}%;"></div>
+                    </div>
+                    <div class="bar-value">{{ attendance[i] }}%</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Fee Collection Progress -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Fee Collection</h3>
+        </div>
+        <div class="card-body">
+            <div style="margin-bottom: var(--space-5);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                    <span style="font-size: var(--font-size-sm); color: var(--slate-400);">Collected</span>
+                    <span style="font-size: var(--font-size-sm); font-weight: 600;">{{ stats.collection_rate }}%</span>
+                </div>
+                <div
+                    style="background: var(--slate-800); height: 10px; border-radius: var(--radius-full); overflow: hidden;">
+                    <div
+                        style="background: linear-gradient(90deg, var(--success-500), var(--success-600)); height: 100%; width: {{ stats.collection_rate }}%; transition: width 0.5s ease;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                <div
+                    style="text-align: center; padding: var(--space-4); background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-lg);">
+                    <div style="font-size: var(--font-size-lg); font-weight: 700; color: var(--success-500);">GHS {{
+                        "{:,.0f}".format(stats.fees_collected) }}</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-400);">Collected</div>
+                </div>
+                <div
+                    style="text-align: center; padding: var(--space-4); background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-lg);">
+                    <div style="font-size: var(--font-size-lg); font-weight: 700; color: var(--error-500);">GHS {{
+                        "{:,.0f}".format(stats.fees_outstanding) }}</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-400);">Outstanding</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Announcements Table -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Recent Announcements</h3>
+        <a href="#" class="btn btn-ghost btn-sm">View All</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Announcement</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--slate-100);">End of Term Examinations Schedule</td>
+                        <td><span class="badge badge-primary">Academic</span></td>
+                        <td style="color: var(--slate-400);">Feb 5, 2026</td>
+                        <td><span class="badge badge-success">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--slate-100);">PTA Meeting - All Parents Invited</td>
+                        <td><span class="badge badge-warning">Event</span></td>
+                        <td style="color: var(--slate-400);">Feb 3, 2026</td>
+                        <td><span class="badge badge-success">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--slate-100);">Fee Payment Deadline Reminder</td>
+                        <td><span class="badge badge-error">Finance</span></td>
+                        <td style="color: var(--slate-400);">Feb 1, 2026</td>
+                        <td><span class="badge badge-neutral">Expired</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 500; color: var(--slate-100);">Inter-School Sports Competition</td>
+                        <td><span class="badge badge-warning">Event</span></td>
+                        <td style="color: var(--slate-400);">Jan 28, 2026</td>
+                        <td><span class="badge badge-neutral">Expired</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Bar Chart Styles */
+    .bar-chart {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: var(--space-4);
+        height: 200px;
+        padding-top: var(--space-4);
+    }
+
+    .bar-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-2);
+        height: 100%;
+    }
+
+    .bar-label {
+        font-size: var(--font-size-xs);
+        font-weight: 500;
+        color: var(--slate-400);
+        order: 3;
+    }
+
+    .bar-track {
+        flex: 1;
+        width: 100%;
+        max-width: 48px;
+        background: var(--slate-800);
+        border-radius: var(--radius-md);
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        order: 2;
+    }
+
+    .bar-fill {
+        width: 100%;
+        background: linear-gradient(180deg, var(--primary-400), var(--primary-600));
+        border-radius: var(--radius-md);
+        transition: height 0.5s ease;
+    }
+
+    .bar-value {
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        color: var(--slate-100);
+        order: 1;
+    }
+</style>
+{% endblock %}

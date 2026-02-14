@@ -1,0 +1,142 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('fees.invoices') }}">Fees</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ invoice.invoice_number }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">Invoice {{ invoice.invoice_number }}</h1>
+        <p class="page-subtitle">
+            {{ invoice.student.full_name }} | {{ invoice.term.name }} {{ invoice.term.academic_year.year }}
+        </p>
+    </div>
+    <div style="display: flex; gap: var(--space-2);">
+        <button onclick="window.print()" class="btn btn-secondary">Print Invoice</button>
+        {% if invoice.balance > 0 %}
+        <a href="{{ url_for('fees.record_payment', invoice_id=invoice.id) }}" class="btn btn-primary">Record Payment</a>
+        {% endif %}
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6);">
+    <!-- Invoice Details -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Invoice Details</h3>
+            {% if invoice.status.value == 'paid' %}
+            <span class="badge badge-success">Paid</span>
+            {% elif invoice.status.value == 'partial' %}
+            <span class="badge badge-warning">Partial Payment</span>
+            {% else %}
+            <span class="badge badge-error">Pending</span>
+            {% endif %}
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th style="text-align: right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in invoice.items %}
+                        <tr>
+                            <td>{{ item.fee_structure.fee_category.name }}</td>
+                            <td style="text-align: right;">GHS {{ "{:,.2f}".format(item.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: var(--slate-950);">
+                            <td style="font-weight: 600;">Total</td>
+                            <td style="text-align: right; font-weight: 700; font-size: var(--font-size-lg);">GHS {{
+                                "{:,.2f}".format(invoice.total_amount) }}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--success-500);">Amount Paid</td>
+                            <td style="text-align: right; color: var(--success-500); font-weight: 600;">GHS {{
+                                "{:,.2f}".format(invoice.amount_paid) }}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--error-500); font-weight: 600;">Balance Due</td>
+                            <td
+                                style="text-align: right; color: var(--error-500); font-weight: 700; font-size: var(--font-size-lg);">
+                                GHS {{ "{:,.2f}".format(invoice.balance) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Info & Payments -->
+    <div>
+        <!-- Student Card -->
+        <div class="card" style="margin-bottom: var(--space-6);">
+            <div class="card-header">
+                <h3 class="card-title">Student</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+                    <div class="user-avatar">{{ invoice.student.first_name[0] }}{{ invoice.student.last_name[0] }}</div>
+                    <div>
+                        <div style="font-weight: 600;">{{ invoice.student.full_name }}</div>
+                        <div style="font-size: var(--font-size-sm); color: var(--slate-400);">{{
+                            invoice.student.student_id }}</div>
+                    </div>
+                </div>
+                <div style="font-size: var(--font-size-sm);">
+                    <div style="display: flex; justify-content: space-between; padding: var(--space-2) 0;">
+                        <span style="color: var(--slate-500);">Class</span>
+                        <span>{{ invoice.student.current_class.name if invoice.student.current_class else '-' }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: var(--space-2) 0;">
+                        <span style="color: var(--slate-500);">Term</span>
+                        <span>{{ invoice.term.name }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: var(--space-2) 0;">
+                        <span style="color: var(--slate-500);">Due Date</span>
+                        <span>{{ invoice.due_date.strftime('%B %d, %Y') if invoice.due_date else '-' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Payment History</h3>
+            </div>
+            <div class="card-body">
+                {% for payment in invoice.payments %}
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--slate-800);">
+                    <div>
+                        <div style="font-weight: 500; color: var(--success-500);">GHS {{
+                            "{:,.2f}".format(payment.amount) }}</div>
+                        <div style="font-size: var(--font-size-xs); color: var(--slate-500);">{{
+                            payment.payment_date.strftime('%b %d, %Y') }}</div>
+                    </div>
+                    <span class="badge badge-neutral">{{ payment.payment_method }}</span>
+                </div>
+                {% else %}
+                <p style="color: var(--slate-500); text-align: center; padding: var(--space-4);">No payments recorded
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

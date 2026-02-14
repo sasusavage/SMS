@@ -1,0 +1,40 @@
+# Environment
+.env
+*.env
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Database
+*.db
+*.sqlite3
+instance/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flask
+migrations/versions/*.pyc
+
+# Uploads
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Agent
+.agent/

@@ -1,0 +1,118 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Teacher Dashboard - NaCCA SMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">My Dashboard</h1>
+    <p class="page-subtitle">Welcome back, {{ current_user.staff_profile.full_name if current_user.staff_profile else
+        'Teacher' }}</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+        </div>
+        <div class="stat-value">{{ my_classes|length }}</div>
+        <div class="stat-label">My Classes</div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M18 21a8 8 0 0 0-16 0" />
+                <circle cx="10" cy="8" r="5" />
+            </svg>
+        </div>
+        <div class="stat-value">{{ student_count }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+
+    <div class="stat-card warning">
+        <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+            </svg>
+        </div>
+        <div class="stat-value">{{ my_subjects|length }}</div>
+        <div class="stat-label">Subjects Taught</div>
+    </div>
+</div>
+
+<!-- My Classes -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">My Classes</h3>
+    </div>
+    <div class="card-body">
+        {% if my_classes %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4);">
+            {% for cls in my_classes %}
+            <div
+                style="background: var(--slate-800); border-radius: var(--radius-lg); padding: var(--space-5); border: 1px solid var(--slate-700);">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+                    <h4 style="font-size: var(--font-size-lg); font-weight: 600;">{{ cls.name }}</h4>
+                    <span class="badge badge-primary">{{ cls.level }}</span>
+                </div>
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400); margin-bottom: var(--space-4);">
+                    Room: {{ cls.room_number or 'Not assigned' }}
+                </div>
+                <a href="{{ url_for('classes.view', id=cls.id) }}" class="btn btn-secondary btn-sm">View Class</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color: var(--slate-400); text-align: center; padding: var(--space-8);">
+            You are not assigned as class teacher to any class.
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Subjects Taught -->
+<div class="card" style="margin-top: var(--space-6);">
+    <div class="card-header">
+        <h3 class="card-title">Subjects I Teach</h3>
+        <a href="{{ url_for('assessments.index') }}" class="btn btn-primary btn-sm">Enter Scores</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if my_subjects %}
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Class</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cs in my_subjects %}
+                    <tr>
+                        <td>{{ cs.subject.name }}</td>
+                        <td><span class="badge badge-neutral">{{ cs.class_.name }}</span></td>
+                        <td>
+                            <a href="{{ url_for('assessments.entry', class_subject_id=cs.id) }}"
+                                class="btn btn-ghost btn-sm">Enter Scores</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: var(--slate-400); text-align: center; padding: var(--space-8);">
+            No subjects assigned to you yet.
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Assessments - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Assessments</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Assessments</h1>
+    <p class="page-subtitle">Enter and manage student assessments based on NaCCA standards</p>
+</div>
+
+<!-- Assessment Components Info -->
+<div class="card" style="margin-bottom: var(--space-6);">
+    <div class="card-body">
+        <h4 style="margin-bottom: var(--space-4);">NaCCA Assessment Components</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-4);">
+            <div
+                style="background: var(--slate-800); padding: var(--space-4); border-radius: var(--radius-lg); text-align: center;">
+                <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--primary-400);">30%</div>
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">Class Work</div>
+            </div>
+            <div
+                style="background: var(--slate-800); padding: var(--space-4); border-radius: var(--radius-lg); text-align: center;">
+                <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--success-500);">10%</div>
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">Homework</div>
+            </div>
+            <div
+                style="background: var(--slate-800); padding: var(--space-4); border-radius: var(--radius-lg); text-align: center;">
+                <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--warning-500);">10%</div>
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">Project</div>
+            </div>
+            <div
+                style="background: var(--slate-800); padding: var(--space-4); border-radius: var(--radius-lg); text-align: center;">
+                <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--error-500);">50%</div>
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">End of Term Exam</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Class Subjects to Assess -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">My Subjects</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Class</th>
+                        <th>Students</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cs in class_subjects %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ cs.subject.name }}</td>
+                        <td><span class="badge badge-primary">{{ cs.class_.name }}</span></td>
+                        <td>-</td>
+                        <td>
+                            <div style="display: flex; gap: var(--space-2);">
+                                <a href="{{ url_for('assessments.entry', class_subject_id=cs.id) }}"
+                                    class="btn btn-primary btn-sm">Enter Scores</a>
+                                <a href="{{ url_for('assessments.view_class', class_id=cs.class_.id) }}"
+                                    class="btn btn-ghost btn-sm">View All</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: var(--space-8); color: var(--slate-500);">
+                            No subjects assigned to you yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if current_user.is_admin() %}
+<!-- All Classes for Admin -->
+<div class="card" style="margin-top: var(--space-6);">
+    <div class="card-header">
+        <h3 class="card-title">All Classes</h3>
+    </div>
+    <div class="card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4);">
+            {% for cls in classes %}
+            <a href="{{ url_for('assessments.view_class', class_id=cls.id) }}"
+                style="background: var(--slate-800); padding: var(--space-4); border-radius: var(--radius-lg); text-decoration: none; transition: all var(--transition-fast);"
+                onmouseover="this.style.backgroundColor='var(--slate-700)'"
+                onmouseout="this.style.backgroundColor='var(--slate-800)'">
+                <div style="font-weight: 600; color: var(--slate-100);">{{ cls.name }}</div>
+                <div style="font-size: var(--font-size-sm); color: var(--slate-400);">{{ cls.level }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

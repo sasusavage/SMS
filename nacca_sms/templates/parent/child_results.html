@@ -1,0 +1,81 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ student.full_name }} Results - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('parent.dashboard') }}">Parent Portal</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ student.full_name }} - Results</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div style="display: flex; align-items: center; gap: var(--space-4);">
+        <div class="user-avatar" style="width: 56px; height: 56px; font-size: var(--font-size-lg);">
+            {{ student.first_name[0] }}{{ student.last_name[0] }}
+        </div>
+        <div>
+            <h1 class="page-title">{{ student.full_name }}</h1>
+            <p class="page-subtitle">Academic Results</p>
+        </div>
+    </div>
+    <a href="{{ url_for('parent.child_profile', id=student.id) }}" class="btn btn-secondary">View Profile</a>
+</div>
+
+<!-- Terminal Reports -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Terminal Reports</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Term</th>
+                        <th>Class</th>
+                        <th style="text-align: center;">Average</th>
+                        <th style="text-align: center;">Position</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ report.term.name }}</td>
+                        <td>{{ report.class_enrollment.class_.name if report.class_enrollment else '-' }}</td>
+                        <td style="text-align: center; font-weight: 600;">{{ report.average_score|round(1) if
+                            report.average_score else '-' }}%</td>
+                        <td style="text-align: center; font-weight: 700; color: var(--primary-400);">
+                            {{ report.class_position }}/{{ report.class_size }}
+                        </td>
+                        <td>
+                            {% if report.is_published %}
+                            <span class="badge badge-success">Published</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if report.is_published %}
+                            <a href="{{ url_for('reports.terminal_report', student_id=student.id, term_id=report.term_id) }}"
+                                class="btn btn-primary btn-sm">View Report</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: var(--space-8); color: var(--slate-500);">
+                            No published reports yet
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

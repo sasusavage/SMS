@@ -1,0 +1,124 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ cls.name }} - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('classes.index') }}">Classes</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ cls.name }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">{{ cls.name }}</h1>
+        <p class="page-subtitle">
+            <span class="badge badge-primary">{{ cls.level }}</span>
+            {% if cls.class_teacher %}
+            <span style="margin-left: var(--space-2);">Class Teacher: {{ cls.class_teacher.full_name }}</span>
+            {% endif %}
+        </p>
+    </div>
+    <div style="display: flex; gap: var(--space-2);">
+        <a href="{{ url_for('classes.edit', id=cls.id) }}" class="btn btn-secondary">Edit Class</a>
+        <a href="{{ url_for('assessments.view_class', class_id=cls.id) }}" class="btn btn-primary">View
+            Assessments</a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="stat-card">
+        <div class="stat-value">{{ students|length }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-value">{{ male_count }}</div>
+        <div class="stat-label">Male Students</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value">{{ female_count }}</div>
+        <div class="stat-label">Female Students</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ cls.capacity }}</div>
+        <div class="stat-label">Capacity</div>
+    </div>
+</div>
+
+<!-- Class Details -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6);">
+    <!-- Students List -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Students</h3>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Gender</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td><code style="color: var(--primary-400);">{{ student.student_id }}</code></td>
+                            <td style="font-weight: 500;">{{ student.full_name }}</td>
+                            <td>{{ student.gender.value|title }}</td>
+                            <td>
+                                <a href="{{ url_for('students.view', id=student.id) }}"
+                                    class="btn btn-ghost btn-sm">View</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5"
+                                style="text-align: center; padding: var(--space-8); color: var(--slate-500);">
+                                No students enrolled in this class
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subjects -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Subjects</h3>
+        </div>
+        <div class="card-body">
+            {% for cs in subjects %}
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--slate-800);">
+                <div>
+                    <div style="font-weight: 500;">{{ cs.subject.name }}</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">{{ cs.teacher.full_name if
+                        cs.teacher else 'No teacher assigned' }}</div>
+                </div>
+            </div>
+            {% else %}
+            <p style="color: var(--slate-500);">No subjects assigned</p>
+            {% endfor %}
+
+            <a href="{{ url_for('classes.assign_subjects', id=cls.id) }}" class="btn btn-secondary btn-sm"
+                style="margin-top: var(--space-4); width: 100%;">
+                Manage Subjects
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

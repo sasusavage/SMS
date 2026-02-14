@@ -1,0 +1,83 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Record Payment - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('fees.invoices') }}">Invoices</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Record Payment</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Record Payment</h1>
+    <p class="page-subtitle">Record a fee payment against an invoice</p>
+</div>
+
+<div style="max-width: 600px;">
+    <div class="card">
+        <form method="POST" action="{{ url_for('fees.record_payment') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="form-label">Invoice</label>
+                    <input type="text" id="invoice_search" class="form-input"
+                        placeholder="Search by student name or invoice number..."
+                        value="{{ request.args.get('invoice_id', '') }}">
+                    <input type="hidden" name="invoice_id" id="invoice_id"
+                        value="{{ request.args.get('invoice_id', '') }}" required>
+                    <div id="invoice_info"
+                        style="margin-top: var(--space-2); padding: var(--space-3); background: var(--slate-800); border-radius: var(--radius-lg); display: none;">
+                        <div id="invoice_details"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount (GHS)</label>
+                    <input type="number" name="amount" id="amount" class="form-input" step="0.01" min="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <select name="payment_method" class="form-select" required>
+                        {% for method in payment_methods %}
+                        <option value="{{ method.value }}">{{ method.value|title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Payer Name</label>
+                    <input type="text" name="payer_name" class="form-input" placeholder="Name of person making payment">
+                </div>
+            </div>
+            <div class="card-footer" style="display: flex; justify-content: flex-end; gap: var(--space-2);">
+                <a href="{{ url_for('fees.invoices') }}" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-primary">Record Payment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const invoiceId = document.getElementById('invoice_id').value;
+        if (invoiceId) {
+            loadInvoice(invoiceId);
+        }
+    });
+
+    function loadInvoice(id) {
+        // In production, this would fetch from API
+        document.getElementById('invoice_info').style.display = 'block';
+        document.getElementById('invoice_details').innerHTML = `
+        <div style="font-weight: 600;">Invoice #${id}</div>
+        <div style="font-size: var(--font-size-sm); color: var(--slate-400);">Loading...</div>
+    `;
+    }
+</script>
+{% endblock %}

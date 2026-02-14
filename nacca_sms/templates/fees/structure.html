@@ -1,0 +1,65 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Fee Structure - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Fee Structure</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Fee Structure</h1>
+    <p class="page-subtitle">Define fee amounts per class and category</p>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        {% for cat in categories %}
+                        <th style="text-align: right;">{{ cat.name }}</th>
+                        {% endfor %}
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cls in classes %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ cls.name }}</td>
+                        {% set total = namespace(value=0) %}
+                        {% for cat in categories %}
+                        {% set structure = cls.fee_structures|selectattr('category_id', 'equalto', cat.id)|first %}
+                        <td style="text-align: right;">
+                            {% if structure %}
+                            GHS {{ "{:,.2f}".format(structure.amount) }}
+                            {% set total.value = total.value + float(structure.amount) %}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                        <td style="text-align: right; font-weight: 700; color: var(--primary-400);">
+                            GHS {{ "{:,.2f}".format(total.value) }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="{{ categories|length + 2 }}"
+                            style="text-align: center; padding: var(--space-8); color: var(--slate-500);">
+                            No classes found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

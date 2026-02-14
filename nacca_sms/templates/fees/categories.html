@@ -1,0 +1,86 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Fee Categories - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Fee Categories</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">Fee Categories</h1>
+        <p class="page-subtitle">Manage fee types and categories</p>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="document.getElementById('addModal').showModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Add Category
+    </button>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-5);">
+    {% for cat in categories %}
+    <div class="card">
+        <div class="card-body">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h3 style="font-weight: 600; margin-bottom: var(--space-1);">{{ cat.name }}</h3>
+                    <p style="font-size: var(--font-size-sm); color: var(--slate-400);">{{ cat.description or 'No
+                        description' }}</p>
+                </div>
+                {% if cat.is_recurring %}
+                <span class="badge badge-primary">Recurring</span>
+                {% else %}
+                <span class="badge badge-secondary">One-time</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-body" style="text-align: center; padding: var(--space-12); color: var(--slate-500);">
+            No fee categories defined. Add one to get started.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Modal -->
+<dialog id="addModal" class="card"
+    style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: none; padding: 0; width: 100%; max-width: 400px;">
+    <div class="card-header">
+        <h3 class="card-title">Add Fee Category</h3>
+    </div>
+    <form method="POST" action="{{ url_for('fees.add_category') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="card-body">
+            <div class="form-group">
+                <label class="form-label">Category Name</label>
+                <input type="text" name="name" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-input" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: var(--space-2);">
+                    <input type="checkbox" name="is_recurring" value="true">
+                    <span>Recurring (charged every term)</span>
+                </label>
+            </div>
+        </div>
+        <div class="card-footer" style="display: flex; justify-content: flex-end; gap: var(--space-2);">
+            <button type="button" class="btn btn-ghost"
+                onclick="document.getElementById('addModal').close()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+    </form>
+</dialog>
+{% endblock %}

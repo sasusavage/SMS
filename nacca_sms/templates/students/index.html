@@ -1,0 +1,156 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Students - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Students</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">Students</h1>
+        <p class="page-subtitle">Manage student records and enrollments</p>
+    </div>
+    <a href="{{ url_for('students.add') }}" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Add Student
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-bottom: var(--space-6);">
+    <div class="card-body" style="padding: var(--space-4) var(--space-6);">
+        <form method="GET" style="display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <input type="text" name="search" class="form-input" placeholder="Search by name or ID..."
+                    value="{{ search }}">
+            </div>
+            <div style="min-width: 180px;">
+                <select name="class_id" class="form-select">
+                    <option value="">All Classes</option>
+                    {% for cls in classes %}
+                    <option value="{{ cls.id }}" {% if class_filter==cls.id %}selected{% endif %}>{{ cls.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="min-width: 150px;">
+                <select name="status" class="form-select">
+                    <option value="active" {% if status_filter=='active' %}selected{% endif %}>Active</option>
+                    <option value="all" {% if status_filter=='all' %}selected{% endif %}>All Status</option>
+                    <option value="graduated" {% if status_filter=='graduated' %}selected{% endif %}>Graduated</option>
+                    <option value="transferred" {% if status_filter=='transferred' %}selected{% endif %}>Transferred
+                    </option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-secondary">Filter</button>
+            <a href="{{ url_for('students.index') }}" class="btn btn-ghost">Clear</a>
+        </form>
+    </div>
+</div>
+
+<!-- Students Table -->
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Class</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students.items %}
+                    <tr>
+                        <td><code style="color: var(--primary-400);">{{ student.student_id }}</code></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: var(--space-3);">
+                                <div class="user-avatar"
+                                    style="width: 32px; height: 32px; font-size: var(--font-size-xs);">
+                                    {{ student.first_name[0] }}{{ student.last_name[0] }}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500; color: var(--slate-100);">{{ student.full_name }}
+                                    </div>
+                                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">{{
+                                        student.date_of_birth.strftime('%b %d, %Y') if student.date_of_birth else 'N/A'
+                                        }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ student.gender.value|title }}</td>
+                        <td>
+                            {% if student.current_class %}
+                            <span class="badge badge-primary">{{ student.current_class.name }}</span>
+                            {% else %}
+                            <span class="badge badge-neutral">Not Enrolled</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if student.status.value == 'active' %}
+                            <span class="badge badge-success">Active</span>
+                            {% elif student.status.value == 'graduated' %}
+                            <span class="badge badge-primary">Graduated</span>
+                            {% else %}
+                            <span class="badge badge-neutral">{{ student.status.value|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: var(--space-2);">
+                                <a href="{{ url_for('students.view', id=student.id) }}"
+                                    class="btn btn-ghost btn-sm">View</a>
+                                <a href="{{ url_for('students.edit', id=student.id) }}"
+                                    class="btn btn-ghost btn-sm">Edit</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: var(--space-12); color: var(--slate-500);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1"
+                                style="margin: 0 auto var(--space-4); opacity: 0.5;">
+                                <path d="M18 21a8 8 0 0 0-16 0" />
+                                <circle cx="10" cy="8" r="5" />
+                            </svg>
+                            <p>No students found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if students.pages > 1 %}
+    <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: var(--font-size-sm); color: var(--slate-400);">
+            Showing {{ students.items|length }} of {{ students.total }} students
+        </div>
+        <div style="display: flex; gap: var(--space-2);">
+            {% if students.has_prev %}
+            <a href="{{ url_for('students.index', page=students.prev_num, search=search, class_id=class_filter, status=status_filter) }}"
+                class="btn btn-secondary btn-sm">Previous</a>
+            {% endif %}
+            {% if students.has_next %}
+            <a href="{{ url_for('students.index', page=students.next_num, search=search, class_id=class_filter, status=status_filter) }}"
+                class="btn btn-secondary btn-sm">Next</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

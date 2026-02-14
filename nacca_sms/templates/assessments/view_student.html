@@ -1,0 +1,116 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ student.full_name }} - Results - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('assessments.index') }}">Assessments</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ student.full_name }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div style="display: flex; align-items: center; gap: var(--space-4);">
+        <div class="user-avatar" style="width: 56px; height: 56px; font-size: var(--font-size-lg);">
+            {{ student.first_name[0] }}{{ student.last_name[0] }}
+        </div>
+        <div>
+            <h1 class="page-title">{{ student.full_name }}</h1>
+            <p class="page-subtitle">
+                {{ student.current_class.name if student.current_class else '-' }} |
+                {{ current_term.name if current_term else '' }}
+            </p>
+        </div>
+    </div>
+    <a href="{{ url_for('reports.terminal_report', student_id=student.id) }}" class="btn btn-primary">View Report
+        Card</a>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_subjects }}</div>
+        <div class="stat-label">Subjects</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-value">{{ average_score }}%</div>
+        <div class="stat-label">Average Score</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ overall_grade }}</div>
+        <div class="stat-label">Overall Grade</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value">{{ position }}</div>
+        <div class="stat-label">Class Position</div>
+    </div>
+</div>
+
+<!-- Assessment Results -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Assessment Results</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th style="text-align: center;">Class Work (30)</th>
+                        <th style="text-align: center;">Homework (10)</th>
+                        <th style="text-align: center;">Project (10)</th>
+                        <th style="text-align: center;">Exam (50)</th>
+                        <th style="text-align: center;">Total (100)</th>
+                        <th style="text-align: center;">Grade</th>
+                        <th>Remark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assessment in assessments %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ assessment.class_subject.subject.name }}</td>
+                        <td style="text-align: center;">{{ assessment.classwork_score or '-' }}</td>
+                        <td style="text-align: center;">{{ assessment.homework_score or '-' }}</td>
+                        <td style="text-align: center;">{{ assessment.project_score or '-' }}</td>
+                        <td style="text-align: center;">{{ assessment.exam_score or '-' }}</td>
+                        <td
+                            style="text-align: center; font-weight: 700; {% if assessment.total_score >= 50 %}color: var(--success-500);{% elif assessment.total_score < 40 %}color: var(--error-500);{% endif %}">
+                            {{ assessment.total_score }}
+                        </td>
+                        <td
+                            style="text-align: center; font-weight: 700; font-size: var(--font-size-lg); color: var(--primary-400);">
+                            {{ assessment.grade }}
+                        </td>
+                        <td>{{ assessment.grade_remark }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: var(--space-8); color: var(--slate-500);">
+                            No assessment results found for this term
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if assessments %}
+                <tfoot>
+                    <tr style="background: var(--slate-950);">
+                        <td colspan="5" style="text-align: right; font-weight: 600;">Average</td>
+                        <td style="text-align: center; font-weight: 700; font-size: var(--font-size-lg);">{{
+                            average_score }}%</td>
+                        <td
+                            style="text-align: center; font-weight: 700; font-size: var(--font-size-lg); color: var(--primary-400);">
+                            {{ overall_grade }}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

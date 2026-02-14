@@ -1,0 +1,141 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Terminal Reports - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('assessments.index') }}">Assessments</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Terminal Reports</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Terminal Reports</h1>
+    <p class="page-subtitle">Generate and manage end-of-term report cards</p>
+</div>
+
+<!-- Current Term Info -->
+<div class="card" style="margin-bottom: var(--space-6);">
+    <div class="card-body" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <div style="font-size: var(--font-size-sm); color: var(--slate-400);">Current Term</div>
+            <div style="font-size: var(--font-size-xl); font-weight: 600;">
+                {{ current_term.name if current_term else 'No active term' }}
+                <span style="font-size: var(--font-size-sm); color: var(--slate-500); margin-left: var(--space-2);">
+                    {{ current_academic_year.name if current_academic_year else '' }}
+                </span>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: var(--font-size-sm); color: var(--slate-400);">Term Period</div>
+            <div style="font-weight: 500;">
+                {% if current_term %}
+                {{ current_term.start_date.strftime('%b %d') }} - {{ current_term.end_date.strftime('%b %d, %Y') }}
+                {% else %}
+                -
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Classes Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-5);">
+    {% for cls in classes %}
+    <div class="card">
+        <div style="height: 4px; background: linear-gradient(90deg, var(--primary-500), var(--primary-700));"></div>
+        <div class="card-body">
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4);">
+                <div>
+                    <h3 style="font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--space-1);">{{
+                        cls.name }}</h3>
+                    <span class="badge badge-primary">{{ cls.level }}</span>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--primary-400);">{{
+                        cls.student_count or 0 }}</div>
+                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">Students</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: var(--space-4);">
+                <div
+                    style="display: flex; justify-content: space-between; font-size: var(--font-size-sm); margin-bottom: var(--space-2);">
+                    <span style="color: var(--slate-400);">Reports Generated</span>
+                    <span style="font-weight: 600;">{{ cls.reports_generated or 0 }} / {{ cls.student_count or 0
+                        }}</span>
+                </div>
+                <div
+                    style="background: var(--slate-800); height: 6px; border-radius: var(--radius-full); overflow: hidden;">
+                    {% set progress = (cls.reports_generated or 0) / (cls.student_count or 1) * 100 %}
+                    <div
+                        style="background: linear-gradient(90deg, var(--primary-500), var(--primary-600)); height: 100%; width: {{ progress }}%;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: var(--space-2);">
+                <button type="button" class="btn btn-secondary btn-sm" style="flex: 1;"
+                    onclick="generateReports({{ cls.id }}, '{{ cls.name }}')">
+                    Generate
+                </button>
+                <a href="{{ url_for('assessments.view_class', class_id=cls.id) }}" class="btn btn-ghost btn-sm">View</a>
+                {% if cls.reports_generated > 0 %}
+                <button type="button" class="btn btn-primary btn-sm"
+                    onclick="publishReports({{ cls.id }}, '{{ cls.name }}')">
+                    Publish
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-body" style="text-align: center; padding: var(--space-12); color: var(--slate-500);">
+            No classes found
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function generateReports(classId, className) {
+        if (!confirm(`Generate terminal reports for all students in ${className}?`)) return;
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/assessments/reports/generate/${classId}`;
+
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrf_token';
+        csrf.value = '{{ csrf_token() }}';
+        form.appendChild(csrf);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function publishReports(classId, className) {
+        if (!confirm(`Publish terminal reports for ${className}? Parents will be able to view them.`)) return;
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/assessments/reports/publish/${classId}`;
+
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrf_token';
+        csrf.value = '{{ csrf_token() }}';
+        form.appendChild(csrf);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+{% endblock %}

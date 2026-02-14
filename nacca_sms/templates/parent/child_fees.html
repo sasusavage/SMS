@@ -1,0 +1,78 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ student.full_name }} Fees - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('parent.dashboard') }}">Parent Portal</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ student.full_name }} - Fees</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; gap: var(--space-4);">
+        <div class="user-avatar" style="width: 56px; height: 56px; font-size: var(--font-size-lg);">
+            {{ student.first_name[0] }}{{ student.last_name[0] }}
+        </div>
+        <div>
+            <h1 class="page-title">{{ student.full_name }}</h1>
+            <p class="page-subtitle">Fee History</p>
+        </div>
+    </div>
+</div>
+
+<!-- Invoices -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Fee Invoices</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Term</th>
+                        <th style="text-align: right;">Total</th>
+                        <th style="text-align: right;">Paid</th>
+                        <th style="text-align: right;">Balance</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td><code style="color: var(--primary-400);">{{ invoice.invoice_number }}</code></td>
+                        <td>{{ invoice.term.name if invoice.term else '-' }}</td>
+                        <td style="text-align: right;">GHS {{ "{:,.2f}".format(invoice.total_amount) }}</td>
+                        <td style="text-align: right; color: var(--success-500);">GHS {{
+                            "{:,.2f}".format(invoice.amount_paid) }}</td>
+                        <td style="text-align: right; font-weight: 600;"
+                            class="{% if invoice.balance > 0 %}text-error{% else %}text-success{% endif %}">
+                            GHS {{ "{:,.2f}".format(invoice.balance) }}
+                        </td>
+                        <td>
+                            {% if invoice.status.value == 'paid' %}
+                            <span class="badge badge-success">Paid</span>
+                            {% elif invoice.status.value == 'partial' %}
+                            <span class="badge badge-warning">Partial</span>
+                            {% else %}
+                            <span class="badge badge-error">Unpaid</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: var(--space-8); color: var(--slate-500);">
+                            No invoices found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

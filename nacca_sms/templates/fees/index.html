@@ -1,0 +1,133 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Fee Invoices - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Fee Invoices</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">Fee Invoices</h1>
+        <p class="page-subtitle">Manage student fee invoices</p>
+    </div>
+    <div style="display: flex; gap: var(--space-2);">
+        <a href="{{ url_for('fees.generate_invoices') }}" class="btn btn-secondary">Generate Invoices</a>
+        <a href="{{ url_for('fees.debtors') }}" class="btn btn-ghost">View Debtors</a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">GHS {{ "{:,.0f}".format(stats.total_expected) }}</div>
+        <div class="stat-label">Total Expected</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-value">GHS {{ "{:,.0f}".format(stats.total_collected) }}</div>
+        <div class="stat-label">Total Collected</div>
+    </div>
+    <div class="stat-card error">
+        <div class="stat-value">GHS {{ "{:,.0f}".format(stats.total_outstanding) }}</div>
+        <div class="stat-label">Outstanding</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value">{{ stats.collection_rate }}%</div>
+        <div class="stat-label">Collection Rate</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-bottom: var(--space-6);">
+    <div class="card-body">
+        <form method="GET" style="display: flex; gap: var(--space-4); align-items: flex-end; flex-wrap: wrap;">
+            <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                <label class="form-label" for="class_id">Class</label>
+                <select id="class_id" name="class_id" class="form-select">
+                    <option value="">All Classes</option>
+                    {% for cls in classes %}
+                    <option value="{{ cls.id }}" {% if request.args.get('class_id')|int==cls.id %}selected{% endif %}>{{
+                        cls.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+                <label class="form-label" for="status">Status</label>
+                <select id="status" name="status" class="form-select">
+                    <option value="">All</option>
+                    <option value="pending" {% if request.args.get('status')=='pending' %}selected{% endif %}>Pending
+                    </option>
+                    <option value="partial" {% if request.args.get('status')=='partial' %}selected{% endif %}>Partial
+                    </option>
+                    <option value="paid" {% if request.args.get('status')=='paid' %}selected{% endif %}>Paid</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
+</div>
+
+<!-- Invoices Table -->
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td><code style="color: var(--primary-400);">{{ invoice.invoice_number }}</code></td>
+                        <td style="font-weight: 500;">{{ invoice.student.full_name }}</td>
+                        <td>{{ invoice.student.current_class.name if invoice.student.current_class else '-' }}</td>
+                        <td>GHS {{ "{:,.2f}".format(invoice.total_amount) }}</td>
+                        <td style="color: var(--success-500);">GHS {{ "{:,.2f}".format(invoice.amount_paid) }}</td>
+                        <td style="color: var(--error-500);">GHS {{ "{:,.2f}".format(invoice.balance) }}</td>
+                        <td>
+                            {% if invoice.status.value == 'paid' %}
+                            <span class="badge badge-success">Paid</span>
+                            {% elif invoice.status.value == 'partial' %}
+                            <span class="badge badge-warning">Partial</span>
+                            {% else %}
+                            <span class="badge badge-error">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: var(--space-2);">
+                                <a href="{{ url_for('fees.view_invoice', id=invoice.id) }}"
+                                    class="btn btn-ghost btn-sm">View</a>
+                                {% if invoice.balance > 0 %}
+                                <a href="{{ url_for('fees.record_payment', invoice_id=invoice.id) }}"
+                                    class="btn btn-primary btn-sm">Pay</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: var(--space-12); color: var(--slate-500);">
+                            No invoices found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

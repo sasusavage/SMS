@@ -1,0 +1,122 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ class_obj.name }} Assessments - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('assessments.index') }}">Assessments</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ class_obj.name }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <h1 class="page-title">{{ class_obj.name }} - Assessment Results</h1>
+        <p class="page-subtitle">{{ current_term.name if current_term else '' }} {{ current_academic_year.year if
+            current_academic_year else '' }}</p>
+    </div>
+    <a href="{{ url_for('assessments.terminal_reports') }}?class_id={{ class_obj.id }}" class="btn btn-primary">Generate
+        Reports</a>
+</div>
+
+<!-- Subject Tabs -->
+<div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-6); flex-wrap: wrap;">
+    <a href="{{ url_for('assessments.view_class', class_id=class_obj.id) }}"
+        class="btn {% if not selected_subject %}btn-primary{% else %}btn-secondary{% endif %}">
+        All Subjects
+    </a>
+    {% for cs in class_subjects %}
+    <a href="{{ url_for('assessments.view_class', class_id=class_obj.id) }}?subject={{ cs.subject.id }}"
+        class="btn {% if selected_subject == cs.subject.id %}btn-primary{% else %}btn-secondary{% endif %}">
+        {{ cs.subject.name }}
+    </a>
+    {% endfor %}
+</div>
+
+<!-- Results Table -->
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="position: sticky; left: 0; background: var(--slate-950); z-index: 1;">#</th>
+                        <th
+                            style="position: sticky; left: 30px; background: var(--slate-950); z-index: 1; min-width: 200px;">
+                            Student</th>
+                        {% if selected_subject %}
+                        <th>Class Work</th>
+                        <th>Homework</th>
+                        <th>Project</th>
+                        <th>Exam</th>
+                        <th>Total</th>
+                        <th>Grade</th>
+                        <th>Remark</th>
+                        {% else %}
+                        {% for cs in class_subjects %}
+                        <th style="text-align: center;">{{ cs.subject.name[:3] }}</th>
+                        {% endfor %}
+                        <th>Avg</th>
+                        <th>Pos</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student_id, data in assessment_data.items() %}
+                    {% set student = data.student %}
+                    <tr>
+                        <td style="position: sticky; left: 0; background: var(--slate-900);">{{ loop.index }}</td>
+                        <td style="position: sticky; left: 30px; background: var(--slate-900);">
+                            <a href="{{ url_for('assessments.view_student', student_id=student.id) }}"
+                                style="font-weight: 500; color: var(--slate-100);">
+                                {{ student.full_name }}
+                            </a>
+                        </td>
+                        {% if selected_subject %}
+                        {% set assessment = data.subjects.get(selected_subject) %}
+                        <td>{{ assessment.classwork_score if assessment else '-' }}</td>
+                        <td>{{ assessment.homework_score if assessment else '-' }}</td>
+                        <td>{{ assessment.project_score if assessment else '-' }}</td>
+                        <td>{{ assessment.exam_score if assessment else '-' }}</td>
+                        <td style="font-weight: 700;">{{ assessment.total_score if assessment else '-' }}</td>
+                        <td style="font-weight: 700; color: var(--primary-400);">{{ assessment.grade if assessment else
+                            '-' }}</td>
+                        <td>{{ assessment.grade_remark if assessment else '-' }}</td>
+                        {% else %}
+                        {% set student_data = data.subjects %}
+                        {% for cs in class_subjects %}
+                        {% set assessment = student_data.get(cs.subject.id) %}
+                        <td
+                            style="text-align: center; {% if assessment and assessment.total_score >= 50 %}color: var(--success-500);{% elif assessment and assessment.total_score < 40 %}color: var(--error-500);{% endif %}">
+                            {{ assessment.total_score|round(1) if assessment else '-' }}
+                        </td>
+                        {% endfor %}
+                        <td style="font-weight: 700;">{{ student_data.get('average', '-') }}</td>
+                        <td style="font-weight: 700; color: var(--primary-400);">{{ student_data.get('position', '-') }}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: var(--space-8); color: var(--slate-500);">
+                            No students in this class
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Legend -->
+<div
+    style="display: flex; gap: var(--space-6); margin-top: var(--space-4); font-size: var(--font-size-sm); color: var(--slate-400);">
+    <span><span style="color: var(--success-500); font-weight: 600;">Green</span> = 50% and above</span>
+    <span><span style="color: var(--error-500); font-weight: 600;">Red</span> = Below 40%</span>
+</div>
+{% endblock %}

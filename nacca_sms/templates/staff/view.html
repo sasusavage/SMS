@@ -1,0 +1,176 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ staff.full_name }} - Staff - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('staff.index') }}">Staff</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ staff.full_name }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div style="display: flex; align-items: center; gap: var(--space-4);">
+        <div class="user-avatar" style="width: 64px; height: 64px; font-size: var(--font-size-xl);">
+            {{ staff.first_name[0] }}{{ staff.last_name[0] }}
+        </div>
+        <div>
+            <h1 class="page-title">{{ staff.full_name }}</h1>
+            <p class="page-subtitle">
+                {{ staff.position }} | <code style="color: var(--primary-400);">{{ staff.staff_id }}</code>
+            </p>
+        </div>
+    </div>
+    <a href="{{ url_for('staff.edit', id=staff.id) }}" class="btn btn-secondary">Edit</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6);">
+    <!-- Staff Details -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Staff Information</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5);">
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Full Name</div>
+                    <div style="font-weight: 500;">{{ staff.full_name }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Staff ID</div>
+                    <div style="font-weight: 500;">{{ staff.staff_id }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Position</div>
+                    <div style="font-weight: 500;">{{ staff.position }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Gender</div>
+                    <div style="font-weight: 500;">{{ staff.gender.value|title if staff.gender else '-' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Phone</div>
+                    <div style="font-weight: 500;">{{ staff.phone or '-' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Email</div>
+                    <div style="font-weight: 500;">{{ staff.email or '-' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Date Employed</div>
+                    <div style="font-weight: 500;">{{ staff.date_employed.strftime('%B %d, %Y') if staff.date_employed
+                        else '-' }}</div>
+                </div>
+                <div>
+                    <div
+                        style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                        Status</div>
+                    {% if staff.is_active %}
+                    <span class="badge badge-success">Active</span>
+                    {% else %}
+                    <span class="badge badge-neutral">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Account -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">User Account</h3>
+        </div>
+        <div class="card-body">
+            {% if staff.user %}
+            <div style="margin-bottom: var(--space-4);">
+                <div style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                    Login Email</div>
+                <div style="font-weight: 500;">{{ staff.user.email }}</div>
+            </div>
+            <div style="margin-bottom: var(--space-4);">
+                <div style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                    Role</div>
+                <span class="badge badge-primary">{{ staff.user.role.value|replace('_', ' ')|title }}</span>
+            </div>
+            <div>
+                <div style="font-size: var(--font-size-xs); color: var(--slate-500); margin-bottom: var(--space-1);">
+                    Account Status</div>
+                {% if staff.user.is_active %}
+                <span class="badge badge-success">Active</span>
+                {% else %}
+                <span class="badge badge-neutral">Disabled</span>
+                {% endif %}
+            </div>
+            {% else %}
+            <p style="color: var(--slate-500); margin-bottom: var(--space-4);">No user account linked</p>
+            <a href="{{ url_for('staff.create_user', id=staff.id) }}" class="btn btn-primary btn-sm">Create User
+                Account</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Classes & Subjects -->
+<div class="card" style="margin-top: var(--space-6);">
+    <div class="card-header">
+        <h3 class="card-title">Assigned Classes & Subjects</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if staff.class_teacher_for %}
+                    {% for cls in staff.class_teacher_for %}
+                    <tr>
+                        <td>{{ cls.name }}</td>
+                        <td>-</td>
+                        <td><span class="badge badge-warning">Class Teacher</span></td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                    {% for cs in staff.teaching_assignments %}
+                    <tr>
+                        <td>{{ cs.class_.name }}</td>
+                        <td>{{ cs.subject.name }}</td>
+                        <td><span class="badge badge-primary">Subject Teacher</span></td>
+                    </tr>
+                    {% else %}
+                    {% if not staff.class_teacher_for %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: var(--space-6); color: var(--slate-500);">
+                            No assignments found
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

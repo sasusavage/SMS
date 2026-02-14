@@ -196,6 +196,9 @@ def staff_required(f):
 # =============================================================================
 # MAIN ENTRY POINT
 # =============================================================================
+# Create app instance for gunicorn (production)
+app = create_app(os.environ.get('FLASK_CONFIG', 'production'))
+
 if __name__ == '__main__':
     app = create_app(os.environ.get('FLASK_CONFIG', 'development'))
     

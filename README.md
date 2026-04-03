@@ -1,45 +1,50 @@
 # NaCCA School Management System
 
-A comprehensive school management solution for Ghanaian schools following **NaCCA standards**.
+A production-grade school management solution for Ghanaian schools following **NaCCA standards**, refactored for scale, performance, and full mobile responsiveness.
+
+## Key Refactor Features (Production Ready)
+
+- **Architecture:** Transitioned from a "fat route" system to a **Service Layer** architecture for better maintainability.
+- **Performance:** Complex grading and ranking logic moved to **PostgreSQL Database Views** (`v_student_subject_performance` and `v_student_terminal_reports`) using high-performance window functions.
+- **Mobile Responsive:** Full mobile-first design implemented with vanilla CSS, including a toggleable sidebar and adaptive grids.
+- **Audit Logging:** Built-in system to track critical actions (student creation, updates, etc.) via the `AuditLog` model.
+- **RBAC:** Granular Role-Based Access Control enforcing strict permissions across all modules.
 
 ## Features
 
-- **Role-Based Access Control (RBAC)** - Headteachers, Admins, Teachers, Accounts Officers, and Parents
-- **NaCCA Academic Logic** - Automatic grading based on NaCCA assessment standards
-- **Financial Engine** - Fee structures, invoice generation, payment tracking
-- **Parent Portal** - Secure read-only access for parents
-- **Terminal Reports** - Generate and publish student reports
+- **NaCCA Academic Logic** - Automatic grading and descriptors based on latest NaCCA assessment standards.
+- **Financial Engine** - Fee structures, automated invoice generation, and payment tracking.
+- **Parent Portal** - Secure access for parents to view student performance, attendance, and attendance reports.
+- **Terminal Reports** - Instant generation of terminal reports with class rankings and subject-level positions.
 
 ## Tech Stack
 
-- **Backend:** Python / Flask
-- **Database:** PostgreSQL
-- **Frontend:** Vanilla HTML5, CSS3, JavaScript (ES6+)
+- **Backend:** Python / Flask (Framework: Antigravity-style architecture)
+- **Database:** PostgreSQL (with complex SQL Views)
+- **Frontend:** Vanilla HTML5, CSS3 (Modern Glassmorphism aesthetics), JavaScript (ES6+)
 
 ## Installation
 
 ### Prerequisites
 
 - Python 3.10+
-- PostgreSQL 13+
-- pip (Python package manager)
+- PostgreSQL 14+
+- `pip`
 
 ### Setup
 
 1. **Clone and navigate to the project:**
    ```bash
-   cd nacca_sms
+   git clone <repo-url>
+   cd School
    ```
 
-2. **Create a virtual environment:**
-   ```bash
-   python -m venv venv
-   
-   # Windows
-   venv\Scripts\activate
-   
-   # Linux/Mac
-   source venv/bin/activate
+2. **Initialize Environment:**
+   Create a `.env` file in the root directory:
+   ```env
+   FLASK_CONFIG=development
+   SECRET_KEY=your-secret-key
+   DATABASE_URL=postgresql://user:password@localhost:5432/schooldb
    ```
 
 3. **Install dependencies:**
@@ -47,128 +52,61 @@ A comprehensive school management solution for Ghanaian schools following **NaCC
    pip install -r requirements.txt
    ```
 
-4. **Configure database:**
-   
-   Create a PostgreSQL database named `nacca_sms`:
-   ```sql
-   CREATE DATABASE nacca_sms;
-   ```
-   
-   Update the database connection in `config.py` if needed:
-   ```python
-   SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:password@localhost:5432/nacca_sms'
-   ```
-
-5. **Seed the database:**
+4. **Production Refactor Reset (Recommended):**
+   To ensure the database schema and PostgreSQL views are correctly initialized, run the final reseed script:
    ```bash
-   python seed.py
+   python reseed_db_final.py
    ```
 
-6. **Run the application:**
+5. **Run the application:**
    ```bash
    python app.py
    ```
 
-7. **Access the application:**
-   
-   Open [http://localhost:5000](http://localhost:5000) in your browser.
+## Production Credentials (Default)
 
-## Default Login Credentials
+**Password for all accounts:** `admin123`
 
-| Role | Email | Password |
-|------|-------|----------|
-| Headteacher | headteacher@sasuacademy.edu.gh | admin123 |
-| Admin | admin@sasuacademy.edu.gh | admin123 |
-| Teacher | teacher@sasuacademy.edu.gh | teacher123 |
-| Accounts | accounts@sasuacademy.edu.gh | accounts123 |
+| Role | Email |
+|------|-------|
+| **Super Admin** | `superadmin@school.com` |
+| **Headteacher** | `headteacher@school.com` |
+| **Admin** | `admin@school.com` |
+| **Teacher** | `teacher@school.com` |
+| **Accounts** | `accounts@school.com` |
+| **Parent** | `parent@school.com` |
 
 ## Project Structure
 
 ```
-nacca_sms/
-├── app.py                 # Main Flask application
-├── config.py              # Configuration settings
-├── seed.py                # Database seeder
-├── requirements.txt       # Python dependencies
+School/
+├── app.py                 # Main Entry Point & Flask Factory
+├── config.py              # Central Configuration (RBAC & Environment)
+├── reseed_db_final.py     # Final Production Seeder & View Creator
 ├── models/
-│   └── __init__.py        # Database models
-├── routes/
-│   ├── auth.py            # Authentication routes
-│   ├── dashboard.py       # Dashboard routes
-│   ├── students.py        # Student management
-│   ├── staff.py           # Staff management
-│   ├── classes.py         # Classes & subjects
-│   ├── assessments.py     # NaCCA assessments
-│   ├── fees.py            # Fee management
-│   ├── reports.py         # PDF reports
-│   ├── parent_portal.py   # Parent access
-│   └── api.py             # API endpoints
-├── templates/
-│   ├── base.html
-│   ├── layouts/
-│   ├── auth/
-│   ├── dashboard/
-│   ├── students/
-│   └── errors/
+│   └── __init__.py        # Database Models & SQL View Definitions
+├── services/              # Business Logic Layer (Clean Architecture)
+│   └── student_service.py # Core student business logic
+├── routes/                # Blueprint Route Handlers (Slim Routes)
+│   ├── students.py        # Student module
+│   ├── reports.py         # NaCCA Reporting module (PDFs)
+│   └── ...
+├── templates/             # Premium Glassmorphism UI
+│   ├── base.html          # Global Shell
+│   └── layouts/           # Dashboard Shells
 └── static/
     ├── css/
-    │   └── main.css       # Custom CSS
+    │   └── main.css       # Full Responsive Design System
     └── js/
-        └── main.js        # JavaScript utilities
+        └── main.js        # Core Interaction Logic
 ```
 
-## NaCCA Grading Scales
+## NaCCA Terminal Report Engine
 
-### Primary School (Grades 1-6)
-| Score Range | Grade | Remark |
-|-------------|-------|--------|
-| 80-100 | 1 | Highest |
-| 70-79 | 2 | Higher |
-| 60-69 | 3 | High |
-| 50-59 | 4 | High Average |
-| 40-49 | 5 | Average |
-| 30-39 | 6 | Low Average |
-| 25-29 | 7 | Below Average |
-| 20-24 | 8 | Low |
-| 0-19 | 9 | Very Low |
-
-### JHS
-| Score Range | Grade | Remark |
-|-------------|-------|--------|
-| 80-100 | 1 | Excellent |
-| 70-79 | 2 | Very Good |
-| 60-69 | 3 | Good |
-| 55-59 | 4 | Credit |
-| 50-54 | 5 | Credit |
-| 45-49 | 6 | Credit |
-| 40-44 | 7 | Pass |
-| 35-39 | 8 | Pass |
-| 0-34 | 9 | Fail |
-
-## Production Deployment
-
-For VPS deployment:
-
-1. Use **Gunicorn** as the WSGI server:
-   ```bash
-   gunicorn -w 4 -b 0.0.0.0:5000 app:create_app()
-   ```
-
-2. Set environment variables:
-   ```bash
-   export FLASK_CONFIG=production
-   export SECRET_KEY=your-secure-secret-key
-   export DATABASE_URL=postgresql://user:pass@host:5432/dbname
-   ```
-
-3. Use **Nginx** as a reverse proxy.
-
-4. Enable HTTPS with **Let's Encrypt**.
-
-## License
-
-MIT License - See LICENSE file for details.
+The system uses two primary PostgreSQL views for reporting:
+1. `v_student_subject_performance`: Calculates 50/50 weighting, subject ranking, and grade descriptors per student per subject.
+2. `v_student_terminal_reports`: Aggregates totals, averages, and calculates "Position in Class" using SQL `RANK()` functions.
 
 ---
 
-Built with "Sasu Labs" Aesthetic - Modern, high-contrast, professional design.
+Built for **NaCCA Excellence** - Modern, High-Performance, and Mobile-First.

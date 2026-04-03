@@ -749,12 +749,111 @@ class AuditLog(db.Model):
 
 
 # =============================================================================
-# HELPER FUNCTIONS
+# HELPER FUNCTIONS & DATABASE VIEWS
 # =============================================================================
-def init_db(app):
-    """Initialize database with app context."""
-    db.init_app(app)
+
+class SubjectPerformanceView(db.Model):
+    """SQLAlchemy Mapping for the Subject Performance View"""
+    __tablename__ = 'v_student_subject_performance'
+    __table_args__ = {'info': {'is_view': True}}
     
+    # SQLAlchemy requires a primary key even for views.
+    # assessment_id is unique per term/student/subject combo.
+    assessment_id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer)
+    term_id = db.Column(db.Integer)
+    class_id = db.Column(db.Integer)
+    subject_id = db.Column(db.Integer)
+    
+    class_score = db.Column(db.Float)
+    exam_score = db.Column(db.Float)
+    total_score = db.Column(db.Float)
+    nacca_grade = db.Column(db.String(50))
+    subject_position = db.Column(db.Integer)
+
+
+class TerminalReportView(db.Model):
+    """SQLAlchemy Mapping for the Aggregated Terminal Report View"""
+    __tablename__ = 'v_student_terminal_reports'
+    __table_args__ = {'info': {'is_view': True}}
+    
+    # Composite PK needed for the view mapping
+    student_id = db.Column(db.Integer, primary_key=True)
+    term_id = db.Column(db.Integer, primary_key=True)
+    class_id = db.Column(db.Integer)
+    academic_year_id = db.Column(db.Integer)
+    
+    subjects_taken = db.Column(db.Integer)
+    total_marks = db.Column(db.Float)
+    average_score = db.Column(db.Float)
+    class_position = db.Column(db.Integer)
+    class_size = db.Column(db.Integer)
+
+
+def init_db(app):
+    """Initialize database within app context.
+    Avoid double init_app(app) as it's already done in create_app.
+    """
     with app.app_context():
         db.create_all()
-        print("Database tables created successfully!")
+        
+        from sqlalchemy import text
+        
+        # 1. Subject-Level Performance View
+        sql_subject_view = (
+            "DROP TABLE IF EXISTS v_student_subject_performance CASCADE; " # Remove if SQLAlchemy created it as table
+            "CREATE OR REPLACE VIEW v_student_subject_performance AS "
+            "SELECT "
+            "a.id AS assessment_id, "
+            "s.id AS student_id, "
+            "a.term_id, "
+            "ce.class_id, "
+            "cs.subject_id, "
+            "(COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0)) AS class_score, "
+            "COALESCE(a.exam_score, 0) AS exam_score, "
+            "(COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) AS total_score, "
+            "CASE "
+            "WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 80 THEN 'Highly Proficient' "
+            "WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 70 THEN 'Proficient' "
+            "WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 60 THEN 'Approaching Proficiency' "
+            "WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 50 THEN 'Developing' "
+            "ELSE 'Emerging' "
+            "END AS nacca_grade, "
+            "RANK() OVER (PARTITION BY ce.class_id, a.term_id, cs.subject_id ORDER BY (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) DESC) AS subject_position "
+            "FROM assessments a "
+            "JOIN students s ON a.student_id = s.id "
+            "JOIN class_subjects cs ON a.class_subject_id = cs.id "
+            "JOIN class_enrollments ce ON s.id = ce.student_id AND cs.class_id = ce.class_id AND cs.academic_year_id = ce.academic_year_id "
+        )
+        
+        # 2. Terminal Report Aggregation View
+        sql_terminal_view = (
+            "DROP TABLE IF EXISTS v_student_terminal_reports CASCADE; " # Remove if SQLAlchemy created it as table
+            "CREATE OR REPLACE VIEW v_student_terminal_reports AS "
+            "WITH student_totals AS ( "
+            "SELECT "
+            "s.id AS student_id, "
+            "a.term_id, "
+            "ce.class_id, "
+            "ce.academic_year_id, "
+            "COUNT(a.id) AS subjects_taken, "
+            "SUM(COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) AS total_marks, "
+            "AVG(COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) AS average_score "
+            "FROM students s "
+            "JOIN class_enrollments ce ON s.id = ce.student_id "
+            "JOIN class_subjects cs ON ce.class_id = cs.class_id AND ce.academic_year_id = cs.academic_year_id "
+            "JOIN assessments a ON s.id = a.student_id AND cs.id = a.class_subject_id "
+            "GROUP BY s.id, a.term_id, ce.class_id, ce.academic_year_id "
+            ") "
+            "SELECT *, "
+            "RANK() OVER (PARTITION BY class_id, term_id ORDER BY total_marks DESC) AS class_position, "
+            "COUNT(*) OVER (PARTITION BY class_id, term_id) AS class_size "
+            "FROM student_totals "
+        )
+        
+        db.session.execute(text(sql_subject_view))
+        db.session.execute(text(sql_terminal_view))
+        db.session.commit()
+        
+        print("Database tables and NaCCA PostgreSQL Views created successfully!")
+

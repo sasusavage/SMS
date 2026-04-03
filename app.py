@@ -202,7 +202,7 @@ app = create_app(os.environ.get('FLASK_CONFIG', 'production'))
 if __name__ == '__main__':
     app = create_app(os.environ.get('FLASK_CONFIG', 'development'))
     
-    with app.app_context():
-        db.create_all()
+    from models import init_db
+    init_db(app)
     
     app.run(debug=True, port=5008)

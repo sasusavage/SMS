@@ -1,0 +1,909 @@
+--- [WARNING] PURGING DATABASE ---
+2026-04-03 04:14:37,170 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2026-04-03 04:14:37,170 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-04-03 04:14:37,851 INFO sqlalchemy.engine.Engine select current_schema()
+2026-04-03 04:14:37,851 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-04-03 04:14:38,388 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-04-03 04:14:38,388 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-04-03 04:14:38,903 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-03 04:14:38,904 INFO sqlalchemy.engine.Engine DROP SCHEMA public CASCADE; CREATE SCHEMA public;
+2026-04-03 04:14:38,904 INFO sqlalchemy.engine.Engine [generated in 0.00034s] {}
+2026-04-03 04:14:39,979 INFO sqlalchemy.engine.Engine COMMIT
+Database purged (CASCADE).
+2026-04-03 04:14:40,829 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-03 04:14:40,837 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:40,837 INFO sqlalchemy.engine.Engine [generated in 0.00054s] {'table_name': 'schools', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:42,200 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:42,200 INFO sqlalchemy.engine.Engine [cached since 1.364s ago] {'table_name': 'academic_years', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:42,403 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:42,403 INFO sqlalchemy.engine.Engine [cached since 1.567s ago] {'table_name': 'terms', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:42,602 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:42,602 INFO sqlalchemy.engine.Engine [cached since 1.766s ago] {'table_name': 'departments', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:42,760 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:42,760 INFO sqlalchemy.engine.Engine [cached since 1.923s ago] {'table_name': 'classes', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:42,988 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:42,988 INFO sqlalchemy.engine.Engine [cached since 2.152s ago] {'table_name': 'subjects', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:43,173 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:43,173 INFO sqlalchemy.engine.Engine [cached since 2.337s ago] {'table_name': 'class_subjects', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:43,466 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:43,467 INFO sqlalchemy.engine.Engine [cached since 2.63s ago] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:43,668 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:43,668 INFO sqlalchemy.engine.Engine [cached since 2.832s ago] {'table_name': 'staff', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:44,001 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:44,001 INFO sqlalchemy.engine.Engine [cached since 3.165s ago] {'table_name': 'parents', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:44,229 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:44,229 INFO sqlalchemy.engine.Engine [cached since 3.392s ago] {'table_name': 'students', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:44,441 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:44,441 INFO sqlalchemy.engine.Engine [cached since 3.604s ago] {'table_name': 'class_enrollments', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:44,798 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:44,798 INFO sqlalchemy.engine.Engine [cached since 3.962s ago] {'table_name': 'assessments', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:45,215 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:45,215 INFO sqlalchemy.engine.Engine [cached since 4.378s ago] {'table_name': 'terminal_reports', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:45,709 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:45,710 INFO sqlalchemy.engine.Engine [cached since 4.873s ago] {'table_name': 'attendance', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:46,636 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:46,636 INFO sqlalchemy.engine.Engine [cached since 5.799s ago] {'table_name': 'staff_attendance', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:47,041 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:47,041 INFO sqlalchemy.engine.Engine [cached since 6.205s ago] {'table_name': 'fee_categories', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:48,229 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:48,229 INFO sqlalchemy.engine.Engine [cached since 7.392s ago] {'table_name': 'fee_structures', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:48,537 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:48,537 INFO sqlalchemy.engine.Engine [cached since 7.7s ago] {'table_name': 'fee_invoices', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:48,844 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:48,844 INFO sqlalchemy.engine.Engine [cached since 8.007s ago] {'table_name': 'fee_invoice_items', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:49,293 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:49,294 INFO sqlalchemy.engine.Engine [cached since 8.457s ago] {'table_name': 'payments', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:49,703 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:49,704 INFO sqlalchemy.engine.Engine [cached since 8.867s ago] {'table_name': 'notifications', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:50,001 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:50,001 INFO sqlalchemy.engine.Engine [cached since 9.164s ago] {'table_name': 'audit_logs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:50,225 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:50,225 INFO sqlalchemy.engine.Engine [cached since 9.389s ago] {'table_name': 'v_student_subject_performance', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:51,000 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:51,000 INFO sqlalchemy.engine.Engine [cached since 10.16s ago] {'table_name': 'v_student_terminal_reports', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:51,202 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:51,202 INFO sqlalchemy.engine.Engine [generated in 0.00023s] {'typname_1': 'userrole', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:51,446 INFO sqlalchemy.engine.Engine CREATE TYPE userrole AS ENUM ('SUPER_ADMIN', 'HEADTEACHER', 'ADMIN', 'TEACHER', 'ACCOUNTS_OFFICER', 'PARENT')
+2026-04-03 04:14:51,446 INFO sqlalchemy.engine.Engine [no key 0.00024s] {}
+2026-04-03 04:14:51,773 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:51,773 INFO sqlalchemy.engine.Engine [cached since 0.5711s ago] {'typname_1': 'gender', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:52,245 INFO sqlalchemy.engine.Engine CREATE TYPE gender AS ENUM ('MALE', 'FEMALE')
+2026-04-03 04:14:52,245 INFO sqlalchemy.engine.Engine [no key 0.00028s] {}
+2026-04-03 04:14:52,697 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:52,697 INFO sqlalchemy.engine.Engine [cached since 1.496s ago] {'typname_1': 'studentstatus', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:53,119 INFO sqlalchemy.engine.Engine CREATE TYPE studentstatus AS ENUM ('ACTIVE', 'GRADUATED', 'TRANSFERRED', 'SUSPENDED', 'WITHDRAWN')
+2026-04-03 04:14:53,119 INFO sqlalchemy.engine.Engine [no key 0.00018s] {}
+2026-04-03 04:14:53,455 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:53,455 INFO sqlalchemy.engine.Engine [cached since 2.254s ago] {'typname_1': 'attendancestatus', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:53,783 INFO sqlalchemy.engine.Engine CREATE TYPE attendancestatus AS ENUM ('PRESENT', 'ABSENT', 'LATE', 'EXCUSED')
+2026-04-03 04:14:53,783 INFO sqlalchemy.engine.Engine [no key 0.00018s] {}
+2026-04-03 04:14:53,929 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:53,929 INFO sqlalchemy.engine.Engine [cached since 2.728s ago] {'typname_1': 'paymentstatus', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:54,065 INFO sqlalchemy.engine.Engine CREATE TYPE paymentstatus AS ENUM ('PENDING', 'COMPLETED', 'PARTIAL', 'FAILED', 'REFUNDED')
+2026-04-03 04:14:54,065 INFO sqlalchemy.engine.Engine [no key 0.00023s] {}
+2026-04-03 04:14:54,245 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-03 04:14:54,245 INFO sqlalchemy.engine.Engine [cached since 3.043s ago] {'typname_1': 'paymentmethod', 'nspname_1': 'pg_catalog'}
+2026-04-03 04:14:54,385 INFO sqlalchemy.engine.Engine CREATE TYPE paymentmethod AS ENUM ('CASH', 'MOBILE_MONEY', 'BANK_TRANSFER', 'ONLINE')
+2026-04-03 04:14:54,386 INFO sqlalchemy.engine.Engine [no key 0.00028s] {}
+2026-04-03 04:14:54,553 INFO sqlalchemy.engine.Engine 
+CREATE TABLE schools (
+	id SERIAL NOT NULL, 
+	uuid VARCHAR(36) NOT NULL, 
+	name VARCHAR(200) NOT NULL, 
+	motto VARCHAR(300), 
+	address TEXT, 
+	city VARCHAR(100), 
+	region VARCHAR(100), 
+	phone VARCHAR(20), 
+	email VARCHAR(120), 
+	website VARCHAR(200), 
+	logo_url VARCHAR(500), 
+	primary_color VARCHAR(7), 
+	secondary_color VARCHAR(7), 
+	established_year INTEGER, 
+	school_type VARCHAR(50), 
+	is_active BOOLEAN, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (uuid)
+)
+
+
+2026-04-03 04:14:54,554 INFO sqlalchemy.engine.Engine [no key 0.00037s] {}
+2026-04-03 04:14:54,789 INFO sqlalchemy.engine.Engine 
+CREATE TABLE departments (
+	id SERIAL NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	name VARCHAR(100) NOT NULL, 
+	code VARCHAR(10), 
+	description TEXT, 
+	head_of_department_id INTEGER, 
+	is_active BOOLEAN, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_school_department UNIQUE (school_id, name)
+)
+
+
+2026-04-03 04:14:54,789 INFO sqlalchemy.engine.Engine [no key 0.00051s] {}
+2026-04-03 04:14:55,201 INFO sqlalchemy.engine.Engine 
+CREATE TABLE staff (
+	id SERIAL NOT NULL, 
+	uuid VARCHAR(36) NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	staff_id VARCHAR(50) NOT NULL, 
+	first_name VARCHAR(100) NOT NULL, 
+	last_name VARCHAR(100) NOT NULL, 
+	other_names VARCHAR(100), 
+	gender gender NOT NULL, 
+	date_of_birth DATE, 
+	nationality VARCHAR(50), 
+	phone VARCHAR(20), 
+	email VARCHAR(120), 
+	address TEXT, 
+	city VARCHAR(100), 
+	region VARCHAR(100), 
+	position VARCHAR(100), 
+	department_id INTEGER, 
+	qualification VARCHAR(200), 
+	date_employed DATE, 
+	salary NUMERIC(12, 2), 
+	bank_name VARCHAR(100), 
+	bank_account VARCHAR(50), 
+	photo_url VARCHAR(500), 
+	ghana_card_number VARCHAR(20), 
+	ssnit_number VARCHAR(20), 
+	is_active BOOLEAN, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (uuid), 
+	UNIQUE (staff_id)
+)
+
+
+2026-04-03 04:14:55,202 INFO sqlalchemy.engine.Engine [no key 0.00040s] {}
+2026-04-03 04:14:55,614 INFO sqlalchemy.engine.Engine 
+CREATE TABLE v_student_subject_performance (
+	assessment_id SERIAL NOT NULL, 
+	student_id INTEGER, 
+	term_id INTEGER, 
+	class_id INTEGER, 
+	subject_id INTEGER, 
+	class_score FLOAT, 
+	exam_score FLOAT, 
+	total_score FLOAT, 
+	nacca_grade VARCHAR(50), 
+	subject_position INTEGER, 
+	PRIMARY KEY (assessment_id)
+)
+
+
+2026-04-03 04:14:55,614 INFO sqlalchemy.engine.Engine [no key 0.00034s] {}
+2026-04-03 04:14:55,871 INFO sqlalchemy.engine.Engine 
+CREATE TABLE v_student_terminal_reports (
+	student_id INTEGER NOT NULL, 
+	term_id INTEGER NOT NULL, 
+	class_id INTEGER, 
+	academic_year_id INTEGER, 
+	subjects_taken INTEGER, 
+	total_marks FLOAT, 
+	average_score FLOAT, 
+	class_position INTEGER, 
+	class_size INTEGER, 
+	PRIMARY KEY (student_id, term_id)
+)
+
+
+2026-04-03 04:14:55,871 INFO sqlalchemy.engine.Engine [no key 0.00046s] {}
+2026-04-03 04:14:56,138 INFO sqlalchemy.engine.Engine 
+CREATE TABLE academic_years (
+	id SERIAL NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	name VARCHAR(50) NOT NULL, 
+	start_date DATE NOT NULL, 
+	end_date DATE NOT NULL, 
+	is_current BOOLEAN, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_school_academic_year UNIQUE (school_id, name), 
+	FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:14:56,138 INFO sqlalchemy.engine.Engine [no key 0.00031s] {}
+2026-04-03 04:14:56,513 INFO sqlalchemy.engine.Engine 
+CREATE TABLE classes (
+	id SERIAL NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	name VARCHAR(100) NOT NULL, 
+	level VARCHAR(50) NOT NULL, 
+	grade_number INTEGER, 
+	section VARCHAR(10), 
+	capacity INTEGER, 
+	class_teacher_id INTEGER, 
+	room_number VARCHAR(20), 
+	is_active BOOLEAN, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_school_class_name UNIQUE (school_id, name), 
+	FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE, 
+	FOREIGN KEY(class_teacher_id) REFERENCES staff (id) ON DELETE SET NULL
+)
+
+
+2026-04-03 04:14:56,514 INFO sqlalchemy.engine.Engine [no key 0.00075s] {}
+2026-04-03 04:14:57,086 INFO sqlalchemy.engine.Engine 
+CREATE TABLE subjects (
+	id SERIAL NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	department_id INTEGER, 
+	name VARCHAR(100) NOT NULL, 
+	code VARCHAR(20), 
+	description TEXT, 
+	is_core BOOLEAN, 
+	is_active BOOLEAN, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_school_subject UNIQUE (school_id, name), 
+	FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE, 
+	FOREIGN KEY(department_id) REFERENCES departments (id) ON DELETE SET NULL
+)
+
+
+2026-04-03 04:14:57,086 INFO sqlalchemy.engine.Engine [no key 0.00033s] {}
+2026-04-03 04:14:57,493 INFO sqlalchemy.engine.Engine 
+CREATE TABLE parents (
+	id SERIAL NOT NULL, 
+	uuid VARCHAR(36) NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	father_name VARCHAR(200), 
+	father_occupation VARCHAR(100), 
+	father_phone VARCHAR(20), 
+	father_email VARCHAR(120), 
+	mother_name VARCHAR(200), 
+	mother_occupation VARCHAR(100), 
+	mother_phone VARCHAR(20), 
+	mother_email VARCHAR(120), 
+	guardian_name VARCHAR(200), 
+	guardian_relationship VARCHAR(50), 
+	guardian_occupation VARCHAR(100), 
+	guardian_phone VARCHAR(20), 
+	guardian_email VARCHAR(120), 
+	address TEXT, 
+	city VARCHAR(100), 
+	region VARCHAR(100), 
+	primary_contact_phone VARCHAR(20), 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (uuid), 
+	FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:14:57,494 INFO sqlalchemy.engine.Engine [no key 0.00043s] {}
+2026-04-03 04:14:57,738 INFO sqlalchemy.engine.Engine 
+CREATE TABLE staff_attendance (
+	id SERIAL NOT NULL, 
+	staff_id INTEGER NOT NULL, 
+	date DATE NOT NULL, 
+	time_in TIME WITHOUT TIME ZONE, 
+	time_out TIME WITHOUT TIME ZONE, 
+	status attendancestatus NOT NULL, 
+	remarks TEXT, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_staff_date_attendance UNIQUE (staff_id, date), 
+	FOREIGN KEY(staff_id) REFERENCES staff (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:14:57,738 INFO sqlalchemy.engine.Engine [no key 0.00036s] {}
+2026-04-03 04:14:58,723 INFO sqlalchemy.engine.Engine 
+CREATE TABLE fee_categories (
+	id SERIAL NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	name VARCHAR(100) NOT NULL, 
+	description TEXT, 
+	is_recurring BOOLEAN, 
+	is_active BOOLEAN, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_school_fee_category UNIQUE (school_id, name), 
+	FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:14:58,723 INFO sqlalchemy.engine.Engine [no key 0.00022s] {}
+2026-04-03 04:14:58,979 INFO sqlalchemy.engine.Engine 
+CREATE TABLE terms (
+	id SERIAL NOT NULL, 
+	academic_year_id INTEGER NOT NULL, 
+	name VARCHAR(50) NOT NULL, 
+	term_number INTEGER NOT NULL, 
+	start_date DATE NOT NULL, 
+	end_date DATE NOT NULL, 
+	is_current BOOLEAN, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_year_term UNIQUE (academic_year_id, term_number), 
+	CONSTRAINT chk_term_number CHECK (term_number >= 1 AND term_number <= 3), 
+	FOREIGN KEY(academic_year_id) REFERENCES academic_years (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:14:58,980 INFO sqlalchemy.engine.Engine [no key 0.00019s] {}
+2026-04-03 04:14:59,175 INFO sqlalchemy.engine.Engine 
+CREATE TABLE class_subjects (
+	id SERIAL NOT NULL, 
+	class_id INTEGER NOT NULL, 
+	subject_id INTEGER NOT NULL, 
+	teacher_id INTEGER, 
+	academic_year_id INTEGER NOT NULL, 
+	classwork_weight FLOAT, 
+	homework_weight FLOAT, 
+	project_weight FLOAT, 
+	exam_weight FLOAT, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_class_subject_year UNIQUE (class_id, subject_id, academic_year_id), 
+	FOREIGN KEY(class_id) REFERENCES classes (id) ON DELETE CASCADE, 
+	FOREIGN KEY(subject_id) REFERENCES subjects (id) ON DELETE CASCADE, 
+	FOREIGN KEY(teacher_id) REFERENCES staff (id) ON DELETE SET NULL, 
+	FOREIGN KEY(academic_year_id) REFERENCES academic_years (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:14:59,176 INFO sqlalchemy.engine.Engine [no key 0.00021s] {}
+2026-04-03 04:14:59,372 INFO sqlalchemy.engine.Engine 
+CREATE TABLE users (
+	id SERIAL NOT NULL, 
+	uuid VARCHAR(36) NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	email VARCHAR(120) NOT NULL, 
+	password_hash VARCHAR(256) NOT NULL, 
+	role userrole NOT NULL, 
+	is_active BOOLEAN, 
+	last_login TIMESTAMP WITHOUT TIME ZONE, 
+	staff_id INTEGER, 
+	parent_id INTEGER, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (uuid), 
+	FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE, 
+	UNIQUE (email), 
+	FOREIGN KEY(staff_id) REFERENCES staff (id) ON DELETE SET NULL, 
+	FOREIGN KEY(parent_id) REFERENCES parents (id) ON DELETE SET NULL
+)
+
+
+2026-04-03 04:14:59,372 INFO sqlalchemy.engine.Engine [no key 0.00033s] {}
+2026-04-03 04:14:59,867 INFO sqlalchemy.engine.Engine 
+CREATE TABLE students (
+	id SERIAL NOT NULL, 
+	uuid VARCHAR(36) NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	parent_id INTEGER, 
+	student_id VARCHAR(50) NOT NULL, 
+	first_name VARCHAR(100) NOT NULL, 
+	last_name VARCHAR(100) NOT NULL, 
+	other_names VARCHAR(100), 
+	gender gender NOT NULL, 
+	date_of_birth DATE NOT NULL, 
+	nationality VARCHAR(50), 
+	place_of_birth VARCHAR(100), 
+	hometown VARCHAR(100), 
+	religion VARCHAR(50), 
+	blood_group VARCHAR(5), 
+	allergies TEXT, 
+	medical_conditions TEXT, 
+	admission_date DATE NOT NULL, 
+	admission_number VARCHAR(50), 
+	previous_school VARCHAR(200), 
+	status studentstatus, 
+	photo_url VARCHAR(500), 
+	birth_certificate_url VARCHAR(500), 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (uuid), 
+	FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE, 
+	FOREIGN KEY(parent_id) REFERENCES parents (id) ON DELETE SET NULL, 
+	UNIQUE (student_id)
+)
+
+
+2026-04-03 04:14:59,867 INFO sqlalchemy.engine.Engine [no key 0.00027s] {}
+2026-04-03 04:15:00,308 INFO sqlalchemy.engine.Engine 
+CREATE TABLE fee_structures (
+	id SERIAL NOT NULL, 
+	school_id INTEGER NOT NULL, 
+	class_id INTEGER NOT NULL, 
+	academic_year_id INTEGER NOT NULL, 
+	fee_category_id INTEGER NOT NULL, 
+	amount NUMERIC(12, 2) NOT NULL, 
+	term_applicable INTEGER, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_class_year_fee_term UNIQUE (class_id, academic_year_id, fee_category_id, term_applicable), 
+	FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE, 
+	FOREIGN KEY(class_id) REFERENCES classes (id) ON DELETE CASCADE, 
+	FOREIGN KEY(academic_year_id) REFERENCES academic_years (id) ON DELETE CASCADE, 
+	FOREIGN KEY(fee_category_id) REFERENCES fee_categories (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:15:00,308 INFO sqlalchemy.engine.Engine [no key 0.00033s] {}
+2026-04-03 04:15:00,819 INFO sqlalchemy.engine.Engine 
+CREATE TABLE class_enrollments (
+	id SERIAL NOT NULL, 
+	student_id INTEGER NOT NULL, 
+	class_id INTEGER NOT NULL, 
+	academic_year_id INTEGER NOT NULL, 
+	enrollment_date DATE, 
+	is_promoted BOOLEAN, 
+	promotion_remarks TEXT, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_student_year_enrollment UNIQUE (student_id, academic_year_id), 
+	FOREIGN KEY(student_id) REFERENCES students (id) ON DELETE CASCADE, 
+	FOREIGN KEY(class_id) REFERENCES classes (id) ON DELETE CASCADE, 
+	FOREIGN KEY(academic_year_id) REFERENCES academic_years (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:15:00,819 INFO sqlalchemy.engine.Engine [no key 0.00026s] {}
+2026-04-03 04:15:01,297 INFO sqlalchemy.engine.Engine 
+CREATE TABLE assessments (
+	id SERIAL NOT NULL, 
+	student_id INTEGER NOT NULL, 
+	class_subject_id INTEGER NOT NULL, 
+	term_id INTEGER NOT NULL, 
+	classwork_score FLOAT, 
+	homework_score FLOAT, 
+	project_score FLOAT, 
+	exam_score FLOAT, 
+	total_score FLOAT, 
+	grade VARCHAR(5), 
+	grade_remark VARCHAR(50), 
+	class_position INTEGER, 
+	teacher_remarks TEXT, 
+	recorded_by_id INTEGER, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_student_subject_term UNIQUE (student_id, class_subject_id, term_id), 
+	FOREIGN KEY(student_id) REFERENCES students (id) ON DELETE CASCADE, 
+	FOREIGN KEY(class_subject_id) REFERENCES class_subjects (id) ON DELETE CASCADE, 
+	FOREIGN KEY(term_id) REFERENCES terms (id) ON DELETE CASCADE, 
+	FOREIGN KEY(recorded_by_id) REFERENCES users (id) ON DELETE SET NULL
+)
+
+
+2026-04-03 04:15:01,297 INFO sqlalchemy.engine.Engine [no key 0.00022s] {}
+2026-04-03 04:15:01,675 INFO sqlalchemy.engine.Engine 
+CREATE TABLE attendance (
+	id SERIAL NOT NULL, 
+	student_id INTEGER NOT NULL, 
+	class_id INTEGER NOT NULL, 
+	date DATE NOT NULL, 
+	status attendancestatus NOT NULL, 
+	remarks TEXT, 
+	recorded_by_id INTEGER, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_student_date_attendance UNIQUE (student_id, date), 
+	FOREIGN KEY(student_id) REFERENCES students (id) ON DELETE CASCADE, 
+	FOREIGN KEY(class_id) REFERENCES classes (id) ON DELETE CASCADE, 
+	FOREIGN KEY(recorded_by_id) REFERENCES users (id) ON DELETE SET NULL
+)
+
+
+2026-04-03 04:15:01,675 INFO sqlalchemy.engine.Engine [no key 0.00027s] {}
+2026-04-03 04:15:02,024 INFO sqlalchemy.engine.Engine 
+CREATE TABLE fee_invoices (
+	id SERIAL NOT NULL, 
+	uuid VARCHAR(36) NOT NULL, 
+	invoice_number VARCHAR(50) NOT NULL, 
+	student_id INTEGER NOT NULL, 
+	term_id INTEGER NOT NULL, 
+	total_amount NUMERIC(12, 2) NOT NULL, 
+	discount_amount NUMERIC(12, 2), 
+	amount_paid NUMERIC(12, 2), 
+	balance NUMERIC(12, 2) NOT NULL, 
+	issue_date DATE, 
+	due_date DATE, 
+	status paymentstatus, 
+	notes TEXT, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (uuid), 
+	UNIQUE (invoice_number), 
+	FOREIGN KEY(student_id) REFERENCES students (id) ON DELETE CASCADE, 
+	FOREIGN KEY(term_id) REFERENCES terms (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:15:02,024 INFO sqlalchemy.engine.Engine [no key 0.00032s] {}
+2026-04-03 04:15:02,292 INFO sqlalchemy.engine.Engine 
+CREATE TABLE notifications (
+	id SERIAL NOT NULL, 
+	user_id INTEGER NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	message TEXT NOT NULL, 
+	category VARCHAR(50), 
+	is_read BOOLEAN, 
+	read_at TIMESTAMP WITHOUT TIME ZONE, 
+	link VARCHAR(500), 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:15:02,292 INFO sqlalchemy.engine.Engine [no key 0.00026s] {}
+2026-04-03 04:15:02,782 INFO sqlalchemy.engine.Engine 
+CREATE TABLE audit_logs (
+	id SERIAL NOT NULL, 
+	timestamp TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	user_id INTEGER, 
+	action VARCHAR(100) NOT NULL, 
+	entity_type VARCHAR(50), 
+	entity_id INTEGER, 
+	old_values JSON, 
+	new_values JSON, 
+	ip_address VARCHAR(45), 
+	user_agent VARCHAR(500), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE SET NULL
+)
+
+
+2026-04-03 04:15:02,783 INFO sqlalchemy.engine.Engine [no key 0.00028s] {}
+2026-04-03 04:15:03,866 INFO sqlalchemy.engine.Engine 
+CREATE TABLE terminal_reports (
+	id SERIAL NOT NULL, 
+	student_id INTEGER NOT NULL, 
+	term_id INTEGER NOT NULL, 
+	class_enrollment_id INTEGER NOT NULL, 
+	total_marks FLOAT, 
+	average_score FLOAT, 
+	class_position INTEGER, 
+	class_size INTEGER, 
+	total_days INTEGER, 
+	days_present INTEGER, 
+	days_absent INTEGER, 
+	conduct_grade VARCHAR(50), 
+	attitude_grade VARCHAR(50), 
+	interest_grade VARCHAR(50), 
+	class_teacher_remarks TEXT, 
+	headteacher_remarks TEXT, 
+	next_term_begins DATE, 
+	promotion_status VARCHAR(50), 
+	is_published BOOLEAN, 
+	published_at TIMESTAMP WITHOUT TIME ZONE, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_student_term_report UNIQUE (student_id, term_id), 
+	FOREIGN KEY(student_id) REFERENCES students (id) ON DELETE CASCADE, 
+	FOREIGN KEY(term_id) REFERENCES terms (id) ON DELETE CASCADE, 
+	FOREIGN KEY(class_enrollment_id) REFERENCES class_enrollments (id) ON DELETE CASCADE
+)
+
+
+2026-04-03 04:15:03,866 INFO sqlalchemy.engine.Engine [no key 0.00029s] {}
+2026-04-03 04:15:04,119 INFO sqlalchemy.engine.Engine 
+CREATE TABLE fee_invoice_items (
+	id SERIAL NOT NULL, 
+	invoice_id INTEGER NOT NULL, 
+	fee_category_id INTEGER, 
+	description VARCHAR(200) NOT NULL, 
+	amount NUMERIC(12, 2) NOT NULL, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(invoice_id) REFERENCES fee_invoices (id) ON DELETE CASCADE, 
+	FOREIGN KEY(fee_category_id) REFERENCES fee_categories (id) ON DELETE SET NULL
+)
+
+
+2026-04-03 04:15:04,119 INFO sqlalchemy.engine.Engine [no key 0.00023s] {}
+2026-04-03 04:15:04,301 INFO sqlalchemy.engine.Engine 
+CREATE TABLE payments (
+	id SERIAL NOT NULL, 
+	uuid VARCHAR(36) NOT NULL, 
+	receipt_number VARCHAR(50) NOT NULL, 
+	invoice_id INTEGER NOT NULL, 
+	amount NUMERIC(12, 2) NOT NULL, 
+	payment_method paymentmethod NOT NULL, 
+	payment_date TIMESTAMP WITHOUT TIME ZONE, 
+	transaction_reference VARCHAR(100), 
+	payer_name VARCHAR(200), 
+	payer_phone VARCHAR(20), 
+	status paymentstatus, 
+	notes TEXT, 
+	received_by_id INTEGER, 
+	created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (uuid), 
+	UNIQUE (receipt_number), 
+	FOREIGN KEY(invoice_id) REFERENCES fee_invoices (id) ON DELETE CASCADE, 
+	FOREIGN KEY(received_by_id) REFERENCES users (id) ON DELETE SET NULL
+)
+
+
+2026-04-03 04:15:04,301 INFO sqlalchemy.engine.Engine [no key 0.00022s] {}
+2026-04-03 04:15:04,690 INFO sqlalchemy.engine.Engine ALTER TABLE departments ADD FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE
+2026-04-03 04:15:04,691 INFO sqlalchemy.engine.Engine [no key 0.00042s] {}
+2026-04-03 04:15:05,029 INFO sqlalchemy.engine.Engine ALTER TABLE staff ADD FOREIGN KEY(department_id) REFERENCES departments (id) ON DELETE SET NULL
+2026-04-03 04:15:05,029 INFO sqlalchemy.engine.Engine [no key 0.00027s] {}
+2026-04-03 04:15:05,200 INFO sqlalchemy.engine.Engine ALTER TABLE departments ADD FOREIGN KEY(head_of_department_id) REFERENCES staff (id) ON DELETE SET NULL
+2026-04-03 04:15:05,201 INFO sqlalchemy.engine.Engine [no key 0.00030s] {}
+2026-04-03 04:15:05,576 INFO sqlalchemy.engine.Engine ALTER TABLE staff ADD FOREIGN KEY(school_id) REFERENCES schools (id) ON DELETE CASCADE
+2026-04-03 04:15:05,577 INFO sqlalchemy.engine.Engine [no key 0.00050s] {}
+2026-04-03 04:15:05,848 INFO sqlalchemy.engine.Engine COMMIT
+2026-04-03 04:15:06,737 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-03 04:15:06,738 INFO sqlalchemy.engine.Engine 
+        CREATE OR REPLACE VIEW v_student_subject_performance AS
+        SELECT
+            a.id AS assessment_id,
+            s.id AS student_id,
+            a.term_id,
+            ce.class_id,
+            cs.subject_id,
+            
+            -- 50%% Class Score (Classwork + Homework + Project)
+            (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0)) AS class_score,
+            
+            -- 50%% Exam Score
+            COALESCE(a.exam_score, 0) AS exam_score,
+            
+            -- 100%% Total Score
+            (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) AS total_score,
+            
+            -- Dynamic NaCCA Primary Descriptors
+            CASE 
+                WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 80 THEN '1 - Highly Proficient'
+                WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 70 THEN '2 - Proficient'
+                WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 60 THEN '3 - Approaching Proficiency'
+                WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 50 THEN '4 - Developing'
+                ELSE '5 - Emerging'
+            END AS nacca_grade,
+            
+            -- Rank/Position per SUBJECT within the CLASS for the TERM
+            RANK() OVER (
+                PARTITION BY ce.class_id, a.term_id, cs.subject_id 
+                ORDER BY (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) DESC
+            ) AS subject_position
+
+        FROM 
+            assessments a
+        JOIN 
+            students s ON a.student_id = s.id
+        JOIN 
+            class_subjects cs ON a.class_subject_id = cs.id
+        JOIN 
+            class_enrollments ce ON s.id = ce.student_id AND cs.class_id = ce.class_id AND cs.academic_year_id = ce.academic_year_id;
+        
+2026-04-03 04:15:06,738 INFO sqlalchemy.engine.Engine [generated in 0.00045s] {}
+2026-04-03 04:15:07,506 INFO sqlalchemy.engine.Engine ROLLBACK
+Traceback (most recent call last):
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.WrongObjectType: "v_student_subject_performance" is not a view
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\DeLL\OneDrive\Documents\School\reseed_db_final.py", line 178, in <module>
+    reseed()
+    ~~~~~~^^
+  File "C:\Users\DeLL\OneDrive\Documents\School\reseed_db_final.py", line 48, in reseed
+    init_db(app)
+    ~~~~~~~^^^^^
+  File "C:\Users\DeLL\OneDrive\Documents\School\models\__init__.py", line 881, in init_db
+    db.session.execute(sql_subject_view)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\orm\scoping.py", line 765, in execute
+    return self._proxied.execute(
+           ~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\orm\session.py", line 2258, in _execute_internal
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\DeLL\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.WrongObjectType) "v_student_subject_performance" is not a view
+
+[SQL: 
+        CREATE OR REPLACE VIEW v_student_subject_performance AS
+        SELECT
+            a.id AS assessment_id,
+            s.id AS student_id,
+            a.term_id,
+            ce.class_id,
+            cs.subject_id,
+            
+            -- 50%% Class Score (Classwork + Homework + Project)
+            (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0)) AS class_score,
+            
+            -- 50%% Exam Score
+            COALESCE(a.exam_score, 0) AS exam_score,
+            
+            -- 100%% Total Score
+            (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) AS total_score,
+            
+            -- Dynamic NaCCA Primary Descriptors
+            CASE 
+                WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 80 THEN '1 - Highly Proficient'
+                WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 70 THEN '2 - Proficient'
+                WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 60 THEN '3 - Approaching Proficiency'
+                WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 50 THEN '4 - Developing'
+                ELSE '5 - Emerging'
+            END AS nacca_grade,
+            
+            -- Rank/Position per SUBJECT within the CLASS for the TERM
+            RANK() OVER (
+                PARTITION BY ce.class_id, a.term_id, cs.subject_id 
+                ORDER BY (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) DESC
+            ) AS subject_position
+
+        FROM 
+            assessments a
+        JOIN 
+            students s ON a.student_id = s.id
+        JOIN 
+            class_subjects cs ON a.class_subject_id = cs.id
+        JOIN 
+            class_enrollments ce ON s.id = ce.student_id AND cs.class_id = ce.class_id AND cs.academic_year_id = ce.academic_year_id;
+        ]
+(Background on this error at: https://sqlalche.me/e/20/f405)

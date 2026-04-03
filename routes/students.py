@@ -65,76 +65,24 @@ def index():
     )
 
 
+from services.student_service import StudentService
+
 @students_bp.route('/add', methods=['GET', 'POST'])
 @admin_required
 def add():
     """Add new student."""
     if request.method == 'POST':
-        # Generate student ID
-        school_id = current_user.school_id
-        count = Student.query.filter_by(school_id=school_id).count()
-        student_id = f"STU{school_id:03d}{count + 1:04d}"
-        
-        # Create parent record
-        parent = Parent(
-            school_id=school_id,
-            father_name=request.form.get('father_name'),
-            father_phone=request.form.get('father_phone'),
-            father_occupation=request.form.get('father_occupation'),
-            mother_name=request.form.get('mother_name'),
-            mother_phone=request.form.get('mother_phone'),
-            mother_occupation=request.form.get('mother_occupation'),
-            guardian_name=request.form.get('guardian_name'),
-            guardian_phone=request.form.get('guardian_phone'),
-            guardian_relationship=request.form.get('guardian_relationship'),
-            address=request.form.get('address'),
-            city=request.form.get('city'),
-            region=request.form.get('region'),
-            primary_contact_phone=request.form.get('guardian_phone') or request.form.get('father_phone')
+        student, error = StudentService.create_student_with_parent(
+            school_id=current_user.school_id,
+            user_id=current_user.id,
+            data=request.form,
+            current_academic_year=g.current_academic_year
         )
-        db.session.add(parent)
-        db.session.flush()
         
-        # Parse date of birth
-        dob_str = request.form.get('date_of_birth')
-        dob = date.fromisoformat(dob_str) if dob_str else None
-        
-        # Create student record
-        student = Student(
-            school_id=school_id,
-            parent_id=parent.id,
-            student_id=student_id,
-            first_name=request.form.get('first_name'),
-            last_name=request.form.get('last_name'),
-            other_names=request.form.get('other_names'),
-            gender=Gender(request.form.get('gender')),
-            date_of_birth=dob,
-            nationality=request.form.get('nationality', 'Ghanaian'),
-            place_of_birth=request.form.get('place_of_birth'),
-            hometown=request.form.get('hometown'),
-            religion=request.form.get('religion'),
-            blood_group=request.form.get('blood_group'),
-            allergies=request.form.get('allergies'),
-            medical_conditions=request.form.get('medical_conditions'),
-            admission_date=date.today(),
-            previous_school=request.form.get('previous_school'),
-            status=StudentStatus.ACTIVE
-        )
-        db.session.add(student)
-        db.session.flush()
-        
-        # Enroll in class if selected
-        class_id = request.form.get('class_id', type=int)
-        if class_id and g.current_academic_year:
-            enrollment = ClassEnrollment(
-                student_id=student.id,
-                class_id=class_id,
-                academic_year_id=g.current_academic_year.id,
-                enrollment_date=date.today()
-            )
-            db.session.add(enrollment)
-        
-        db.session.commit()
+        if error:
+            flash(f'Error adding student: {error}', 'error')
+            return redirect(url_for('students.add'))
+            
         flash(f'Student {student.full_name} added successfully!', 'success')
         return redirect(url_for('students.view', id=student.id))
     

@@ -274,4 +274,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Smooth scroll for anchors
+    $$('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = $(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
 });

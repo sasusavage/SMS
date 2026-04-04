@@ -11,12 +11,12 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/')
 def index():
-    """Landing page - redirect based on auth status."""
+    """Landing page - show index for unauthenticated users."""
     if current_user.is_authenticated:
         if current_user.role == UserRole.PARENT:
             return redirect(url_for('parent.dashboard'))
         return redirect(url_for('dashboard.index'))
-    return redirect(url_for('auth.login'))
+    return render_template('index.html')
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])

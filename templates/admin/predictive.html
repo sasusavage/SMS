@@ -1,0 +1,140 @@
+{% extends 'layouts/dashboard.html' %}
+
+{% block title %}Predictive Analytics - Elite Tier{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 mb-2">School Health & Predictive Insights</h1>
+            <p class="text-muted">Early warning systems for academic, attendance, and financial health.</p>
+        </div>
+    </div>
+
+    <!-- Health Radar Charts -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card glass shadow-sm h-100">
+                <div class="card-header border-0 bg-transparent">
+                    <h5 class="mb-0">Academic Performance Radar</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="academicRadar" style="max-height: 350px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card glass shadow-sm h-100">
+                <div class="card-header border-0 bg-transparent">
+                    <h5 class="mb-0">30-Day Financial Forecast</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="financialForecast" style="max-height: 350px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Alerts -->
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card glass shadow-sm">
+                <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Predictive Alerts (At-Risk Students)</h5>
+                    <span class="badge bg-danger rounded-pill">{{ insights|length }} Critical</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for insight in insights %}
+                        <div class="list-group-item bg-transparent border-0 py-3 px-4">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 d-flex align-items-center">
+                                    <span class="status-dot {% if insight.severity == 'high' %}bg-danger{% else %}bg-warning{% endif %} me-2"></span>
+                                    {{ insight.entity_name }}
+                                </h6>
+                                <small class="text-muted">{{ insight.created_at.strftime('%H:%M') }}</small>
+                            </div>
+                            <p class="mb-1 small text-secondary">{{ insight.insight_text }}</p>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;">Contact parent</button>
+                                <button class="btn btn-sm btn-link py-0 px-2 text-muted" style="font-size: 0.75rem;">Dismiss</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card glass border-primary text-white bg-primary bg-opacity-75 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <div class="display-6 mb-2">GHS {{ "%.2f"|format(forecast.forecast_30d) }}</div>
+                    <div class="text-white-50">Projected 30-Day Cashflow</div>
+                    <hr class="my-3 opacity-25">
+                    <div class="small">
+                        <i class="bi bi-graph-up-arrow me-1"></i> 
+                        Velocity: <strong>GHS {{ "%.2f"|format(forecast.velocity_daily) }}/day</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Academic Radar Chart
+    const academicCtx = document.getElementById('academicRadar').getContext('2d');
+    new Chart(academicCtx, {
+        type: 'radar',
+        data: {
+            labels: ['Mathematics', 'English', 'Science', 'Social Studies', 'Computing', 'Creative Arts'],
+            datasets: [{
+                label: 'Current Term',
+                data: [85, 92, 78, 65, 88, 70],
+                fill: true,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgb(54, 162, 235)',
+            }, {
+                label: 'Previous Term',
+                data: [82, 88, 85, 75, 90, 68],
+                fill: true,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgb(255, 99, 132)',
+            }]
+        },
+        options: {
+            elements: { line: { borderWidth: 3 } },
+            scales: { r: { angleLines: { display: false }, suggestMin: 0, suggestMax: 100 } }
+        }
+    });
+
+    // Financial Forecast Line
+    const financialCtx = document.getElementById('financialForecast').getContext('2d');
+    new Chart(financialCtx, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Projected Revenue',
+                data: [{{ (forecast.forecast_30d * 0.2)|round }}, {{ (forecast.forecast_30d * 0.5)|round }}, {{ (forecast.forecast_30d * 0.7)|round }}, {{ (forecast.forecast_30d)|round }}],
+                borderColor: '#10B981',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(16, 185, 129, 0.1)'
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+});
+</script>
+
+<style>
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.card.glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+</style>
+{% endblock %}

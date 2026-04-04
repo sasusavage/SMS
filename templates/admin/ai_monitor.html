@@ -1,0 +1,87 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}AI Conversation Monitor | NaCCA SMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">AI Conversation Monitor</h1>
+            <p class="text-slate-400">Audit real-time Sasu AI 2.0 interactions across all schools.</p>
+        </div>
+        <div class="flex gap-4">
+            <select class="form-input bg-slate-800 border-slate-700 text-xs py-2 px-4 rounded-xl" id="schoolFilter">
+                <option value="all">All Schools</option>
+                {% for sid, sname in schools %}
+                <option value="{{ sid }}">{{ sname }}</option>
+                {% endfor %}
+            </select>
+            <div class="px-4 py-2 bg-primary-500/10 border border-primary-500/20 rounded-xl text-primary-400 flex items-center gap-2 text-sm font-bold">
+                <i class="fas fa-eye"></i> LIVE MONITORING
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Sessions List -->
+        <div class="lg:col-span-1 space-y-4 max-h-[600px] overflow-y-auto pr-2">
+            {% for session in sessions %}
+            <div class="glass-card p-4 cursor-pointer hover:bg-slate-800/50 transition-all border-l-4 {% if loop.first %}border-primary-500 bg-slate-800/50{% else %}border-transparent{% endif %}">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-xs font-bold text-white">{{ session.phone_number }}</span>
+                    {% if session.user_feedback %}
+                        <i class="fas {% if session.user_feedback == 'good' %}fa-thumbs-up text-success-500{% else %}fa-thumbs-down text-error-500{% endif %} text-[9px]"></i>
+                    {% endif %}
+                    <span class="text-[10px] text-slate-500">{{ session.last_interaction.strftime('%H:%M') }}</span>
+                </div>
+                <p class="text-[10px] text-slate-400 line-clamp-1 italic">
+                    {{ session.history[-1].content if session.history else 'No messages yet' }}
+                </p>
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-slate-500 text-sm">No AI sessions yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Conversation Details -->
+        <div class="lg:col-span-3 glass-card flex flex-col h-[600px]">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="font-bold text-white">Conversation Transcript</h3>
+                <span class="text-xs text-slate-500">Sasu Jnr Agentic Hub</span>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-900/20">
+                {% if sessions %}
+                {% set active = sessions[0] %}
+                {% for msg in active.history %}
+                <div class="flex {% if msg.role == 'user' %}justify-end{% else %}justify-start{% endif %}">
+                    <div class="max-w-[70%] p-4 rounded-2xl {% if msg.role == 'user' %}bg-primary-600/20 border border-primary-500/20 text-white{% else %}bg-slate-800/80 border border-slate-700/50 text-slate-200{% endif %}">
+                        <p class="text-sm">{{ msg.content }}</p>
+                        <span class="text-[9px] text-slate-500 mt-2 block uppercase font-bold tracking-tighter">
+                            {{ msg.role }} | {{ active.last_interaction.strftime('%d %b') }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if active.user_feedback %}
+                <div class="flex flex-col items-center py-6 border-t border-white/5 opacity-80 mt-8">
+                    <div class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2
+                        {% if active.user_feedback == 'good' %}bg-success-500/20 text-success-400{% else %}bg-error-500/20 text-error-400{% endif %}">
+                        <i class="fas {% if active.user_feedback == 'good' %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                        User Rating: {{ active.user_feedback }}
+                    </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="h-full flex flex-col items-center justify-center text-slate-600">
+                    <i class="fas fa-robot fa-3x mb-4 opacity-20"></i>
+                    <p>Select a session to view transcript</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

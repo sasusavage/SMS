@@ -42,14 +42,32 @@ def create_app(config_name='default'):
     # Context processors
     @app.context_processor
     def inject_globals():
+        from models import ModuleConfig
+        config = None
+        if current_user.is_authenticated:
+            config = ModuleConfig.query.filter_by(school_id=current_user.school_id).first()
+            
         return dict(
             current_year=datetime.now().year,
-            UserRole=UserRole
+            UserRole=UserRole,
+            module_config=config
         )
     
     @app.before_request
     def before_request():
         if current_user.is_authenticated:
+            # Load school status
+            from models import School
+            school = School.query.get(current_user.school_id)
+            
+            # Global Suspension Guard
+            if school and school.is_account_suspended:
+                # Allow access to support and logout
+                allowed_endpoints = ['auth.logout', 'admin.support_contact']
+                if request.endpoint not in allowed_endpoints:
+                    flash(f"Account Suspended: {school.suspension_reason}", "error")
+                    return redirect(url_for('admin.support_contact'))
+
             # Load current academic year and term
             g.current_academic_year = AcademicYear.query.filter_by(
                 school_id=current_user.school_id,
@@ -75,6 +93,10 @@ def create_app(config_name='default'):
     from routes.reports import reports_bp
     from routes.parent_portal import parent_bp
     from routes.api import api_bp
+    from routes.admin import admin_bp
+    from routes.api_ai import ai_bp
+    from routes.market import market_bp
+    from routes.migration import migration_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -86,6 +108,10 @@ def create_app(config_name='default'):
     app.register_blueprint(reports_bp)
     app.register_blueprint(parent_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(ai_bp)
+    app.register_blueprint(market_bp)
+    app.register_blueprint(migration_bp)
     
     # Error handlers
     @app.errorhandler(404)
@@ -104,6 +130,14 @@ def create_app(config_name='default'):
     # Create upload folder
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
+    # CLI Commands
+    @app.cli.command("run-analytics")
+    def run_analytics_command():
+        """Midnight task to generate school insights."""
+        from services.analytics_engine import run_midnight_analytics
+        run_midnight_analytics()
+        print("Sasu AI: School Insights generated for all active schools.")
+
     return app
 
 

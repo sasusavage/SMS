@@ -1,0 +1,167 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Migration War Room - SmartSchool{% endblock %}
+
+{% block dashboard_content %}
+<div class="space-y-8 animate-fade-in">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 bg-slate-900/50 backdrop-blur-xl border border-white/5 rounded-3xl">
+        <div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">Migration <span class="text-indigo-400">War Room</span></h1>
+            <p class="text-slate-400 mt-2">Zero-downtime legacy data ingestion for multi-tenant schools.</p>
+        </div>
+        <div class="flex gap-4">
+            <div class="px-6 py-3 bg-white/5 rounded-2xl border border-white/5">
+                <span class="block text-xs text-slate-500 uppercase tracking-widest font-bold">Max File Size</span>
+                <span class="block text-xl font-bold text-white">50 MB</span>
+            </div>
+            <div class="px-6 py-3 bg-white/5 rounded-2xl border border-white/5">
+                <span class="block text-xs text-slate-500 uppercase tracking-widest font-bold">Postgres Engine</span>
+                <span class="block text-xl font-bold text-emerald-400">Pipelined</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 1: Upload -->
+    <div id="step-1" class="card p-10 bg-slate-900 border border-white/10 rounded-3xl shadow-2xl">
+        <h2 class="text-xl font-bold text-white flex items-center gap-3 mb-6">
+            <span class="flex items-center justify-center w-10 h-10 bg-indigo-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">1</span>
+            Initial Data Injection
+        </h2>
+        
+        <div class="border-2 border-dashed border-slate-700 hover:border-indigo-500/50 bg-slate-950/50 rounded-3xl p-12 text-center transition-all cursor-pointer group" onclick="document.getElementById('file-input').click()">
+            <input type="file" id="file-input" class="hidden" accept=".xlsx, .csv, .xls" onchange="handleFileUpload(event)">
+            <div class="w-20 h-20 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <i class="fas fa-file-excel text-3xl"></i>
+            </div>
+            <p class="text-white font-bold text-lg">Click to Upload Legacy Excel/CSV</p>
+            <p class="text-slate-500 mt-2">Drag and drop institutional records here to begin ingestion pipeline.</p>
+        </div>
+    </div>
+
+    <!-- Step 2: Mapping (Hidden initially) -->
+    <div id="step-2" class="hidden card p-10 bg-slate-900 border border-white/10 rounded-3xl shadow-2xl">
+        <h2 class="text-xl font-bold text-white flex items-center gap-3 mb-6">
+            <span class="flex items-center justify-center w-10 h-10 bg-indigo-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">2</span>
+            Column Topology Matching
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+                <p class="text-slate-400 mb-6 font-medium">Map your Excel headers to the SmartSchool production schema.</p>
+                <div id="mapping-container" class="space-y-4">
+                    <!-- Dynamic mapping rows -->
+                </div>
+            </div>
+            <div class="bg-indigo-500/5 border border-indigo-500/10 rounded-3xl p-8 h-fit">
+                <h4 class="text-indigo-400 font-bold mb-4 uppercase text-xs tracking-widest">Pipeline Summary</h4>
+                <div class="space-y-4" id="pipeline-stats">
+                    <p class="text-slate-300 text-sm">Waiting for mapping...</p>
+                </div>
+                <button onclick="startProcessing()" id="process-btn" class="w-full mt-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/20 transition-all">START INGESTION</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentFilepath = "";
+let excelHeaders = [];
+let dbFields = [];
+
+async function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const btn = event.target.parentElement;
+    btn.classList.add('opacity-50', 'pointer-events-none');
+    
+    try {
+        const res = await fetch('/migration/upload-stage', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': "{{ csrf_token() if csrf_token else '' }}"
+            }
+        });
+        const data = await res.json();
+        
+        if (data.headers) {
+            currentFilepath = data.filepath;
+            excelHeaders = data.headers;
+            dbFields = data.db_fields;
+            showMappingStep();
+        } else {
+            alert(data.error);
+        }
+    } catch (err) {
+        console.error(err);
+    } finally {
+        btn.classList.remove('opacity-50', 'pointer-events-none');
+    }
+}
+
+function showMappingStep() {
+    document.getElementById('step-1').classList.add('hidden');
+    document.getElementById('step-2').classList.remove('hidden');
+    
+    const container = document.getElementById('mapping-container');
+    container.innerHTML = "";
+    
+    dbFields.forEach(field => {
+        const row = document.createElement('div');
+        row.className = "flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5";
+        row.innerHTML = `
+            <div class="flex-1">
+                <span class="block text-xs text-slate-500 uppercase font-bold tracking-widest">${field.replace('_', ' ')}</span>
+            </div>
+            <div class="flex-1">
+                <select data-field="${field}" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-indigo-500 transition-all h-10 outline-none">
+                    <option value="">-- Ignore --</option>
+                    ${excelHeaders.map(h => `<option value="${h}">${h}</option>`).join('')}
+                </select>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+async function startProcessing() {
+    const btn = document.getElementById('process-btn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> PIPELINING...';
+    btn.disabled = true;
+    
+    const mapping = {};
+    document.querySelectorAll('#mapping-container select').forEach(sel => {
+        if (sel.value) mapping[sel.dataset.field] = sel.value;
+    });
+    
+    try {
+        const res = await fetch('/migration/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': "{{ csrf_token() if csrf_token else '' }}"
+            },
+            body: JSON.stringify({ filepath: currentFilepath, mapping })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            alert(`Successfully ingested ${data.count} records!`);
+            location.reload();
+        } else {
+            alert(data.error);
+        }
+    } catch (err) {
+        console.error(err);
+    } finally {
+        btn.innerHTML = 'START INGESTION';
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

@@ -8,11 +8,56 @@ import uuid
 
 from models import (
     db, Student, Parent, Class, ClassEnrollment, AcademicYear,
-    StudentStatus, Gender, User, UserRole
+    StudentStatus, Gender, User, UserRole, School
 )
 from app import admin_required, staff_required
 
 students_bp = Blueprint('students', __name__, url_prefix='/students')
+
+
+@students_bp.route('/class/<int:class_id>/generate-ids')
+@admin_required
+def generate_ids(class_id):
+    """Generate bulk Student ID cards for a class."""
+    school_id = current_user.school_id
+    school = School.query.get(school_id)
+    class_obj = Class.query.get_or_404(class_id)
+    
+    # Students in class
+    if not g.current_academic_year:
+        flash('No current academic year set.', 'error')
+        return redirect(url_for('classes.view', id=class_id))
+        
+    enrollments = ClassEnrollment.query.filter_by(
+        class_id=class_id,
+        academic_year_id=g.current_academic_year.id
+    ).all()
+    students = [e.student for e in enrollments]
+    
+    if not students:
+        flash('No students found in this class.', 'warning')
+        return redirect(url_for('classes.view', id=class_id))
+        
+    from utils.qr_generator import generate_student_qr
+    qr_codes = {s.id: generate_student_qr(s.uuid, school_id) for s in students}
+    
+    html = render_template('reports/id_card_template.html', 
+                          students=students, 
+                          school=school, 
+                          class_obj=class_obj,
+                          qr_codes=qr_codes)
+    
+    from weasyprint import HTML
+    pdf = HTML(string=html).write_pdf()
+    
+    return (
+        pdf,
+        200,
+        {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": f"attachment; filename=ID_Cards_{class_obj.name.replace(' ', '_')}.pdf",
+        },
+    )
 
 
 @students_bp.route('/')

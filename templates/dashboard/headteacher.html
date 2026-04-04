@@ -3,9 +3,16 @@
 {% block title %}Dashboard - NaCCA SMS{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Dashboard Overview</h1>
-    <p class="page-subtitle">Welcome back! Here's your school at a glance.</p>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h1 class="page-title">Dashboard Overview</h1>
+        <p class="page-subtitle">Welcome back! Here's your school at a glance.</p>
+    </div>
+    <a href="{{ url_for('classes.scanner') }}" class="btn btn-primary" style="background: linear-gradient(135deg, var(--primary-600), var(--primary-400)); border: none; box-shadow: 0 4px 15px rgba(79, 70, 233, 0.3);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: var(--space-1);">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Morning Scanner
+    </a>
 </div>
 
 <!-- Stats Cards -->
@@ -76,7 +83,7 @@
                 <div class="bar-item">
                     <div class="bar-label">{{ days[i] }}</div>
                     <div class="bar-track">
-                        <div class="bar-fill" style="height: {{ attendance[i] }}%;"></div>
+                        <div class="bar-fill js-dynamic-height" data-height="{{ attendance[i] }}"></div>
                     </div>
                     <div class="bar-value">{{ attendance[i] }}%</div>
                 </div>
@@ -96,26 +103,19 @@
                     <span style="font-size: var(--font-size-sm); color: var(--slate-400);">Collected</span>
                     <span style="font-size: var(--font-size-sm); font-weight: 600;">{{ stats.collection_rate }}%</span>
                 </div>
-                <div
-                    style="background: var(--slate-800); height: 10px; border-radius: var(--radius-full); overflow: hidden;">
-                    <div
-                        style="background: linear-gradient(90deg, var(--success-500), var(--success-600)); height: 100%; width: {{ stats.collection_rate }}%; transition: width 0.5s ease;">
-                    </div>
+                <div class="progress-track">
+                    <div class="progress-fill js-dynamic-width" data-width="{{ stats.collection_rate }}"></div>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
-                <div
-                    style="text-align: center; padding: var(--space-4); background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-lg);">
-                    <div style="font-size: var(--font-size-lg); font-weight: 700; color: var(--success-500);">GHS {{
-                        "{:,.0f}".format(stats.fees_collected) }}</div>
-                    <div style="font-size: var(--font-size-xs); color: var(--slate-400);">Collected</div>
+            <div class="balance-grid">
+                <div class="balance-box balance-collected">
+                    <div class="balance-value balance-success">GHS {{ "{:,.0f}".format(stats.fees_collected) }}</div>
+                    <div class="balance-label">Collected</div>
                 </div>
-                <div
-                    style="text-align: center; padding: var(--space-4); background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-lg);">
-                    <div style="font-size: var(--font-size-lg); font-weight: 700; color: var(--error-500);">GHS {{
-                        "{:,.0f}".format(stats.fees_outstanding) }}</div>
-                    <div style="font-size: var(--font-size-xs); color: var(--slate-400);">Outstanding</div>
+                <div class="balance-box balance-due">
+                    <div class="balance-value balance-error">GHS {{ "{:,.0f}".format(stats.fees_outstanding) }}</div>
+                    <div class="balance-label">Outstanding</div>
                 </div>
             </div>
         </div>
@@ -222,5 +222,45 @@
         color: var(--slate-100);
         order: 1;
     }
+
+    /* Progress & Balance Styles */
+    .progress-track {
+        background: var(--slate-800);
+        height: 10px;
+        border-radius: var(--radius-full);
+        overflow: hidden;
+    }
+    .progress-fill {
+        background: linear-gradient(90deg, var(--success-500), var(--success-600));
+        height: 100%;
+        transition: width 0.5s ease;
+    }
+    .balance-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-4);
+    }
+    .balance-box {
+        text-align: center;
+        padding: var(--space-4);
+        border-radius: var(--radius-lg);
+    }
+    .balance-collected { background: rgba(16, 185, 129, 0.1); }
+    .balance-due { background: rgba(239, 68, 68, 0.1); }
+    .balance-value { font-size: var(--font-size-lg); font-weight: 700; }
+    .balance-success { color: var(--success-500); }
+    .balance-error { color: var(--error-500); }
+    .balance-label { font-size: var(--font-size-xs); color: var(--slate-400); }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.js-dynamic-height').forEach(el => {
+            el.style.height = el.dataset.height + '%';
+        });
+        document.querySelectorAll('.js-dynamic-width').forEach(el => {
+            el.style.width = el.dataset.width + '%';
+        });
+    });
+</script>
 {% endblock %}

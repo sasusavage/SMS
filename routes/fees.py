@@ -8,9 +8,10 @@ from decimal import Decimal
 
 from models import (
     db, FeeCategory, FeeStructure, FeeInvoice, FeeInvoiceItem, Payment,
-    Student, Class, ClassEnrollment, PaymentMethod, PaymentStatus
+    Student, Class, ClassEnrollment, PaymentMethod, PaymentStatus, Expense
 )
 from app import accounts_required, admin_required
+from services.payment_service import PaymentService
 
 fees_bp = Blueprint('fees', __name__, url_prefix='/fees')
 
@@ -55,24 +56,47 @@ def invoices():
         query = query.filter(FeeInvoice.term_id == g.current_term.id)
     invs = query.order_by(FeeInvoice.created_at.desc()).paginate(page=page, per_page=25)
     
-    # Get stats
-    all_invoices = FeeInvoice.query.join(Student).filter(Student.school_id == current_user.school_id)
-    if g.current_term:
-        all_invoices = all_invoices.filter(FeeInvoice.term_id == g.current_term.id)
-    
-    total_expected = sum(float(inv.total_amount or 0) for inv in all_invoices.all())
-    total_collected = sum(float(inv.amount_paid or 0) for inv in all_invoices.all())
-    total_outstanding = sum(float(inv.balance or 0) for inv in all_invoices.all())
-    
-    classes = Class.query.filter_by(school_id=current_user.school_id, is_active=True).all()
+    # Use PaymentService for metrics
+    metrics, _ = PaymentService.get_finance_analytics(current_user.school_id)
     
     return render_template('fees/invoices.html', 
         invoices=invs,
-        total_expected=total_expected,
-        total_collected=total_collected,
-        total_outstanding=total_outstanding,
+        metrics=metrics,
         classes=classes
     )
+
+
+# --- EXPENSES ---
+@fees_bp.route('/expenses')
+@accounts_required
+def expenses():
+    page = request.args.get('page', 1, type=int)
+    exps = Expense.query.filter_by(school_id=current_user.school_id)\
+        .order_by(Expense.expense_date.desc()).paginate(page=page, per_page=25)
+    
+    metrics, _ = PaymentService.get_finance_analytics(current_user.school_id)
+    return render_template('fees/expenses.html', expenses=exps, metrics=metrics)
+
+
+@fees_bp.route('/expenses/add', methods=['GET', 'POST'])
+@accounts_required
+def add_expense():
+    if request.method == 'POST':
+        exp = Expense(
+            school_id=current_user.school_id,
+            category=request.form.get('category'),
+            amount=Decimal(request.form.get('amount', '0')),
+            description=request.form.get('description'),
+            expense_date=datetime.strptime(request.form.get('date'), '%Y-%m-%d').date(),
+            recorded_by_id=current_user.id
+        )
+        db.session.add(exp)
+        db.session.commit()
+        flash('Expense recorded successfully!', 'success')
+        return redirect(url_for('fees.expenses'))
+    
+    categories = ['Salary', 'Utilities', 'Stationery', 'Fuel', 'Maintenance', 'Canteen', 'Other']
+    return render_template('fees/add_expense.html', categories=categories, today_date=date.today().isoformat())
 
 
 @fees_bp.route('/invoices/<int:id>')
@@ -126,6 +150,52 @@ def record_payment():
     
     return render_template('fees/record_payment.html', payment_methods=PaymentMethod)
 
+
+@fees_bp.route('/invoices/<int:id>/remind')
+@accounts_required
+def send_reminder(id):
+    """Sends a fee reminder SMS to the parent."""
+    from services.notification_service import NotificationService
+    NotificationService.trigger_fee_reminder(id)
+    flash('Fee reminder SMS sent successfully!', 'success')
+    return redirect(request.referrer or url_for('fees.invoices'))
+
+@fees_bp.route('/payments/<int:id>/delete', methods=['POST'])
+@admin_required
+def delete_payment(id):
+    """Deletes a payment record and reconciles the invoice balance."""
+    from models import AuditLog
+    pay = Payment.query.get_or_404(id)
+    inv = pay.invoice
+    
+    if pay.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('fees.payments'))
+        
+    old_amount = float(pay.amount)
+    ref = pay.reference or pay.receipt_number
+    
+    # 1. Audit Log
+    log = AuditLog(
+        school_id=current_user.school_id,
+        user_id=current_user.id,
+        action='DELETE_PAYMENT',
+        entity_type='payment',
+        entity_id=pay.id,
+        old_values={'amount': old_amount, 'reference': ref}
+    )
+    db.session.add(log)
+    
+    # 2. Reconcile Invoice
+    inv.amount_paid -= Decimal(str(old_amount))
+    inv.update_balance()
+    
+    # 3. Delete Payment
+    db.session.delete(pay)
+    db.session.commit()
+    
+    flash('Payment deleted and invoice balance reconciled.', 'warning')
+    return redirect(url_for('fees.payments'))
 
 @fees_bp.route('/debtors')
 @accounts_required

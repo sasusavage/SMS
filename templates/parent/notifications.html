@@ -1,0 +1,95 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Notifications - Parent Portal{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('parent.dashboard') }}">Parent Portal</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Notifications History</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h1 class="page-title">Notification Hub</h1>
+        <p class="page-subtitle">Stay updated with your ward's daily activities and school alerts.</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Recent Alerts</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="notification-list">
+            {% for notif in notifications %}
+            <div class="notification-item {% if not notif.is_read %}notif-unread{% endif %}">
+                <div class="notif-icon notif-{{ notif.category.value }}">
+                    {% if notif.category.value == 'attendance' %}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    {% elif notif.category.value == 'finance' %}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    {% else %}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    {% endif %}
+                </div>
+                <div class="notif-content">
+                    <div class="notif-header">
+                        <h4 class="notif-title">{{ notif.title }}</h4>
+                        <span class="notif-time">{{ notif.created_at.strftime('%b %d, %I:%M %p') }}</span>
+                    </div>
+                    <p class="notif-message">{{ notif.message }}</p>
+                    <div class="notif-footer">
+                        <span class="badge notif-badge">{{ notif.type.value }}</span>
+                        {% if not notif.is_read %}
+                        <span class="notif-new-tag">New Alert</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div style="padding: var(--space-10); text-align: center; color: var(--slate-500);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: var(--space-4); opacity: 0.3;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <p>No notifications yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .notification-item {
+        padding: var(--space-4);
+        border-bottom: 1px solid var(--slate-800);
+        display: flex;
+        gap: var(--space-4);
+        align-items: flex-start;
+        transition: background 0.2s;
+    }
+    .notification-item:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+    .notif-unread {
+        background: rgba(79, 70, 229, 0.05);
+    }
+    .notif-icon {
+        padding: var(--space-2);
+        border-radius: var(--radius-lg);
+        flex-shrink: 0;
+    }
+    .notif-attendance { background: var(--primary-900); color: var(--primary-400); }
+    .notif-finance { background: #7c2d12; color: #fb923c; }
+    .notif-general { background: var(--slate-800); color: var(--slate-400); }
+    
+    .notif-content { flex: 1; }
+    .notif-header { display: flex; justify-content: space-between; margin-bottom: var(--space-1); }
+    .notif-title { font-weight: 600; font-size: var(--font-size-sm); margin: 0; color: var(--white); }
+    .notif-time { font-size: var(--font-size-xs); color: var(--slate-500); }
+    .notif-message { font-size: var(--font-size-sm); color: var(--slate-300); margin: 0; line-height: 1.5; }
+    .notif-footer { margin-top: var(--space-2); display: flex; gap: var(--space-3); align-items: center; }
+    .notif-badge { font-size: 8px; text-transform: uppercase; background: var(--slate-800); border: 1px solid var(--slate-700); }
+    .notif-new-tag { font-size: 10px; color: var(--primary-400); font-weight: 500; }
+</style>
+{% endblock %}

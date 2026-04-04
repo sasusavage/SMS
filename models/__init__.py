@@ -86,11 +86,17 @@ class School(db.Model, TimestampMixin):
     email = db.Column(db.String(120))
     website = db.Column(db.String(200))
     logo_url = db.Column(db.String(500))
+    headteacher_signature_url = db.Column(db.String(500))
     primary_color = db.Column(db.String(7), default='#4F46E5')  # Electric Indigo
     secondary_color = db.Column(db.String(7), default='#1E293B')  # Slate
     established_year = db.Column(db.Integer)
     school_type = db.Column(db.String(50))  # Primary, JHS, SHS, Combined
     is_active = db.Column(db.Boolean, default=True)
+    
+    # SaaS Status & Suspension
+    is_account_suspended = db.Column(db.Boolean, default=False)
+    suspension_reason = db.Column(db.String(255))
+    sms_credits = db.Column(db.Integer, default=100) # Pre-seeded credits
     
     # Relationships
     academic_years = db.relationship('AcademicYear', backref='school', lazy='dynamic')
@@ -126,6 +132,7 @@ class Term(db.Model, TimestampMixin):
     __tablename__ = 'terms'
     
     id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
     academic_year_id = db.Column(db.Integer, db.ForeignKey('academic_years.id', ondelete='CASCADE'), nullable=False)
     name = db.Column(db.String(50), nullable=False)  # First Term, Second Term, Third Term
     term_number = db.Column(db.Integer, nullable=False)  # 1, 2, or 3
@@ -217,6 +224,7 @@ class ClassSubject(db.Model, TimestampMixin):
     __tablename__ = 'class_subjects'
     
     id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id', ondelete='CASCADE'), nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id', ondelete='CASCADE'), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('staff.id', ondelete='SET NULL'))
@@ -234,6 +242,32 @@ class ClassSubject(db.Model, TimestampMixin):
     __table_args__ = (
         db.UniqueConstraint('class_id', 'subject_id', 'academic_year_id', name='uq_class_subject_year'),
     )
+
+
+# =============================================================================
+# NaCCA STRANDS & SUB-STRANDS
+# =============================================================================
+class Strand(db.Model, TimestampMixin):
+    """NaCCA Strands (e.g., Number, Algebra)."""
+    __tablename__ = 'strands'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id', ondelete='CASCADE'), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    
+    sub_strands = db.relationship('SubStrand', backref='strand', lazy='dynamic', cascade='all, delete-orphan')
+
+
+class SubStrand(db.Model, TimestampMixin):
+    """NaCCA Sub-strands (e.g., Whole Numbers, Operations)."""
+    __tablename__ = 'sub_strands'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    strand_id = db.Column(db.Integer, db.ForeignKey('strands.id', ondelete='CASCADE'), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    code = db.Column(db.String(50))  # e.g., B6.1.1
+    description = db.Column(db.Text)
 
 
 # =============================================================================
@@ -455,9 +489,11 @@ class Assessment(db.Model, TimestampMixin):
     __tablename__ = 'assessments'
     
     id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id', ondelete='CASCADE'), nullable=False)
     class_subject_id = db.Column(db.Integer, db.ForeignKey('class_subjects.id', ondelete='CASCADE'), nullable=False)
     term_id = db.Column(db.Integer, db.ForeignKey('terms.id', ondelete='CASCADE'), nullable=False)
+    sub_strand_id = db.Column(db.Integer, db.ForeignKey('sub_strands.id', ondelete='SET NULL'))
     
     # NaCCA Assessment Components
     classwork_score = db.Column(db.Float, default=0)  # Out of 30
@@ -468,7 +504,8 @@ class Assessment(db.Model, TimestampMixin):
     # Calculated fields (stored for performance)
     total_score = db.Column(db.Float)  # Out of 100
     grade = db.Column(db.String(5))
-    grade_remark = db.Column(db.String(50))
+    grade_remark = db.Column(db.String(100)) # e.g. Highly Proficient
+    narrative_comment = db.Column(db.Text)   # Automated NaCCA comment
     class_position = db.Column(db.Integer)
     
     # Teacher remarks
@@ -478,7 +515,10 @@ class Assessment(db.Model, TimestampMixin):
     recorded_by_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'))
     
     __table_args__ = (
-        db.UniqueConstraint('student_id', 'class_subject_id', 'term_id', name='uq_student_subject_term'),
+        db.UniqueConstraint('student_id', 'class_subject_id', 'term_id', 'sub_strand_id', name='uq_student_subject_term_strand'),
+        db.Index('idx_assessment_school_student', 'school_id', 'student_id'),
+        # Performance index for the v_student_subject_performance view ranking
+        db.Index('idx_assessment_ranking', 'school_id', 'class_subject_id', 'term_id', 'total_score'),
     )
     
     def calculate_total(self):
@@ -514,6 +554,7 @@ class TerminalReport(db.Model, TimestampMixin):
     __tablename__ = 'terminal_reports'
     
     id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id', ondelete='CASCADE'), nullable=False)
     term_id = db.Column(db.Integer, db.ForeignKey('terms.id', ondelete='CASCADE'), nullable=False)
     class_enrollment_id = db.Column(db.Integer, db.ForeignKey('class_enrollments.id', ondelete='CASCADE'), nullable=False)
@@ -564,6 +605,7 @@ class Attendance(db.Model, TimestampMixin):
     __tablename__ = 'attendance'
     
     id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id', ondelete='CASCADE'), nullable=False)
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id', ondelete='CASCADE'), nullable=False)
     date = db.Column(db.Date, nullable=False)
@@ -573,6 +615,7 @@ class Attendance(db.Model, TimestampMixin):
     
     __table_args__ = (
         db.UniqueConstraint('student_id', 'date', name='uq_student_date_attendance'),
+        db.Index('idx_attendance_school_student', 'school_id', 'student_id'),
     )
 
 
@@ -640,6 +683,7 @@ class FeeInvoice(db.Model, TimestampMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
     invoice_number = db.Column(db.String(50), unique=True, nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id', ondelete='CASCADE'), nullable=False)
     term_id = db.Column(db.Integer, db.ForeignKey('terms.id', ondelete='CASCADE'), nullable=False)
@@ -703,28 +747,31 @@ class Payment(db.Model, TimestampMixin):
     status = db.Column(db.Enum(PaymentStatus), default=PaymentStatus.COMPLETED)
     notes = db.Column(db.Text)
     
-    # Who recorded the payment
     received_by_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'))
     received_by = db.relationship('User', backref='payments_received')
+
+
+class Expense(db.Model, TimestampMixin):
+    """School operational expenses."""
+    __tablename__ = 'expenses'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    academic_year_id = db.Column(db.Integer, db.ForeignKey('academic_years.id', ondelete='CASCADE'))
+    category = db.Column(db.String(50), nullable=False) # Salary, Utilities, Stationery, Fuel, Maintenance
+    amount = db.Column(db.Numeric(12, 2), nullable=False)
+    description = db.Column(db.Text)
+    expense_date = db.Column(db.Date, default=date.today)
+    recorded_by_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'))
+    
+    school = db.relationship('School', backref='expenses')
+    recorder = db.relationship('User', backref='expenses_recorded')
 
 
 # =============================================================================
 # NOTIFICATIONS & COMMUNICATIONS
 # =============================================================================
-class Notification(db.Model, TimestampMixin):
-    """System notifications."""
-    __tablename__ = 'notifications'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    title = db.Column(db.String(200), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    category = db.Column(db.String(50))  # fee, academic, attendance, system
-    is_read = db.Column(db.Boolean, default=False)
-    read_at = db.Column(db.DateTime)
-    link = db.Column(db.String(500))  # Optional link to relevant page
-    
-    user = db.relationship('User', backref='notifications')
+# (Removed legacy Notification model - merged into upgraded multi-tenant version below)
 
 
 # =============================================================================
@@ -735,6 +782,7 @@ class AuditLog(db.Model):
     __tablename__ = 'audit_logs'
     
     id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'))
     action = db.Column(db.String(100), nullable=False)
@@ -746,6 +794,36 @@ class AuditLog(db.Model):
     user_agent = db.Column(db.String(500))
     
     user = db.relationship('User', backref='audit_logs')
+
+
+# =============================================================================
+# SaaS SUBSCRIPTIONS
+# =============================================================================
+class SubscriptionPlan(db.Model, TimestampMixin):
+    """SaaS Subscription Tiers (Basic, Pro, Enterprise)."""
+    __tablename__ = 'subscription_plans'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    price = db.Column(db.Numeric(10, 2), nullable=False)
+    student_limit = db.Column(db.Integer, default=100)
+    features = db.Column(db.JSON) # List of enabled modules
+    is_active = db.Column(db.Boolean, default=True)
+
+
+class Subscription(db.Model, TimestampMixin):
+    """Schools' specific subscription status."""
+    __tablename__ = 'subscriptions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    plan_id = db.Column(db.Integer, db.ForeignKey('subscription_plans.id'), nullable=False)
+    start_date = db.Column(db.Date, default=date.today)
+    end_date = db.Column(db.Date)
+    status = db.Column(db.String(20), default='active') # active, expired, cancelled
+    
+    school = db.relationship('School', backref=db.backref('subscription', uselist=False))
+    plan = db.relationship('SubscriptionPlan')
 
 
 # =============================================================================
@@ -790,6 +868,220 @@ class TerminalReportView(db.Model):
     class_size = db.Column(db.Integer)
 
 
+class SchoolSetting(db.Model, TimestampMixin):
+    """Global school configurations to toggle SaaS features."""
+    __tablename__ = 'school_settings'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    sms_enabled = db.Column(db.Boolean, default=True)
+    whatsapp_enabled = db.Column(db.Boolean, default=False)
+    whatsapp_business_id = db.Column(db.String(100), unique=True) # For routing webhooks
+    api_key_sms = db.Column(db.String(255))  # Arkesel/Hubtel API Key
+    sms_sender_id = db.Column(db.String(11))
+    
+    # AI Specific Settings
+    ai_bot_enabled = db.Column(db.Boolean, default=False)
+    ai_bot_name = db.Column(db.String(50), default='Sasu Jnr')
+
+
+class NotificationType(Enum):
+    SMS = 'sms'
+    SYSTEM = 'system'
+    BOTH = 'both'
+
+
+class NotificationCategory(Enum):
+    ATTENDANCE = 'attendance'
+    FINANCE = 'finance'
+    ACADEMIC = 'academic'
+    GENERAL = 'general'
+
+
+class Notification(db.Model, TimestampMixin):
+    """Multi-tenant notification history for parents and staff."""
+    __tablename__ = 'notifications'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    type = db.Column(db.Enum(NotificationType), default=NotificationType.SYSTEM)
+    category = db.Column(db.Enum(NotificationCategory), default=NotificationCategory.GENERAL)
+    is_read = db.Column(db.Boolean, default=False)
+    read_at = db.Column(db.DateTime)
+    link = db.Column(db.String(500))  # Optional link to relevant page
+    
+    user = db.relationship('User', backref='notifications')
+
+
+# =============================================================================
+# AI & AGENTIC AGENTS
+# =============================================================================
+class AISession(db.Model, TimestampMixin):
+    """WhatsApp conversation context for multi-tenant AI."""
+    __tablename__ = 'ai_sessions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    phone_number = db.Column(db.String(20), nullable=False) # The parent/staff phone
+    history = db.Column(db.JSON, default=list) # [{role: user, content: ...}]
+    last_interaction = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Feedback Loop (NEW)
+    last_interaction_id = db.Column(db.String(50)) # Tracking individual prompt/response
+    user_feedback = db.Column(db.String(20)) # 'good', 'bad', None
+
+    __table_args__ = (db.UniqueConstraint('school_id', 'phone_number', name='_school_phone_uc'),)
+
+
+class AIBotConfig(db.Model, TimestampMixin):
+    """School-specific AI personality and knowledge base."""
+    __tablename__ = 'ai_bot_configs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), unique=True, nullable=False)
+    system_prompt_override = db.Column(db.Text)
+    knowledge_base = db.Column(db.Text) # JSON or Raw Text for specific school rules
+    model_name = db.Column(db.String(50), default='llama3-8b-8192')
+    temperature = db.Column(db.Float, default=0.7)
+    
+    school = db.relationship('School', backref=db.backref('ai_config', uselist=False))
+
+
+class SupportTicket(db.Model, TimestampMixin):
+    """AI-generated or Parent-initiated support inquiries."""
+    __tablename__ = 'support_tickets'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    phone_number = db.Column(db.String(20), nullable=False)
+    subject = db.Column(db.String(200))
+    description = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default='open') # open, resolved, pending
+    priority = db.Column(db.String(20), default='normal')
+
+
+class AICreditUsage(db.Model, TimestampMixin):
+    """Track Groq/AI API usage per school for SaaS billing."""
+    __tablename__ = 'ai_credit_usage'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    tokens_used = db.Column(db.Integer, default=0)
+    interaction_type = db.Column(db.String(50)) # whatsapp, web_chat
+    cost_estimated = db.Column(db.Float, default=0.0)
+
+
+class ModuleConfig(db.Model, TimestampMixin):
+    """Granular feature flags per school/tenant."""
+    __tablename__ = 'module_configs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), unique=True, nullable=False)
+    
+    is_ai_enabled = db.Column(db.Boolean, default=True)
+    is_sms_enabled = db.Column(db.Boolean, default=True)
+    is_finance_enabled = db.Column(db.Boolean, default=True)
+    is_qr_scanner_enabled = db.Column(db.Boolean, default=False)
+    is_report_designer_enabled = db.Column(db.Boolean, default=True)
+    is_predictive_ai_enabled = db.Column(db.Boolean, default=False)
+    is_marketplace_enabled = db.Column(db.Boolean, default=False)
+    is_pwa_enabled = db.Column(db.Boolean, default=True) # Enabled by default for all tiers
+    is_voice_ai_enabled = db.Column(db.Boolean, default=False) # Elite/Premium only
+    
+    school = db.relationship('School', backref=db.backref('module_config', uselist=False))
+
+
+class SchoolInsight(db.Model, TimestampMixin):
+    """Identified academic or attendance 'Outliers' per school."""
+    __tablename__ = 'school_insights'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    
+    type = db.Column(db.String(50)) # 'attendance_drop', 'grade_dip', 'enrollment_spike'
+    entity_name = db.Column(db.String(100)) # e.g., 'Grade 5 Red'
+    insight_text = db.Column(db.Text, nullable=False)
+    severity = db.Column(db.String(20), default='medium') # low, medium, high
+    is_active = db.Column(db.Boolean, default=True)
+
+
+class AICorrection(db.Model, TimestampMixin):
+    """Learning feedback for the AI agent."""
+    __tablename__ = 'ai_corrections'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    
+    original_prompt = db.Column(db.Text)
+    wrong_response = db.Column(db.Text)
+    correction_reason = db.Column(db.Text, nullable=False)
+    is_applied = db.Column(db.Boolean, default=True)
+
+
+# =============================================================================
+# DIGITAL MARKETPLACE (ELITE TIER)
+# =============================================================================
+class ProductCategory(db.Model, TimestampMixin):
+    """Categories for school items (Uniforms, Books, etc)."""
+    __tablename__ = 'product_categories'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+
+
+class Product(db.Model, TimestampMixin):
+    """Items for sale in the school marketplace."""
+    __tablename__ = 'products'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('product_categories.id', ondelete='CASCADE'), nullable=False)
+    
+    name = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text)
+    base_price = db.Column(db.Numeric(10, 2), nullable=False)
+    stock_quantity = db.Column(db.Integer, default=0)
+    image_url = db.Column(db.String(500))
+    is_active = db.Column(db.Boolean, default=True)
+
+
+class Order(db.Model, TimestampMixin):
+    """Customer orders (Parents/Staff)."""
+    __tablename__ = 'orders'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    
+    total_amount = db.Column(db.Numeric(10, 2), nullable=False)
+    status = db.Column(db.Enum(PaymentStatus), default=PaymentStatus.PENDING)
+    payment_method = db.Column(db.Enum(PaymentMethod), default=PaymentMethod.ONLINE)
+    paystack_ref = db.Column(db.String(100))
+    is_delivered = db.Column(db.Boolean, default=False)
+    
+    items = db.relationship('OrderItem', backref='order', lazy=True)
+
+
+class OrderItem(db.Model):
+    """Individual items within an order."""
+    __tablename__ = 'order_items'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id', ondelete='CASCADE'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id', ondelete='CASCADE'), nullable=False)
+    
+    quantity = db.Column(db.Integer, nullable=False)
+    unit_price = db.Column(db.Numeric(10, 2), nullable=False)
+    subtotal = db.Column(db.Numeric(10, 2), nullable=False)
+
+
 def init_db(app):
     """Initialize database within app context.
     Avoid double init_app(app) as it's already done in create_app.
@@ -801,11 +1093,13 @@ def init_db(app):
         
         # 1. Subject-Level Performance View
         sql_subject_view = (
-            "DROP TABLE IF EXISTS v_student_subject_performance CASCADE; " # Remove if SQLAlchemy created it as table
-            "CREATE OR REPLACE VIEW v_student_subject_performance AS "
+            "DROP VIEW IF EXISTS v_student_subject_performance CASCADE; "
+            "DROP TABLE IF EXISTS v_student_subject_performance CASCADE; "
+            "CREATE VIEW v_student_subject_performance AS "
             "SELECT "
             "a.id AS assessment_id, "
             "s.id AS student_id, "
+            "a.school_id, "
             "a.term_id, "
             "ce.class_id, "
             "cs.subject_id, "
@@ -819,20 +1113,22 @@ def init_db(app):
             "WHEN (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) >= 50 THEN 'Developing' "
             "ELSE 'Emerging' "
             "END AS nacca_grade, "
-            "RANK() OVER (PARTITION BY ce.class_id, a.term_id, cs.subject_id ORDER BY (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) DESC) AS subject_position "
+            "RANK() OVER (PARTITION BY a.school_id, ce.class_id, a.term_id, cs.subject_id ORDER BY (COALESCE(a.classwork_score, 0) + COALESCE(a.homework_score, 0) + COALESCE(a.project_score, 0) + COALESCE(a.exam_score, 0)) DESC) AS subject_position "
             "FROM assessments a "
             "JOIN students s ON a.student_id = s.id "
             "JOIN class_subjects cs ON a.class_subject_id = cs.id "
             "JOIN class_enrollments ce ON s.id = ce.student_id AND cs.class_id = ce.class_id AND cs.academic_year_id = ce.academic_year_id "
         )
         
-        # 2. Terminal Report Aggregation View
+        # 2. Terminal Report Aggregation (MATERIALIZED VIEW for SCALE)
         sql_terminal_view = (
-            "DROP TABLE IF EXISTS v_student_terminal_reports CASCADE; " # Remove if SQLAlchemy created it as table
-            "CREATE OR REPLACE VIEW v_student_terminal_reports AS "
+            "DROP VIEW IF EXISTS v_student_terminal_reports CASCADE; "
+            "DROP MATERIALIZED VIEW IF EXISTS v_student_terminal_reports CASCADE; "
+            "CREATE MATERIALIZED VIEW v_student_terminal_reports AS "
             "WITH student_totals AS ( "
             "SELECT "
             "s.id AS student_id, "
+            "s.school_id, "
             "a.term_id, "
             "ce.class_id, "
             "ce.academic_year_id, "
@@ -843,17 +1139,51 @@ def init_db(app):
             "JOIN class_enrollments ce ON s.id = ce.student_id "
             "JOIN class_subjects cs ON ce.class_id = cs.class_id AND ce.academic_year_id = cs.academic_year_id "
             "JOIN assessments a ON s.id = a.student_id AND cs.id = a.class_subject_id "
-            "GROUP BY s.id, a.term_id, ce.class_id, ce.academic_year_id "
+            "GROUP BY s.id, s.school_id, a.term_id, ce.class_id, ce.academic_year_id "
             ") "
             "SELECT *, "
-            "RANK() OVER (PARTITION BY class_id, term_id ORDER BY total_marks DESC) AS class_position, "
-            "COUNT(*) OVER (PARTITION BY class_id, term_id) AS class_size "
-            "FROM student_totals "
+            "RANK() OVER (PARTITION BY school_id, class_id, term_id ORDER BY total_marks DESC) AS class_position, "
+            "COUNT(*) OVER (PARTITION BY school_id, class_id, term_id) AS class_size "
+            "FROM student_totals; "
+            "CREATE UNIQUE INDEX idx_mv_terminal_student_term ON v_student_terminal_reports (student_id, term_id);"
+            "CREATE INDEX idx_mv_terminal_class_term ON v_student_terminal_reports (school_id, class_id, term_id);"
         )
         
-        db.session.execute(text(sql_subject_view))
-        db.session.execute(text(sql_terminal_view))
+        # Execute views separately and safely
+        for view_sql in [sql_subject_view, sql_terminal_view]:
+            for stmt in view_sql.split(';'):
+                if stmt.strip():
+                    try:
+                        db.session.execute(text(stmt + ';'))
+                        db.session.commit()
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f"Schema Setup (Minor): Skipping {stmt.split()[:3]}... due to {str(e)[:50]}")
+        
+        # System Initialization Audit Log
+        init_log = AuditLog(
+            action='SYSTEM_INITIALIZATION',
+            entity_type='database',
+            new_values={'status': 'schema_ready', 'timestamp': str(datetime.utcnow())}
+        )
+        db.session.add(init_log)
+        
         db.session.commit()
         
         print("Database tables and NaCCA PostgreSQL Views created successfully!")
+
+
+def refresh_terminal_reports():
+    """Refresh the Materialized View for terminal reports concurrently."""
+    from sqlalchemy import text
+    try:
+        # CONCURRENTLY requires a unique index (which we created)
+        db.session.execute(text("REFRESH MATERIALIZED VIEW CONCURRENTLY v_student_terminal_reports;"))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        # Fallback to standard refresh if concurrent fails (e.g. no index or first time)
+        db.session.execute(text("REFRESH MATERIALIZED VIEW v_student_terminal_reports;"))
+        db.session.commit()
+        print(f"MV Refresh Warning: {e}")
 

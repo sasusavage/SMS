@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            margin: 0;
+            padding: 10mm;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f8fafc;
+        }
+        .sheet {
+            display: grid;
+            grid-template-columns: repeat(2, 85.6mm);
+            grid-gap: 10mm;
+            justify-content: center;
+        }
+        .card {
+            width: 85.6mm;
+            height: 54mm;
+            background: white;
+            border-radius: 4mm;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            page-break-inside: avoid;
+        }
+        .card-header {
+            background: #4f46e5; /* Primary */
+            color: white;
+            padding: 2mm 3mm;
+            display: flex;
+            align-items: center;
+            gap: 2mm;
+        }
+        .school-logo {
+            width: 8mm;
+            height: 8mm;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2mm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 4mm;
+        }
+        .school-name {
+            font-size: 3mm;
+            font-weight: 700;
+            text-transform: uppercase;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .card-body {
+            flex: 1;
+            display: flex;
+            padding: 2mm 3mm;
+            gap: 3mm;
+            align-items: center;
+        }
+        .student-photo {
+            width: 25mm;
+            height: 30mm;
+            background: #f1f5f9;
+            border-radius: 2mm;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #cbd5e1;
+        }
+        .student-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1mm;
+        }
+        .student-name {
+            font-size: 3.5mm;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5mm;
+        }
+        .detail-item {
+            font-size: 2.2mm;
+            color: #64748b;
+        }
+        .detail-value {
+            font-weight: 600;
+            color: #334155;
+        }
+        .qr-section {
+            width: 18mm;
+            height: 18mm;
+            position: absolute;
+            bottom: 3mm;
+            right: 3mm;
+        }
+        .qr-code {
+            width: 100%;
+            height: 100%;
+        }
+        .valid-date {
+            position: absolute;
+            bottom: 2mm;
+            left: 3mm;
+            font-size: 1.8mm;
+            color: #94a3b8;
+        }
+        .card-back {
+            background: #1e293b;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 5mm;
+        }
+        .back-title {
+            font-size: 3mm;
+            font-weight: 600;
+            margin-bottom: 2mm;
+        }
+        .back-text {
+            font-size: 2mm;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="sheet">
+        {% for student in students %}
+        <div class="card">
+            <div class="card-header">
+                <div class="school-logo">
+                    {% if school.logo_url %}
+                    <img src="{{ school.logo_url }}" style="width: 100%; height: 100%; object-fit: contain;">
+                    {% else %}
+                    {{ school.name[0] }}
+                    {% endif %}
+                </div>
+                <div class="school-name">{{ school.name }}</div>
+            </div>
+            <div class="card-body">
+                <div class="student-photo">
+                    {% if student.photo_url %}
+                    <img src="{{ student.photo_url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 2mm;">
+                    {% else %}
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; font-size: 6mm;">
+                        👤
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="student-details">
+                    <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
+                    <div class="detail-item">Student ID: <span class="detail-value">{{ student.student_id }}</span></div>
+                    <div class="detail-item">Grade: <span class="detail-value">{{ class_obj.name }}</span></div>
+                    <div class="detail-item">Parent: <span class="detail-value">{{ student.parent.name or 'N/A' }}</span></div>
+                    <div class="detail-item">Contact: <span class="detail-value">{{ student.parent.guardian_phone or student.parent.primary_contact_phone }}</span></div>
+                </div>
+            </div>
+            <div class="qr-section">
+                <img src="{{ qr_codes[student.id] }}" class="qr-code" alt="QR">
+            </div>
+            <div class="valid-date">VALID UNTIL: AUG 2025</div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

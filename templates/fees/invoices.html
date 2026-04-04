@@ -8,6 +8,12 @@
     <span class="breadcrumb-separator">/</span>
     <span class="breadcrumb-current">Fee Invoices</span>
 </nav>
+
+<style>
+    .balance-cell { text-align: right; font-weight: 600; }
+    .balance-unpaid { color: var(--error-500) !important; }
+    .balance-paid { color: var(--success-500) !important; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -32,15 +38,15 @@
         <div class="stat-label">Total Invoices</div>
     </div>
     <div class="stat-card success">
-        <div class="stat-value">GHS {{ "{:,.2f}".format(total_expected or 0) }}</div>
+        <div class="stat-value">GHS {{ "{:,.2f}".format(metrics.total_income + metrics.outstanding_fees) }}</div>
         <div class="stat-label">Total Expected</div>
     </div>
     <div class="stat-card">
-        <div class="stat-value">GHS {{ "{:,.2f}".format(total_collected or 0) }}</div>
+        <div class="stat-value">GHS {{ "{:,.2f}".format(metrics.total_income) }}</div>
         <div class="stat-label">Collected</div>
     </div>
     <div class="stat-card warning">
-        <div class="stat-value">GHS {{ "{:,.2f}".format(total_outstanding or 0) }}</div>
+        <div class="stat-value">GHS {{ "{:,.2f}".format(metrics.outstanding_fees) }}</div>
         <div class="stat-label">Outstanding</div>
     </div>
 </div>
@@ -104,8 +110,7 @@
                         <td style="text-align: right;">GHS {{ "{:,.2f}".format(invoice.total_amount) }}</td>
                         <td style="text-align: right; color: var(--success-500);">GHS {{
                             "{:,.2f}".format(invoice.amount_paid) }}</td>
-                        <td
-                            style="text-align: right; font-weight: 600; color: {% if invoice.balance > 0 %}var(--error-500){% else %}var(--success-500){% endif %};">
+                        <td class="balance-cell {% if invoice.balance > 0 %}balance-unpaid{% else %}balance-paid{% endif %}">
                             GHS {{ "{:,.2f}".format(invoice.balance) }}
                         </td>
                         <td>
@@ -127,6 +132,12 @@
                                 {% if invoice.balance > 0 %}
                                 <a href="{{ url_for('fees.record_payment') }}?invoice_id={{ invoice.id }}"
                                     class="btn btn-primary btn-sm">Pay</a>
+                                <a href="{{ url_for('fees.send_reminder', id=invoice.id) }}" 
+                                   class="btn btn-ghost btn-sm" title="Send SMS Reminder">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.27-2.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                    </svg>
+                                </a>
                                 {% endif %}
                             </div>
                         </td>

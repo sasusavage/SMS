@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login - NaCCA SMS{% endblock %}
+{% block title %}Sign In - SmartSchool{% endblock %}
 
 {% block body_class %}auth-page{% endblock %}
 
@@ -315,12 +315,9 @@
         <div class="auth-container">
             <div class="auth-logo">
                 <div class="auth-logo-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                    </svg>
+                    <img src="{{ url_for('static', filename='img/icon.png') }}" class="w-8 h-8" alt="S">
                 </div>
-                <span class="auth-logo-text">NaCCA <span>SMS</span></span>
+                <span class="auth-logo-text text-white uppercase">Smart<span class="text-indigo-400">School</span></span>
             </div>
 
             <div class="auth-card">

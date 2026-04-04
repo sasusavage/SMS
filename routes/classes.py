@@ -13,6 +13,13 @@ classes_bp = Blueprint('classes', __name__, url_prefix='/classes')
 # =============================================================================
 # CLASSES
 # =============================================================================
+@classes_bp.route('/scanner')
+@staff_required
+def scanner():
+    """Web-based QR Scanner for attendance."""
+    return render_template('classes/scanner.html')
+
+
 @classes_bp.route('/')
 @staff_required
 def index():
@@ -211,6 +218,92 @@ def assign_subjects(id):
         teachers=teachers,
         current_assignments=current_assignments
     )
+
+
+# =============================================================================
+# ATTENDANCE
+# =============================================================================
+@classes_bp.route('/<int:id>/attendance', methods=['GET'])
+@staff_required
+def attendance(id):
+    """Mark daily attendance for a class."""
+    cls = Class.query.get_or_404(id)
+    if not g.current_academic_year or not g.current_term:
+        flash('No active term or academic year found.', 'error')
+        return redirect(url_for('classes.view', id=id))
+
+    # Get enrolled students
+    enrollments = ClassEnrollment.query.filter_by(
+        class_id=cls.id,
+        academic_year_id=g.current_academic_year.id
+    ).all()
+    
+    from models import Attendance, AttendanceStatus
+    from datetime import date
+    
+    # Check if already marked for today
+    today_attendance = {
+        a.student_id: a.status for a in Attendance.query.filter_by(
+            school_id=current_user.school_id,
+            date=date.today()
+        ).all()
+    }
+
+    return render_template(
+        'classes/attendance.html',
+        cls=cls,
+        enrollments=enrollments,
+        today_attendance=today_attendance,
+        AttendanceStatus=AttendanceStatus,
+        today=date.today()
+    )
+
+
+@classes_bp.route('/<int:id>/attendance', methods=['POST'])
+@staff_required
+def mark_attendance(id):
+    """Save daily attendance and trigger SMS alerts."""
+    from models import Attendance, AttendanceStatus
+    from services.notification_service import NotificationService
+    from datetime import date as dt_date
+    
+    cls = Class.query.get_or_404(id)
+    student_ids = request.form.getlist('student_ids[]')
+    statuses = request.form.getlist('statuses[]')
+    
+    for i, student_id in enumerate(student_ids):
+        status_val = statuses[i] if i < len(statuses) else 'absent'
+        status_enum = AttendanceStatus(status_val)
+        
+        # 1. Update or Create Attendance Record
+        att = Attendance.query.filter_by(
+            student_id=int(student_id),
+            date=dt_date.today()
+        ).first()
+        
+        is_new = False
+        if not att:
+            att = Attendance(
+                school_id=current_user.school_id,
+                student_id=int(student_id),
+                term_id=g.current_term.id,
+                date=dt_date.today()
+            )
+            db.session.add(att)
+            is_new = True
+            
+        att.status = status_enum
+        db.session.commit()
+        
+        # 2. Trigger Smart Notification (only for new or changed)
+        NotificationService.trigger_attendance_alert(
+            int(student_id), 
+            status_enum.value.title(),
+            datetime.now().strftime("%I:%M %p")
+        )
+
+    flash(f'Attendance for {cls.name} updated successfully!', 'success')
+    return redirect(url_for('classes.view', id=cls.id))
 
 
 # =============================================================================

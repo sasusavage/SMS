@@ -1,0 +1,110 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Bulk Data Importer | NaCCA SMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">Bulk Data Importer</h1>
+            <p class="text-slate-400">Onboard students and staff in seconds via CSV.</p>
+        </div>
+        <div class="flex gap-4">
+            <a href="#" class="btn btn-secondary flex items-center gap-2">
+                <i class="fas fa-download"></i> Download Template
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Student Importer -->
+        <div class="glass-card p-8">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="p-3 bg-primary-500/20 rounded-xl text-primary-400">
+                    <i class="fas fa-user-graduate fa-2x"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white">Student Importer</h3>
+                    <p class="text-sm text-slate-400">Import student bio-data and parent links.</p>
+                </div>
+            </div>
+
+            <form action="{{ url_for('admin.import_data') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="import_type" value="students">
+                
+                <div class="file-upload-zone p-8 border-2 border-dashed border-slate-700 rounded-2xl text-center hover:border-primary-400 transition-colors">
+                    <input type="file" name="file" id="student_csv" class="hidden" accept=".csv" required>
+                    <label for="student_csv" class="cursor-pointer">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-slate-500 mb-4"></i>
+                        <p class="text-slate-300 font-medium">Click to upload or drag & drop</p>
+                        <p class="text-xs text-slate-500 mt-2">Maximum file size: 5MB (CSV only)</p>
+                    </label>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded-xl">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Required Columns</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">first_name</span>
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">last_name</span>
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">gender</span>
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">dob</span>
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">parent_phone</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full py-4 font-bold tracking-wide">
+                    Process Students
+                </button>
+            </form>
+        </div>
+
+        <!-- Staff Importer -->
+        <div class="glass-card p-8">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="p-3 bg-secondary-500/20 rounded-xl text-secondary-400">
+                    <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white">Staff & Faculty</h3>
+                    <p class="text-sm text-slate-400">Import staff and auto-create portal accounts.</p>
+                </div>
+            </div>
+
+            <form action="{{ url_for('admin.import_data') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="import_type" value="staff">
+                
+                <div class="file-upload-zone p-8 border-2 border-dashed border-slate-700 rounded-2xl text-center hover:border-secondary-400 transition-colors">
+                    <input type="file" name="file" id="staff_csv" class="hidden" accept=".csv" required>
+                    <label for="staff_csv" class="cursor-pointer">
+                        <i class="fas fa-file-csv fa-3x text-slate-500 mb-4"></i>
+                        <p class="text-slate-300 font-medium">Select Faculty CSV</p>
+                        <p class="text-xs text-slate-500 mt-2">Passwords will default to 'password123'</p>
+                    </label>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded-xl">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Required Columns</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">first_name</span>
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">last_name</span>
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">email</span>
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">role</span>
+                        <span class="px-2 py-1 bg-slate-900 rounded text-[10px] text-slate-400">position</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-secondary w-full py-4 font-bold tracking-wide">
+                    Provision Faculty
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .file-upload-zone label { display: block; }
+    .file-upload-zone:hover { background: rgba(255,255,255,0.02); }
+</style>
+{% endblock %}

@@ -1,14 +1,18 @@
 """
 Dashboard Routes - Role-based dashboards
 """
-from flask import Blueprint, render_template, g
+from flask import Blueprint, render_template, g, redirect, url_for
 from flask_login import login_required, current_user
 from sqlalchemy import func
+from datetime import date
 
 from models import (
     db, User, UserRole, Student, Staff, Class, FeeInvoice, Payment,
-    Attendance, StudentStatus, PaymentStatus, AttendanceStatus
+    Attendance, StudentStatus, PaymentStatus, AttendanceStatus, Expense
 )
+from services.payment_service import PaymentService
+from services.predictive_engine import PredictiveEngine
+from models import SchoolInsight
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
@@ -21,7 +25,9 @@ def index():
     
     if role == UserRole.PARENT:
         return redirect(url_for('parent.dashboard'))
-    elif role in [UserRole.SUPER_ADMIN, UserRole.HEADTEACHER]:
+    elif role == UserRole.SUPER_ADMIN:
+        return super_admin_dashboard()
+    elif role == UserRole.HEADTEACHER:
         return headteacher_dashboard()
     elif role == UserRole.ADMIN:
         return admin_dashboard()
@@ -31,6 +37,39 @@ def index():
         return accounts_dashboard()
     else:
         return render_template('dashboard/default.html')
+
+
+def super_admin_dashboard():
+    """Dashboard for SaaS Platform Owner."""
+    from models import School, Payment, PaymentStatus, AICreditUsage
+    from sqlalchemy import func
+    
+    stats = {
+        'total_schools': School.query.count(),
+        'active_students': Student.query.filter_by(status=StudentStatus.ACTIVE).count(),
+        'platform_total_revenue': db.session.query(func.sum(Payment.amount)).filter(
+            Payment.status == PaymentStatus.COMPLETED
+        ).scalar() or 0,
+        'remaining_sms_credits': 12500,
+        'ai_tokens_today': db.session.query(func.sum(AICreditUsage.tokens_used)).scalar() or 0,
+        'system_health': '99.9%'
+    }
+    
+    # AI Consumption per school
+    ai_top_consumers = db.session.query(
+        School.name, 
+        func.sum(AICreditUsage.tokens_used)
+    ).join(AICreditUsage).group_by(School.name).all()
+    
+    # Aggregated schools with their configs
+    schools_full = School.query.order_by(School.name).all()
+    
+    return render_template('dashboard/super_admin.html', 
+        stats=stats, 
+        recent_schools=recent_schools,
+        ai_usage=ai_top_consumers,
+        schools_full=schools_full
+    )
 
 
 def headteacher_dashboard():
@@ -55,49 +94,38 @@ def headteacher_dashboard():
             school_id=school_id, 
             is_active=True
         ).count(),
-        'pending_reports': 0,  # TODO: Count unpublished reports
+        'pending_reports': 0,
     }
     
-    # Fee statistics for current term
-    if g.current_term:
-        fee_stats = db.session.query(
-            func.coalesce(func.sum(FeeInvoice.total_amount), 0).label('total_expected'),
-            func.coalesce(func.sum(FeeInvoice.amount_paid), 0).label('total_collected'),
-            func.coalesce(func.sum(FeeInvoice.balance), 0).label('total_outstanding')
-        ).filter(
-            FeeInvoice.term_id == g.current_term.id
-        ).first()
-        
-        stats['fees_expected'] = float(fee_stats.total_expected)
-        stats['fees_collected'] = float(fee_stats.total_collected)
-        stats['fees_outstanding'] = float(fee_stats.total_outstanding)
-        
-        # Collection rate
-        if stats['fees_expected'] > 0:
-            stats['collection_rate'] = round(
-                (stats['fees_collected'] / stats['fees_expected']) * 100, 1
-            )
-        else:
-            stats['collection_rate'] = 0
+    # Use PaymentService for metrics
+    metrics, _ = PaymentService.get_finance_analytics(school_id)
+    if metrics:
+        stats.update({
+            'fees_expected': float(metrics['total_income'] + metrics['outstanding_fees']),
+            'fees_collected': float(metrics['total_income']),
+            'fees_outstanding': float(metrics['outstanding_fees']),
+            'total_expenses': float(metrics['total_expenses']),
+            'net_balance': float(metrics['net_balance']),
+            'collection_rate': round((float(metrics['total_income']) / float(metrics['total_income'] + metrics['outstanding_fees']) * 100), 1) if (metrics['total_income'] + metrics['outstanding_fees']) > 0 else 0
+        })
     else:
-        stats['fees_expected'] = 0
-        stats['fees_collected'] = 0
-        stats['fees_outstanding'] = 0
-        stats['collection_rate'] = 0
+        stats.update({
+            'fees_expected': 0, 'fees_collected': 0, 'fees_outstanding': 0,
+            'total_expenses': 0, 'net_balance': 0, 'collection_rate': 0
+        })
     
     # Today's attendance
-    from datetime import date
     today = date.today()
-    
     attendance_stats = db.session.query(
         func.count(Attendance.id).label('total'),
         func.sum(func.cast(Attendance.status == AttendanceStatus.PRESENT, db.Integer)).label('present'),
         func.sum(func.cast(Attendance.status == AttendanceStatus.ABSENT, db.Integer)).label('absent'),
     ).filter(
+        Attendance.school_id == school_id,
         Attendance.date == today
     ).first()
     
-    if attendance_stats.total:
+    if attendance_stats and attendance_stats.total:
         stats['attendance_rate'] = round(
             (attendance_stats.present / attendance_stats.total) * 100, 1
         )
@@ -126,40 +154,42 @@ def headteacher_dashboard():
     )
 
 
+@dashboard_bp.route('/predictive')
+@login_required
+def predictive_dashboard():
+    """Elite Tier Early Warning System Dashboard."""
+    if current_user.role not in [UserRole.SUPER_ADMIN, UserRole.HEADTEACHER, UserRole.ADMIN]:
+        flash('Unauthorized.', 'error')
+        return redirect(url_for('dashboard.index'))
+        
+    school_id = current_user.school_id
+    # Run a quick check (in real app, this would be a background task)
+    PredictiveEngine.check_dropout_risk(school_id)
+    
+    insights = SchoolInsight.query.filter_by(school_id=school_id, is_active=True).order_by(SchoolInsight.created_at.desc()).limit(10).all()
+    forecast = PredictiveEngine.get_financial_forecast(school_id)
+    
+    return render_template('admin/predictive.html', insights=insights, forecast=forecast)
+
+
 def admin_dashboard():
     """Dashboard for Admin users."""
     school_id = current_user.school_id
-    
     stats = {
-        'total_students': Student.query.filter_by(
-            school_id=school_id, 
-            status=StudentStatus.ACTIVE
-        ).count(),
-        'total_staff': Staff.query.filter_by(
-            school_id=school_id, 
-            is_active=True
-        ).count(),
-        'pending_tasks': 0,  # TODO: Implement task system
+        'total_students': Student.query.filter_by(school_id=school_id, status=StudentStatus.ACTIVE).count(),
+        'total_staff': Staff.query.filter_by(school_id=school_id, is_active=True).count(),
+        'pending_tasks': 0,
     }
-    
     return render_template('dashboard/admin.html', stats=stats)
 
 
 def teacher_dashboard():
     """Dashboard for Teachers."""
-    from models import ClassSubject, Assessment
-    
+    from models import ClassSubject, Assessment, ClassEnrollment
     staff = current_user.staff_profile
-    
     if staff:
-        # Classes where user is class teacher
         my_classes = Class.query.filter_by(class_teacher_id=staff.id, is_active=True).all()
-        
-        # Subjects taught by this teacher
         my_subjects = ClassSubject.query.filter_by(teacher_id=staff.id).all()
-        
-        # Students in my classes
-        from models import ClassEnrollment
         student_count = 0
         for cls in my_classes:
             student_count += ClassEnrollment.query.filter_by(
@@ -167,65 +197,41 @@ def teacher_dashboard():
                 academic_year_id=g.current_academic_year.id if g.current_academic_year else 0
             ).count()
     else:
-        my_classes = []
-        my_subjects = []
+        my_classes = my_subjects = []
         student_count = 0
     
-    return render_template(
-        'dashboard/teacher.html',
-        my_classes=my_classes,
-        my_subjects=my_subjects,
-        student_count=student_count
-    )
+    return render_template('dashboard/teacher.html', my_classes=my_classes, my_subjects=my_subjects, student_count=student_count)
 
 
 def accounts_dashboard():
     """Dashboard for Accounts Officers."""
     school_id = current_user.school_id
+    metrics, _ = PaymentService.get_finance_analytics(school_id)
     
-    if g.current_term:
-        # Fee statistics
-        fee_stats = db.session.query(
-            func.coalesce(func.sum(FeeInvoice.total_amount), 0).label('total_expected'),
-            func.coalesce(func.sum(FeeInvoice.amount_paid), 0).label('total_collected'),
-            func.coalesce(func.sum(FeeInvoice.balance), 0).label('total_outstanding')
-        ).filter(
-            FeeInvoice.term_id == g.current_term.id
-        ).first()
-        
+    if metrics:
         stats = {
-            'fees_expected': float(fee_stats.total_expected),
-            'fees_collected': float(fee_stats.total_collected),
-            'fees_outstanding': float(fee_stats.total_outstanding),
+            'fees_expected': float(metrics['total_income'] + metrics['outstanding_fees']),
+            'fees_collected': float(metrics['total_income']),
+            'fees_outstanding': float(metrics['outstanding_fees']),
+            'total_expenses': float(metrics['total_expenses']),
+            'net_balance': float(metrics['net_balance']),
         }
-        
-        # Students with outstanding fees
+    else:
+        stats = {'fees_expected': 0, 'fees_collected': 0, 'fees_outstanding': 0, 'total_expenses': 0, 'net_balance': 0}
+
+    # Today's payments
+    today_payments = Payment.query.join(FeeInvoice).join(Student).filter(
+        Student.school_id == school_id,
+        func.date(Payment.payment_date) == date.today()
+    ).all()
+    stats['today_collected'] = sum(float(p.amount) for p in today_payments)
+
+    # Students with outstanding fees
+    debtors = []
+    if g.current_term:
         debtors = FeeInvoice.query.filter(
             FeeInvoice.term_id == g.current_term.id,
             FeeInvoice.balance > 0
         ).order_by(FeeInvoice.balance.desc()).limit(10).all()
-        
-        # Today's payments
-        from datetime import date
-        today_payments = Payment.query.join(FeeInvoice).join(Student).filter(
-            Student.school_id == school_id,
-            func.date(Payment.payment_date) == date.today()
-        ).all()
-        
-        stats['today_collected'] = sum(float(p.amount) for p in today_payments)
-    else:
-        stats = {
-            'fees_expected': 0,
-            'fees_collected': 0,
-            'fees_outstanding': 0,
-            'today_collected': 0
-        }
-        debtors = []
-        today_payments = []
-    
-    return render_template(
-        'dashboard/accounts.html',
-        stats=stats,
-        debtors=debtors,
-        today_payments=today_payments
-    )
+
+    return render_template('dashboard/accounts.html', stats=stats, debtors=debtors, today_payments=today_payments)

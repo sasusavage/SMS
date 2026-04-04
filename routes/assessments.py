@@ -7,7 +7,7 @@ from sqlalchemy import func
 
 from models import (
     db, Assessment, ClassSubject, Student, Class, Subject, Term,
-    ClassEnrollment, TerminalReport, UserRole
+    ClassEnrollment, TerminalReport, UserRole, refresh_terminal_reports
 )
 from app import teacher_required, admin_required, staff_required
 
@@ -147,6 +147,9 @@ def save_scores():
     calculate_class_positions(class_subject_id, g.current_term.id)
     
     db.session.commit()
+    
+    # Refresh Materialized View for performance
+    refresh_terminal_reports()
     
     return jsonify({
         'success': True,
@@ -467,6 +470,9 @@ def generate_reports(class_id):
     calculate_terminal_positions(class_id, g.current_term.id)
     
     db.session.commit()
+    
+    # Refresh Materialized View for performance
+    refresh_terminal_reports()
     
     flash(f'Successfully generated {generated_count} terminal reports!', 'success')
     return redirect(url_for('assessments.terminal_reports'))

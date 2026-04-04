@@ -13,10 +13,11 @@ from werkzeug.security import generate_password_hash
 class StudentService:
     
     @staticmethod
-    def _log_action(user_id, action, entity_type, entity_id, old_values=None, new_values=None):
-        """Helper to safely record audit logs."""
+    def _log_action(school_id, user_id, action, entity_type, entity_id, old_values=None, new_values=None):
+        """Helper to safely record audit logs within a school scope."""
         try:
             log = AuditLog(
+                school_id=school_id,
                 user_id=user_id,
                 action=action,
                 entity_type=entity_type,
@@ -96,6 +97,7 @@ class StudentService:
                 
             # 5. Audit Logging
             StudentService._log_action(
+                school_id=school_id,
                 user_id=user_id,
                 action='CREATE_STUDENT',
                 entity_type='student',
@@ -164,7 +166,7 @@ class StudentService:
                 'last_name': student.last_name,
                 'status': student.status.value
             }
-            StudentService._log_action(user_id, 'UPDATE_STUDENT', 'student', student.id, old_values, new_values)
+            StudentService._log_action(school_id, user_id, 'UPDATE_STUDENT', 'student', student.id, old_values, new_values)
 
             db.session.commit()
             return student, None

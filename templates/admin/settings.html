@@ -1,0 +1,128 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}System Settings | NaCCA SMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header mb-8">
+        <h1 class="text-3xl font-bold text-white tracking-tight">System Settings</h1>
+        <p class="text-slate-400">Manage school-wide configurations and security protocols.</p>
+    </div>
+
+    <form action="{{ url_for('admin.settings') }}" method="POST" class="space-y-8">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Privacy & Security -->
+            <div class="glass-card p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="p-3 bg-error-500/20 rounded-xl text-error-400">
+                        <i class="fas fa-shield-alt fa-2x"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">Privacy & Compliance</h3>
+                        <p class="text-sm text-slate-400">Ghana Data Protection Act (DPA) Settings.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between p-4 bg-slate-800/50 rounded-2xl">
+                        <div>
+                            <h4 class="text-white font-medium">Privacy Mode</h4>
+                            <p class="text-xs text-slate-400">Mask student phone numbers and addresses from base teachers.</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" name="privacy_mode_enabled" {% if settings and settings.privacy_mode_enabled %}checked{% endif %}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Intelligence Hub (NEW) -->
+            <div class="glass-card p-8 border-l-4 border-primary-500">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="p-3 bg-primary-500/20 rounded-xl text-primary-400">
+                        <i class="fas fa-robot fa-2x"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">Sasu AI 2.0</h3>
+                        <p class="text-sm text-slate-400">Agentic School Intelligence Hub.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-slate-800/50 rounded-2xl mb-4">
+                        <div>
+                            <h4 class="text-white font-medium">Activate Sasu Jnr</h4>
+                            <p class="text-xs text-slate-400">Enable Agentic WhatsApp Assistant.</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" name="ai_bot_enabled" {% if settings and settings.ai_bot_enabled %}checked{% endif %}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label text-xs uppercase tracking-widest text-slate-500">WhatsApp Business ID</label>
+                        <input type="text" name="whatsapp_business_id" value="{{ settings.whatsapp_business_id or '' }}" class="form-input" placeholder="e.g. 104523932454532">
+                        <p class="text-[10px] text-slate-500 mt-2">Required for webhook routing.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communication Settings -->
+            <div class="glass-card p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="p-3 bg-primary-500/20 rounded-xl text-primary-400">
+                        <i class="fas fa-satellite-dish fa-2x"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">SMS Gateway</h3>
+                        <p class="text-sm text-slate-400">Connect your Arkesel/Hubtel API.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-slate-800/50 rounded-2xl mb-4">
+                        <div>
+                            <h4 class="text-white font-medium">Global SMS Alerts</h4>
+                            <p class="text-xs text-slate-400">Enable/Disable automated notifications.</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" name="sms_enabled" {% if settings and settings.sms_enabled %}checked{% endif %}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label">Arkesel API Key</label>
+                        <input type="password" name="api_key_sms" value="{{ settings.api_key_sms or '' }}" class="form-input" placeholder="••••••••••••••••••••">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">SMS Sender ID</label>
+                        <input type="text" name="sms_sender_id" value="{{ settings.sms_sender_id or '' }}" class="form-input" placeholder="e.g. NACOSMS" maxlength="11">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end pt-4">
+            <button type="submit" class="btn btn-primary px-12 py-4 font-bold tracking-wide shadow-lg shadow-primary-500/20">
+                Update Security Profile
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Toggle Switch Styles */
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--slate-700); transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary-500); }
+    input:checked + .slider:before { transform: translateX(24px); }
+</style>
+{% endblock %}

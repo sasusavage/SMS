@@ -1,0 +1,34 @@
+{% extends "layouts/auth.html" %}
+
+{% block title %}Account Suspended | SmartSchool SaaS{% endblock %}
+
+{% block content %}
+<div class="auth-card glass-card p-12 text-center max-w-lg mx-auto">
+    <div class="w-24 h-24 bg-error-500/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse border border-error-500/20">
+        <i class="fas fa-exclamation-triangle text-4xl text-error-500"></i>
+    </div>
+    
+    <h1 class="text-3xl font-bold text-white mb-4 tracking-tighter">Account Restricted</h1>
+    <p class="text-slate-400 mb-8 max-w-sm mx-auto">
+        Your school's access to SmartSchool has been temporarily suspended. This may be due to an overdue subscription or administrative review.
+    </p>
+
+    <div class="p-6 bg-slate-800/50 rounded-2xl border border-white/5 mb-8 text-left">
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Reason for Suspension:</span>
+        <p class="text-white text-sm">Most common: Billing arrears or Unverified SMS Sender ID.</p>
+    </div>
+
+    <div class="space-y-4">
+        <a href="mailto:support@smartschool.com" class="btn btn-primary w-full py-4 text-xs font-bold tracking-widest">
+            CONTACT BILLING HUB
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="btn bg-slate-800 hover:bg-slate-700 w-full py-4 text-xs font-bold tracking-widest text-slate-300">
+            LOG OUT
+        </a>
+    </div>
+    
+    <p class="mt-8 text-[10px] text-slate-600">
+        Sasu Jnr. Agentic Operations © 2026
+    </p>
+</div>
+{% endblock %}

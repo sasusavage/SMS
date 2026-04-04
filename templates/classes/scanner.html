@@ -1,0 +1,194 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Smart Attendance Scanner - NaCCA SMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Morning Roll Call</h1>
+    <p class="page-subtitle">Scan student ID cards to mark arrival.</p>
+</div>
+
+<div class="scanner-container">
+    <div id="qr-reader" class="glass-scanner"></div>
+    <div id="scanner-feedback" class="scanner-feedback">
+        <div class="feedback-icon">📸</div>
+        <div class="feedback-text">Ready to scan...</div>
+    </div>
+</div>
+
+<div id="scan-result" class="scan-result-card" style="display: none;">
+    <div class="result-header">
+        <div id="student-photo-mini" class="student-photo-mini"></div>
+        <div class="student-info">
+            <h3 id="student-name">--</h3>
+            <p id="student-class">--</p>
+        </div>
+    </div>
+    <div id="result-message" class="result-message">--</div>
+</div>
+
+<style>
+    .scanner-container {
+        max-width: 500px;
+        margin: 0 auto;
+        position: relative;
+    }
+    .glass-scanner {
+        border-radius: var(--radius-2xl);
+        overflow: hidden;
+        border: 2px solid var(--slate-800);
+        background: rgba(15, 23, 42, 0.5);
+    }
+    .scanner-feedback {
+        margin-top: var(--space-4);
+        text-align: center;
+        padding: var(--space-4);
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--slate-800);
+    }
+    .feedback-icon { font-size: 24px; margin-bottom: 5px; }
+    .feedback-text { font-size: var(--font-size-sm); color: var(--slate-400); }
+
+    /* Scan Result Card */
+    .scan-result-card {
+        max-width: 500px;
+        margin: var(--space-6) auto;
+        padding: var(--space-4);
+        border-radius: var(--radius-xl);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--slate-800);
+        backdrop-filter: blur(10px);
+        animation: slideUp 0.3s ease-out;
+    }
+    .result-header { display: flex; gap: var(--space-4); align-items: center; }
+    .student-photo-mini {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-size: cover;
+        background-color: var(--slate-800);
+        border: 2px solid var(--primary-500);
+    }
+    .student-name { margin: 0; font-size: var(--font-size-lg); color: var(--white); }
+    .student-class { margin: 0; font-size: var(--font-size-sm); color: var(--primary-400); }
+    .result-message { 
+        margin-top: var(--space-3); 
+        padding-top: var(--space-3); 
+        border-top: 1px solid var(--slate-800);
+        font-size: var(--font-size-sm);
+        color: var(--slate-300);
+    }
+
+    /* Flash Effects */
+    .flash-success { background: rgba(34, 197, 94, 0.2) !important; border-color: var(--success-500) !important; }
+    .flash-error { background: rgba(239, 68, 68, 0.2) !important; border-color: var(--error-500) !important; }
+
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+    const feedback = document.getElementById('scanner-feedback');
+    const resultCard = document.getElementById('scan-result');
+    const studentName = document.getElementById('student-name');
+    const studentClass = document.getElementById('student-class');
+    const resultMsg = document.getElementById('result-message');
+    const studentPhoto = document.getElementById('student-photo-mini');
+    const feedbackText = feedback.querySelector('.feedback-text');
+    const feedbackIcon = feedback.querySelector('.feedback-icon');
+
+    let isScanning = false;
+
+    function onScanSuccess(decodedText, decodedResult) {
+        if (isScanning) return;
+        isScanning = true;
+
+        try {
+            const data = JSON.parse(decodedText);
+            const studentUuid = data.u;
+
+            // Flash visual feedback
+            feedback.classList.add('flash-success');
+            feedbackText.innerText = "Processing QR...";
+            feedbackIcon.innerText = "⏳";
+
+            // Submit to API
+            fetch('/api/attendance/scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ student_uuid: studentUuid })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showResult(data, true);
+                    // Play success beep if available
+                } else {
+                    showResult(data, false);
+                }
+                
+                // Resume scanning after 3 seconds
+                setTimeout(() => {
+                    isScanning = false;
+                    feedback.classList.remove('flash-success', 'flash-error');
+                    feedbackText.innerText = "Ready for next student...";
+                    feedbackIcon.innerText = "📸";
+                }, 3000);
+            })
+            .catch(err => {
+                console.error(err);
+                showResult({ message: "Network error occurred." }, false);
+                setTimeout(() => { isScanning = false; }, 3000);
+            });
+
+        } catch (e) {
+            console.error("Invalid QR format", e);
+            feedback.classList.add('flash-error');
+            feedbackText.innerText = "Invalid QR code format.";
+            setTimeout(() => {
+                isScanning = false;
+                feedback.classList.remove('flash-error');
+            }, 2000);
+        }
+    }
+
+    function showResult(data, success) {
+        resultCard.style.display = 'block';
+        if (success) {
+            resultCard.classList.remove('flash-error');
+            resultCard.classList.add('flash-success');
+            studentName.innerText = data.student;
+            studentClass.innerText = data.class;
+            resultMsg.innerText = data.message;
+            if (data.photo) {
+                studentPhoto.style.backgroundImage = `url(${data.photo})`;
+            } else {
+                studentPhoto.style.backgroundImage = 'none';
+            }
+        } else {
+            resultCard.classList.remove('flash-success');
+            resultCard.classList.add('flash-error');
+            studentName.innerText = "Error";
+            studentClass.innerText = "--";
+            resultMsg.innerText = data.message;
+        }
+    }
+
+    function onScanFailure(error) {
+        // We can ignore most scan failures as they occur frequently during scanning
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+        "qr-reader", 
+        { fps: 10, qrbox: {width: 250, height: 250} },
+        /* verbose= */ false);
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+</script>
+{% endblock %}

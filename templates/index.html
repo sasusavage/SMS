@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}SmartSchool - Best School Management System in Ghana | Sasu AI{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-slate-950 text-slate-100 font-inter selection:bg-indigo-500/30">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-slate-950/50 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                    <img src="{{ url_for('static', filename='img/icon.png') }}" class="w-7 h-7" alt="S">
+                </div>
+                <span class="text-xl font-bold tracking-tight text-white uppercase">Smart<span class="text-indigo-400">School</span></span>
+            </div>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#features" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Features</a>
+                <a href="#pricing" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Pricing</a>
+                <a href="{{ url_for('auth.login') }}" class="text-sm font-bold text-white px-6 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all">Sign In</a>
+                <a href="#pricing" class="text-sm font-bold text-white px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-lg shadow-indigo-600/20 transition-all">Get Started</a>
+            </div>
+            <!-- Mobile Menu Toggle -->
+            <button class="md:hidden text-white"><i class="fas fa-bars text-xl"></i></button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-40 pb-32 overflow-hidden">
+        <!-- Background Orbs -->
+        <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] -z-10 animate-pulse-slow"></div>
+        <div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-sky-600/10 rounded-full blur-[100px] -z-10"></div>
+
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-8 animate-fade-in">
+                <span class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Now With Voice AI 2.0</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold text-white tracking-tighter mb-8 leading-[1.1] animate-fade-in">
+                Transform Your School <br>
+                <span class="bg-gradient-to-r from-indigo-400 to-sky-400 bg-clip-text text-transparent">With Sasu AI</span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-lg text-slate-400 mb-12 animate-slide-up">
+                The most advanced NaCCA-compliant management system in Ghana. Professional automation for attendance, finances, and elite reporting.
+            </p>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6 animate-slide-up">
+                <a href="#pricing" class="w-full md:w-auto px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-2xl shadow-indigo-600/30 transition-all transform hover:-translate-y-1">
+                    START 14-DAY FREE TRIAL
+                </a>
+                <button onclick="installPWA()" class="w-full md:w-auto px-10 py-5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/10 backdrop-blur-xl transition-all">
+                    DOWNLOAD APP
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section id="features" class="py-24 bg-slate-950">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Elite Education Infrastructure</h2>
+                <p class="text-slate-400">Everything you need to run a high-performance modern school.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="p-8 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl hover:border-indigo-500/50 transition-all group">
+                    <div class="w-14 h-14 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-robot text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Sasu AI 2.0</h3>
+                    <p class="text-sm text-slate-400 leading-relaxed">WhatsApp Voice & Text assistant that explains NaCCA grades and checks fees in Pidgin or Twi.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="p-8 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl hover:border-emerald-500/50 transition-all group">
+                    <div class="w-14 h-14 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-wallet text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Financial Engine</h3>
+                    <p class="text-sm text-slate-400 leading-relaxed">Automated fee collection with Paystack integration and instant digital receipts for parents.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="p-8 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl hover:border-sky-500/50 transition-all group">
+                    <div class="w-14 h-14 bg-sky-500/10 text-sky-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-file-invoice text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Smart Reports</h3>
+                    <p class="text-sm text-slate-400 leading-relaxed">1-click NaCCA Terminal Reports. Beautifully formatted, strand-level academic analysis.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="p-8 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl hover:border-purple-500/50 transition-all group">
+                    <div class="w-14 h-14 bg-purple-500/10 text-purple-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-qrcode text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">QR Security</h3>
+                    <p class="text-sm text-slate-400 leading-relaxed">Digital ID cards with QR scanning for attendance and instant arrival SMS alerts to parents.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Scalable Pricing for Every Institution</h2>
+                <p class="text-slate-400">Choose the tier that matches your school's digital ambition.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Basic -->
+                <div class="p-10 bg-white/5 border border-white/5 rounded-[40px] flex flex-col hover:bg-white/[0.07] transition-all">
+                    <div class="mb-8">
+                        <h4 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-4">Foundation</h4>
+                        <h3 class="text-2xl font-bold text-white">Basic</h3>
+                        <div class="mt-4 flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-white">₵1,000</span>
+                            <span class="text-slate-500">/year</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 mb-10 flex-1">
+                        <li class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check text-indigo-500"></i> Student Enrollment</li>
+                        <li class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check text-indigo-500"></i> Attendance Tracking</li>
+                        <li class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check text-indigo-500"></i> Basic Reporting</li>
+                        <li class="flex items-center gap-3 text-sm text-slate-500"><i class="fas fa-times"></i> Sasu AI Assistant</li>
+                    </ul>
+                    <a href="{{ url_for('auth.login') }}" class="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl text-center transition-all">Start Free Trial</a>
+                </div>
+
+                <!-- Standard -->
+                <div class="p-10 bg-indigo-600/10 border border-indigo-500/30 rounded-[40px] flex flex-col relative scale-105 shadow-2xl shadow-indigo-600/10">
+                    <div class="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-indigo-600 text-white text-[10px] font-bold rounded-full uppercase tracking-widest shadow-xl">Most Popular</div>
+                    <div class="mb-8">
+                        <h4 class="text-indigo-400 font-bold text-xs uppercase tracking-widest mb-4">Professional</h4>
+                        <h3 class="text-2xl font-bold text-white">Standard</h3>
+                        <div class="mt-4 flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-white">₵2,500</span>
+                            <span class="text-slate-500">/year</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 mb-10 flex-1">
+                        <li class="flex items-center gap-3 text-sm text-slate-100 font-medium"><i class="fas fa-check text-indigo-400"></i> Everything in Basic</li>
+                        <li class="flex items-center gap-3 text-sm text-slate-100 font-medium"><i class="fas fa-check text-indigo-400"></i> Paystack Finance Integration</li>
+                        <li class="flex items-center gap-3 text-sm text-slate-100 font-medium"><i class="fas fa-check text-indigo-400"></i> Automated SMS Gateway</li>
+                        <li class="flex items-center gap-3 text-sm text-slate-100 font-medium"><i class="fas fa-check text-indigo-400"></i> Advanced NaCCA Reports</li>
+                    </ul>
+                    <a href="{{ url_for('auth.login') }}" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl text-center shadow-lg shadow-indigo-600/20 transition-all">Start Free Trial</a>
+                </div>
+
+                <!-- Elite -->
+                <div class="p-10 bg-white/5 border border-white/5 rounded-[40px] flex flex-col hover:bg-white/[0.07] transition-all">
+                    <div class="mb-8">
+                        <h4 class="text-emerald-400 font-bold text-xs uppercase tracking-widest mb-4">Enterprise</h4>
+                        <h3 class="text-2xl font-bold text-white">Elite</h3>
+                        <div class="mt-4 flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-white">₵6,000</span>
+                            <span class="text-slate-500">/year</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 mb-10 flex-1">
+                        <li class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check text-emerald-500"></i> Everything in Standard</li>
+                        <li class="flex items-center gap-3 text-sm text-slate-300 font-bold text-white"><i class="fas fa-check text-emerald-500"></i> Sasu AI 2.0 (Voice + Text)</li>
+                        <li class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check text-emerald-500"></i> Predictive Risk Analytics</li>
+                        <li class="flex items-center gap-3 text-sm text-slate-300"><i class="fas fa-check text-emerald-500"></i> Digital Marketplace</li>
+                    </ul>
+                    <a href="{{ url_for('auth.login') }}" class="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl text-center transition-all">Start Free Trial</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-20 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div class="col-span-2">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <img src="{{ url_for('static', filename='img/icon.png') }}" class="w-5 h-5" alt="S">
+                    </div>
+                    <span class="text-lg font-bold tracking-tight text-white uppercase">Smart<span class="text-indigo-400">School</span></span>
+                </div>
+                <p class="text-slate-500 max-w-sm">Built for the future of Ghanaian education. NaCCA-compliant, multi-tenant school SaaS with advanced AI assistance.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6">Product</h4>
+                <ul class="space-y-4 text-sm text-slate-500">
+                    <li><a href="#" class="hover:text-indigo-400">Features</a></li>
+                    <li><a href="#" class="hover:text-indigo-400">Smart Reports</a></li>
+                    <li><a href="#" class="hover:text-indigo-400">Pricing</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6">Company</h4>
+                <ul class="space-y-4 text-sm text-slate-500">
+                    <li><a href="#" class="hover:text-indigo-400">About Sasu AI</a></li>
+                    <li><a href="#" class="hover:text-indigo-400">Support Hub</a></li>
+                    <li><a href="#" class="hover:text-indigo-400">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</div>
+{% endblock %}

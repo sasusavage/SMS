@@ -24,10 +24,29 @@ def dashboard():
     
     children = Student.query.filter_by(parent_id=parent.id).all()
     
-    # Get summary for each child
     children_data = []
+    from models import TerminalReportView, Notification
+    
+    recent_notifications = Notification.query.filter_by(
+        user_id=current_user.id,
+        school_id=current_user.school_id
+    ).order_by(Notification.created_at.desc()).limit(5).all()
+    
     for child in children:
-        data = {'student': child, 'enrollment': None, 'balance': 0}
+        data = {
+            'student': child, 
+            'enrollment': None, 
+            'balance': 0,
+            'trend': [], # Termly averages
+            'last_invoice_uuid': None
+        }
+        
+        # 1. Performance Trend
+        history = TerminalReportView.query.filter_by(
+            student_id=child.id,
+            school_id=current_user.school_id
+        ).order_by(TerminalReportView.academic_year_id.asc(), TerminalReportView.term_id.asc()).all()
+        data['trend'] = [{'term': h.term_id, 'avg': float(h.average_score)} for h in history]
         
         if g.current_academic_year:
             data['enrollment'] = ClassEnrollment.query.filter_by(
@@ -42,10 +61,14 @@ def dashboard():
             ).first()
             if invoice:
                 data['balance'] = float(invoice.balance)
+                data['last_invoice_uuid'] = invoice.uuid
         
         children_data.append(data)
     
-    return render_template('parent/dashboard.html', children=children_data)
+    return render_template('parent/dashboard.html', 
+        children=children_data, 
+        notifications=recent_notifications
+    )
 
 
 @parent_bp.route('/child/<int:id>')
@@ -139,3 +162,21 @@ def child_attendance(id):
     records = Attendance.query.filter_by(student_id=student.id).order_by(Attendance.date.desc()).limit(30).all()
     
     return render_template('parent/child_attendance.html', student=student, records=records)
+
+@parent_bp.route('/notifications')
+@parent_required
+def notifications():
+    """View all notifications for the parent."""
+    from models import Notification
+    notifs = Notification.query.filter_by(
+        user_id=current_user.id,
+        school_id=current_user.school_id
+    ).order_by(Notification.created_at.desc()).all()
+    
+    # Mark all as read
+    from models import db
+    for n in notifs:
+        n.is_read = True
+    db.session.commit()
+    
+    return render_template('parent/notifications.html', notifications=notifs)

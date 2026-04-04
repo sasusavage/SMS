@@ -1,0 +1,61 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Log Expense - NaCCA SMS{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{{ url_for('fees.expenses') }}">Expenses</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Log New</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Log Operational Expense</h1>
+    <p class="page-subtitle">Track school expenditures</p>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 class="card-title">Expense Details</h2>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('fees.add_expense') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="form-group">
+                <label class="form-label" for="category">Category</label>
+                <select name="category" id="category" class="form-select" required>
+                    <option value="">Select Category</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="amount">Amount (GHS)</label>
+                <input type="number" step="0.01" name="amount" id="amount" class="form-input" placeholder="0.00" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="date">Date</label>
+                <input type="date" name="date" id="date" class="form-input" value="{{ today_date }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">Description (Optional)</label>
+                <textarea name="description" id="description" class="form-input" rows="3" placeholder="e.g. Fuel for bus, Electricity bill for March..."></textarea>
+            </div>
+
+            <div class="btn-group" style="margin-top: var(--space-6);">
+                <button type="submit" class="btn btn-primary">Save Expense Record</button>
+                <a href="{{ url_for('fees.expenses') }}" class="btn btn-ghost">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

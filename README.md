@@ -1,151 +1,91 @@
-# NaCCA School Management System
+# SmartSchool - Elite NaCCA School Management SaaS
 
-A production-grade school management solution for Ghanaian schools following **NaCCA standards**, refactored for scale, performance, and full mobile responsiveness.
+A production-grade, multi-tenant school management ecosystem designed for the future of Ghanaian education. Refactored for extreme scale, performance, and **Sasu AI 2.0** integration.
 
-## Key Refactor Features (Production Ready)
+## 🚀 Elite Tier Showcase (Live Features)
 
-- **Architecture:** Transitioned from a "fat route" system to a **Service Layer** architecture for better maintainability.
-- **Performance:** Complex grading and ranking logic moved to **PostgreSQL Database Views** (`v_student_subject_performance` and `v_student_terminal_reports`) using high-performance window functions.
-- **Mobile Responsive:** Full mobile-first design implemented with vanilla CSS, including a toggleable sidebar and adaptive grids.
-- **Audit Logging:** Built-in system to track critical actions (student creation, updates, etc.) via the `AuditLog` model.
-- **RBAC:** Granular Role-Based Access Control enforcing strict permissions across all modules.
-- **Smart Notification Hub:** Multi-channel alerting (SMS/WhatsApp) for student arrival, fee reminders, and terminal report releases.
-- **QR Attendance Engine:** Automated morning roll-call system using browser-based QR scanning and CR80-standard secure ID card generation.
+- **Sasu AI 2.0 (Voice & Text):** The industry's first **Whisper-integrated** school assistant. Handles WhatsApp voice notes in **Twi, Pidgin, and English**, explaining NaCCA grades and checking student balances with cultural intelligence.
+- **Predictive Analytics Hub:** An advanced early warning system that scans institutional data to identify **Academic Risk** (dropout detection) and **Financial Flow** forecasting.
+- **Progressive Web App (PWA):** Installs as a native app on Android/iOS with **Offline-First** architecture and a custom 'SmartSchool' premium icon.
+- **Migration War Room:** High-speed bulk data ingestion pipeline with a dynamic **Topology Mapper** for transitioning 10-year legacy histories with zero downtime.
+- **Digital Marketplace:** Integrated e-commerce engine for schools to sell uniforms, books, and canteen credits with **Paystack** checkout.
+- **QR Identity Infrastructure:** Secure, bulk-generated student ID cards with encrypted QR codes for instant morning roll-call and parent SMS alerts.
 
-## Core Modules
+## 🏛️ System Architecture (Production Ready)
+
+- **Platform Governance:** Built-in **Super Admin SaaS Dashboard** to monitor and toggle premium features (AI, PWA, Marketplace) per tenant.
+- **Performance Engine:** Complex grading and ranking moved to **PostgreSQL Materialized Views** for sub-second terminal report rendering.
+- **Audit Governance:** Immutable system tracking of every grade change, fee deletion, and AI-triggered event.
+- **Security:** Strict compliance with the **Ghana Data Protection Act (Act 843)** using multi-tenant partitioning and PII masking.
+
+## 🛠️ Core Modules
 
 - **NaCCA Academic Logic** - Automatic grading and descriptors based on latest NaCCA assessment standards.
-- **Financial Engine** - Fee structures, automated invoice generation, and payment tracking.
-- **Parent Portal** - Secure access for parents to view student performance, attendance notifications, and fees.
-- **ID Card Infrastructure** - Bulk generation of secure, QR-coded student ID cards for automated check-ins.
-- **Attendance Scanner** - Web-based scanning interface for teachers to track arrivals via smartphone.
+- **Financial Engine** - Full ledger with Paystack integration, automated invoicing, and digital receipts.
+- **Parent Portal** - Secure access to track student performance trends, attendance, and fee status.
+- **Smart SMS Hub** - Multi-channel alerting (Arkesel/Hubtel) for attendance landmarks and fee reminders.
 
-## Tech Stack
+## 💻 Tech Stack
 
-- **Backend:** Python / Flask (Framework: Antigravity-style architecture)
-- **Database:** PostgreSQL (with complex SQL Views and Multi-tenant partitioning)
-- **Frontend:** Vanilla HTML5, CSS3 (Modern Glassmorphism aesthetics), JavaScript (ES6+), Html5-QRCode
-- **PDF Generation:** WeasyPrint (Print-ready ID Cards and Terminal Reports)
-- **Messaging:** Arkesel SMS Gateway Integration
-
-## Project Structure
-
-```
-School/
-├── app.py                 # Main Entry Point & Flask Factory
-├── config.py              # Central Configuration (RBAC & Environment)
-├── reseed_db_final.py     # Final Production Seeder & View Creator
-├── models/
-│   └── __init__.py        # Database Models & SQL View Definitions
-├── services/              # Business Logic Layer (Clean Architecture)
-│   ├── student_service.py # Core student business logic
-│   └── notification_service.py # SMS & In-App Alerting
-├── utils/                 # Utility Services
-│   ├── sms_provider.py    # Arkesel API Wrapper
-│   ├── qr_generator.py    # Secure QR payload generation
-│   └── ...
-├── routes/                # Blueprint Route Handlers (Slim Routes)
-│   ├── api.py             # AJAX & Scanner Endpoints
-│   ├── students.py        # Student module (inc. ID Cards)
-│   └── ...
-```
+- **Backend:** Python / Flask (Elite Blueprint Architecture)
+- **AI Core:** OpenAI Whisper (Voice) & Groq Llama 3 (Reasoning)
+- **Database:** PostgreSQL 15+ (With Materialized Views & B-Tree Composite Indexing)
+- **Frontend:** Vanilla HTML5, CSS3 (Premium Glassmorphism), JavaScript (ES6+), PWA Service Workers
+- **Analytics:** Pandas & OpenPyXL for the 'War Room' ingestion pipeline
 
 ---
 
-Built for **NaCCA Excellence** - Modern, High-Performance, and Mobile-First.
+## ⚙️ Setup & Installation
 
 ### Prerequisites
-
 - Python 3.10+
-- PostgreSQL 14+
-- `pip`
+- PostgreSQL 15+
+- OpenAI API Key (for Voice AI)
+- Groq API Key (for Agentic Reasoning)
 
-### Setup
-
-1. **Clone and navigate to the project:**
+### Rapid Deployment
+1. **Clone the repository:**
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/sasusavage/SMS.git
    cd School
    ```
 
 2. **Initialize Environment:**
-   Create a `.env` file in the root directory:
-   ```env
-   FLASK_CONFIG=development
-   SECRET_KEY=your-secret-key
-   DATABASE_URL=postgresql://user:password@localhost:5432/schooldb
+   Create a `.env` file from the example:
+   ```bash
+   cp .env.example .env
    ```
 
-3. **Install dependencies:**
+3. **Install Performance Dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Production Refactor Reset (Recommended):**
-   To ensure the database schema and PostgreSQL views are correctly initialized, run the final reseed script:
+4. **Production Data Provisioning:**
+   Initialize the database, materialize views, and seed elite tenants:
    ```bash
    python reseed_db_final.py
    ```
 
-5. **Run the application:**
+5. **Launch:**
    ```bash
    python app.py
    ```
 
-## Production Credentials (Default)
+---
 
-**Password for all accounts:** `admin123`
+## 📈 SaaS Subscription Tiers
 
-| Role | Email |
-|------|-------|
-| **Super Admin** | `superadmin@school.com` |
-| **Headteacher** | `headteacher@school.com` |
-| **Admin** | `admin@school.com` |
-| **Teacher** | `teacher@school.com` |
-| **Accounts** | `accounts@school.com` |
-| **Parent** | `parent@school.com` |
-
-## Project Structure
-
-```
-School/
-├── app.py                 # Main Entry Point & Flask Factory
-├── config.py              # Central Configuration (RBAC & Environment)
-├── reseed_db_final.py     # Final Production Seeder & View Creator
-├── models/
-│   └── __init__.py        # Database Models & SQL View Definitions
-├── services/              # Business Logic Layer (Clean Architecture)
-│   └── student_service.py # Core student business logic
-├── routes/                # Blueprint Route Handlers (Slim Routes)
-│   ├── students.py        # Student module
-│   ├── reports.py         # NaCCA Reporting module (PDFs)
-│   └── ...
-├── templates/             # Premium Glassmorphism UI
-│   ├── base.html          # Global Shell
-│   └── layouts/           # Dashboard Shells
-└── static/
-    ├── css/
-    │   └── main.css       # Full Responsive Design System
-    └── js/
-        └── main.js        # Core Interaction Logic
-```
-
-## SaaS Platform Tiers
-
-The system is designed for multi-tenant scalability with three primary subscription tiers:
-
-- **Basic:** Core academic & attendance modules for small schools (Up to 200 students).
-- **Pro:** Adds Financial Engine, Paystack integration, and Automated Report Cards.
-- **Enterprise:** Full suite including Bulk Importers, QR ID Card Infrastructure, and Multi-campus support.
-
-## Security & Compliance
-
-### Ghana Data Protection Act (DPA)
-The platform is engineered to comply with the **Ghana Data Protection Act (Act 843)**:
-- **Privacy Mode:** Advanced masking of student/parent PII (Personally Identifiable Information) for non-administrative staff.
-- **Audit Trails:** Immutable logging of all sensitive actions (grade changes, fee deletions, user access).
-- **Data Isolation:** Strict multi-tenant partitioning ensures school data never leaks between instances.
+| Feature | Basic (₵1,000/yr) | Standard (₵2,500/yr) | Elite (₵6,000/yr) |
+|---------|-------------------|----------------------|-------------------|
+| **Enrollment/Attendance** | ✅ | ✅ | ✅ |
+| **Finance Engine** | ❌ | ✅ | ✅ |
+| **NaCCA Reports** | ❌ | ✅ | ✅ |
+| **Sasu AI 2.0 (Voice)** | ❌ | ❌ | ✅ |
+| **Predictive Analytics** | ❌ | ❌ | ✅ |
+| **Digital Market** | ❌ | ❌ | ✅ |
 
 ---
 
-Built for **NaCCA Excellence** - Modern, High-Performance, and Mobile-First.
+Built for **NaCCA Excellence** - Modern, High-Performance, and AI-First.
+© 2026 SmartSchool SaaS | Designed by Antigravity

@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(python -c ':*)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -n \"whatsapp\\\\|webhook\" /c/Users/DeLL/OneDrive/Documents/School/routes/*.py)",
+      "Bash(grep -n \"grading\\\\|50.*50\\\\|class.*exam\" /c/Users/DeLL/OneDrive/Documents/School/services/*.py)",
+      "Bash(grep -n \"DSAR\\\\|data.*subject\\\\|access.*request\\\\|export\" /c/Users/DeLL/OneDrive/Documents/School/routes/*.py)",
+      "Bash(grep -n \"brief\\\\|schedule\\\\|cron\\\\|celery\\\\|background\" /c/Users/DeLL/OneDrive/Documents/School/*.py)",
+      "Bash(grep -n \"cloudinary\\\\|CLOUDINARY\" /c/Users/DeLL/OneDrive/Documents/School/*.py /c/Users/DeLL/OneDrive/Documents/School/routes/*.py)",
+      "Bash(grep -n \"dashboard.html\\\\|bottom.*nav\\\\|mobile\" /c/Users/DeLL/OneDrive/Documents/School/templates/layouts/*.html)",
+      "Bash(grep -n \"brief\\\\|report.*schedule\\\\|whatsapp.*brief\\\\|headteacher\" /c/Users/DeLL/OneDrive/Documents/School/services/*.py)",
+      "Bash(flask db:*)",
+      "Bash(python -m flask db migrate -m \"Add totp_secret and totp_enabled to users\")",
+      "Bash(pip install:*)",
+      "Bash(python -m flask db migrate -m \"Add totp fields to users\")",
+      "Bash(python -c \"import flask_apscheduler; print\\('ok'\\)\")",
+      "Bash(where python:*)",
+      "Bash(C:\\\\Users\\\\DeLL\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe -m pip install pyotp APScheduler Flask-APScheduler Flask-Migrate)",
+      "Bash(pip3 install:*)",
+      "Bash(\"/c/Users/DeLL/AppData/Local/Python/pythoncore-3.14-64/python.exe\" -m flask db migrate -m \"Add totp fields to users\")",
+      "Bash(\"/c/Users/DeLL/AppData/Local/Python/pythoncore-3.14-64/python.exe\" -m flask db init)",
+      "Bash(\"/c/Users/DeLL/AppData/Local/Python/pythoncore-3.14-64/python.exe\" -m flask db upgrade)"
+    ]
+  }
+}

@@ -1,13 +1,10 @@
 /**
  * NaCCA School Management System
- * "Sasu Labs" Design System
- * 
- * Color Palette:
- * - Background: Deep Charcoal (#0F172A) to Slate (#1E293B)
- * - Accent: Electric Indigo (#4F46E5 / #6366F1)
- * - Success: Emerald (#10B981)
- * - Warning: Amber (#F59E0B)
- * - Error: Rose (#EF4444)
+ * "Sasu Labs" Design System — Light Theme
+ *
+ * Primary: Electric Indigo (#4F46E5)
+ * Background: Clean White / Slate-50
+ * Surface: White cards on light grey canvas
  */
 
 /* ============================================
@@ -94,6 +91,17 @@
     /* Layout */
     --sidebar-width: 260px;
     --header-height: 64px;
+
+    /* ── Semantic Theme Tokens (Light Theme Defaults) ── */
+    --bg-primary:    #F8FAFC;
+    --bg-card:       #FFFFFF;
+    --bg-secondary:  #F1F5F9;
+    --text-primary:  #0F172A;
+    --text-secondary:#334155;
+    --text-muted:    #64748B;
+    --border-color:  #E2E8F0;
+    --sidebar-bg:    #FFFFFF;
+    --header-bg:     rgba(255, 255, 255, 0.9);
 }
 
 /* ============================================
@@ -117,8 +125,8 @@ body {
     font-family: var(--font-family);
     font-size: var(--font-size-base);
     line-height: 1.6;
-    color: var(--slate-100);
-    background-color: var(--slate-950);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
 }
 
 a {
@@ -246,7 +254,7 @@ img {
 .bg-error-500\/10 { background-color: rgba(239, 68, 68, 0.1); }
 
 /* Borders */
-.border { border: 1px solid var(--slate-800); }
+.border { border: 1px solid var(--border-color); }
 .border-0 { border-width: 0px; }
 .border-white\/10 { border: 1px solid rgba(255, 255, 255, 0.1); }
 .border-primary-500 { border-color: var(--primary-500); }
@@ -322,17 +330,18 @@ img {
     left: 0;
     width: var(--sidebar-width);
     height: 100vh;
-    background: var(--slate-900);
-    border-right: 1px solid var(--slate-800);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     z-index: 100;
     transition: transform var(--transition-base);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 }
 
 .sidebar-header {
     padding: var(--space-6);
-    border-bottom: 1px solid var(--slate-800);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-logo {
@@ -360,7 +369,7 @@ img {
 .sidebar-logo-text {
     font-size: var(--font-size-xl);
     font-weight: 700;
-    color: var(--slate-100);
+    color: var(--text-primary);
 }
 
 .sidebar-logo-text span {
@@ -383,7 +392,7 @@ img {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--slate-500);
+    color: var(--text-muted);
     padding: var(--space-2) var(--space-3);
     margin-bottom: var(--space-1);
 }
@@ -394,7 +403,7 @@ img {
     gap: var(--space-3);
     padding: var(--space-3) var(--space-3);
     border-radius: var(--radius-lg);
-    color: var(--slate-400);
+    color: var(--text-secondary);
     font-size: var(--font-size-sm);
     font-weight: 500;
     transition: all var(--transition-fast);
@@ -407,8 +416,8 @@ img {
 }
 
 .nav-item:hover {
-    color: var(--slate-100);
-    background: var(--slate-800);
+    color: var(--primary-600);
+    background: var(--bg-secondary);
 }
 
 .nav-item.active {
@@ -419,7 +428,7 @@ img {
 /* Sidebar Footer */
 .sidebar-footer {
     padding: var(--space-4);
-    border-top: 1px solid var(--slate-800);
+    border-top: 1px solid var(--border-color);
 }
 
 .sidebar-user {
@@ -451,7 +460,7 @@ img {
 .sidebar-user-name {
     font-size: var(--font-size-sm);
     font-weight: 600;
-    color: var(--slate-100);
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -459,7 +468,7 @@ img {
 
 .sidebar-user-role {
     font-size: var(--font-size-xs);
-    color: var(--slate-500);
+    color: var(--text-muted);
 }
 
 /* Main Content Area */
@@ -467,7 +476,7 @@ img {
     flex: 1;
     margin-left: var(--sidebar-width);
     min-height: 100vh;
-    background: var(--slate-950);
+    background: var(--bg-primary);
 }
 
 /* Header */
@@ -475,9 +484,9 @@ img {
     position: sticky;
     top: 0;
     height: var(--header-height);
-    background: rgba(15, 23, 42, 0.8);
+    background: var(--header-bg);
     backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--slate-800);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -497,13 +506,13 @@ img {
     height: 40px;
     background: transparent;
     border: none;
-    color: var(--slate-400);
+    color: var(--text-secondary);
     border-radius: var(--radius-lg);
 }
 
 .mobile-menu-btn:hover {
-    background: var(--slate-800);
-    color: var(--slate-100);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 /* Breadcrumb */
@@ -512,19 +521,19 @@ img {
     align-items: center;
     gap: var(--space-2);
     font-size: var(--font-size-sm);
-    color: var(--slate-400);
+    color: var(--text-secondary);
 }
 
 .breadcrumb a:hover {
-    color: var(--slate-100);
+    color: var(--text-primary);
 }
 
 .breadcrumb-separator {
-    color: var(--slate-600);
+    color: var(--text-muted);
 }
 
 .breadcrumb-current {
-    color: var(--slate-100);
+    color: var(--text-primary);
     font-weight: 500;
 }
 
@@ -555,10 +564,10 @@ img {
     width: 100%;
     height: 40px;
     padding: 0 var(--space-4) 0 var(--space-10);
-    background: var(--slate-800);
-    border: 1px solid var(--slate-700);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    color: var(--slate-100);
+    color: var(--text-primary);
     font-size: var(--font-size-sm);
     transition: all var(--transition-fast);
 }
@@ -588,7 +597,7 @@ img {
     justify-content: center;
     background: transparent;
     border: none;
-    color: var(--slate-400);
+    color: var(--text-secondary);
     border-radius: var(--radius-lg);
     transition: all var(--transition-fast);
 }
@@ -599,8 +608,8 @@ img {
 }
 
 .header-icon-btn:hover {
-    background: var(--slate-800);
-    color: var(--slate-100);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .notification-dot {
@@ -632,13 +641,13 @@ img {
 .page-title {
     font-size: var(--font-size-2xl);
     font-weight: 700;
-    color: var(--slate-100);
+    color: var(--text-primary);
     margin-bottom: var(--space-1);
 }
 
 .page-subtitle {
     font-size: var(--font-size-base);
-    color: var(--slate-400);
+    color: var(--text-secondary);
 }
 
 /* ============================================
@@ -652,12 +661,13 @@ img {
 }
 
 .stat-card {
-    background: var(--slate-900);
-    border: 1px solid var(--slate-800);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
     padding: var(--space-5);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .stat-card::before {
@@ -726,23 +736,24 @@ img {
 .stat-value {
     font-size: var(--font-size-2xl);
     font-weight: 700;
-    color: var(--slate-100);
+    color: var(--text-primary);
     margin-bottom: var(--space-1);
 }
 
 .stat-label {
     font-size: var(--font-size-sm);
-    color: var(--slate-400);
+    color: var(--text-secondary);
 }
 
 /* ============================================
    CARDS
    ============================================ */
 .card {
-    background: var(--slate-900);
-    border: 1px solid var(--slate-800);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .card-header {
@@ -750,13 +761,13 @@ img {
     align-items: center;
     justify-content: space-between;
     padding: var(--space-5) var(--space-6);
-    border-bottom: 1px solid var(--slate-800);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .card-title {
     font-size: var(--font-size-lg);
     font-weight: 600;
-    color: var(--slate-100);
+    color: var(--text-primary);
 }
 
 .card-body {
@@ -765,8 +776,8 @@ img {
 
 .card-footer {
     padding: var(--space-4) var(--space-6);
-    border-top: 1px solid var(--slate-800);
-    background: var(--slate-950);
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
 }
 
 /* ============================================
@@ -813,15 +824,15 @@ img {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--slate-400);
-    background: var(--slate-950);
-    border-bottom: 1px solid var(--slate-800);
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .table td {
     font-size: var(--font-size-sm);
-    color: var(--slate-300);
-    border-bottom: 1px solid var(--slate-800);
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .table tbody tr {
@@ -829,7 +840,7 @@ img {
 }
 
 .table tbody tr:hover {
-    background: var(--slate-800);
+    background: var(--bg-secondary);
 }
 
 .table tbody tr:last-child td {
@@ -887,23 +898,23 @@ img {
 }
 
 .btn-secondary {
-    background: var(--slate-800);
-    color: var(--slate-100);
-    border: 1px solid var(--slate-700);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-    background: var(--slate-700);
+    background: var(--slate-200);
 }
 
 .btn-ghost {
     background: transparent;
-    color: var(--slate-400);
+    color: var(--text-secondary);
 }
 
 .btn-ghost:hover {
-    background: var(--slate-800);
-    color: var(--slate-100);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .btn-success {
@@ -926,7 +937,7 @@ img {
     display: block;
     font-size: var(--font-size-sm);
     font-weight: 500;
-    color: var(--slate-300);
+    color: var(--text-secondary);
     margin-bottom: var(--space-2);
 }
 
@@ -936,10 +947,10 @@ img {
     width: 100%;
     padding: 0 var(--space-4);
     height: 44px;
-    background: var(--slate-800);
-    border: 1px solid var(--slate-700);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    color: var(--slate-100);
+    color: var(--text-primary);
     font-size: var(--font-size-sm);
     transition: all var(--transition-fast);
 }
@@ -1005,8 +1016,8 @@ img {
 }
 
 .badge-neutral {
-    background: var(--slate-800);
-    color: var(--slate-300);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
 }
 
 /* ============================================
@@ -1345,7 +1356,7 @@ img {
     .score-table-wrap table tbody td:first-child {
         position: sticky;
         left: 0;
-        background: var(--slate-900);
+        background: var(--bg-card);
         z-index: 1;
     }
 
@@ -1377,7 +1388,7 @@ img {
     bottom: var(--space-4);
     left: 50%;
     transform: translateX(-50%);
-    background: var(--slate-800);
+    background: var(--bg-card);
     border: 1px solid var(--primary-500);
     border-radius: var(--radius-xl);
     padding: var(--space-4) var(--space-6);
@@ -1391,7 +1402,7 @@ img {
 }
 #pwa-install-banner p {
     font-size: var(--font-size-sm);
-    color: var(--slate-200);
+    color: var(--text-secondary);
     margin: 0;
 }
 #pwa-install-banner .btn-xs {
@@ -1423,7 +1434,7 @@ img {
 .module-toggle input[type="checkbox"] { display: none; }
 .module-toggle-track {
     width: 36px; height: 20px;
-    background: var(--slate-700);
+    background: var(--slate-300);
     border-radius: var(--radius-full);
     transition: background var(--transition-fast);
     position: relative;
@@ -1442,7 +1453,6 @@ img {
 }
 .module-toggle input:checked + .module-toggle-track::after {
     transform: translateX(16px);
-}
 }
 /* ============================================
    RESPONSIVE FIXES & MOBILE ENHANCEMENTS
@@ -1525,7 +1535,6 @@ input[type="email"], input[type="password"], input[type="search"],
     backdrop-filter: blur(20px);
     z-index: 500;
     padding: 0;
-    safe-area-inset-bottom: env(safe-area-inset-bottom);
     padding-bottom: env(safe-area-inset-bottom, 0);
 }
 .parent-bottom-nav-inner {

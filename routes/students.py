@@ -15,6 +15,40 @@ from utils.decorators import admin_required, staff_required
 students_bp = Blueprint('students', __name__, url_prefix='/students')
 
 
+@students_bp.route('/<int:id>/upload-photo', methods=['POST'])
+@admin_required
+def upload_photo(id):
+    """Upload / replace a student's profile photo."""
+    student = Student.query.get_or_404(id)
+    if student.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('students.index'))
+
+    file = request.files.get('photo')
+    if not file or file.filename == '':
+        flash('No file selected.', 'error')
+        return redirect(url_for('students.view', id=id))
+
+    from utils.uploads import save_upload, delete_upload, allowed_image
+    if not allowed_image(file.filename):
+        flash('Only image files are allowed (PNG, JPG, GIF, WEBP).', 'error')
+        return redirect(url_for('students.view', id=id))
+
+    # Remove old photo if stored on this server
+    if student.photo_url and student.photo_url.startswith('/uploads/'):
+        delete_upload(student.photo_url)
+
+    url = save_upload(file, subfolder='students')
+    if not url:
+        flash('Upload failed.', 'error')
+        return redirect(url_for('students.view', id=id))
+
+    student.photo_url = url
+    db.session.commit()
+    flash('Photo updated.', 'success')
+    return redirect(url_for('students.view', id=id))
+
+
 @students_bp.route('/class/<int:class_id>/generate-ids')
 @admin_required
 def generate_ids(class_id):

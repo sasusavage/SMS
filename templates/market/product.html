@@ -1,0 +1,114 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ product.name }} - School Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-10">
+        <div class="col-lg-6">
+            <div class="product-img-large rounded-5 glass flex items-center justify-center p-20 border-2 border-dashed border-slate-200">
+                <i class="fas fa-shopping-bag text-8xl text-indigo-500 opacity-20"></i>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-6">
+                    <li class="breadcrumb-item"><a href="{{ url_for('market.browse') }}" class="text-indigo-500 font-bold decoration-none">Marketplace</a></li>
+                    <li class="breadcrumb-item active">{{ product.name }}</li>
+                </ol>
+            </nav>
+            
+            <span class="badge bg-soft-primary rounded-pill mb-4 px-4 py-2">{{ product.category.name }}</span>
+            <h1 class="h1 font-extrabold text-slate-900 mb-4">{{ product.name }}</h1>
+            <div class="mb-4">
+                <h3 class="h2 text-indigo-600 font-bold">GHS {{ product.base_price }}</h3>
+            </div>
+            <p class="text-slate-600 text-lg mb-8 leading-relaxed">{{ product.description }}</p>
+            
+            <div class="p-8 bg-slate-50 rounded-4 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-sm font-bold text-slate-500">QUANTITY</span>
+                    <div class="flex items-center gap-4 bg-white px-4 py-2 rounded-pill border shadow-sm">
+                        <button onclick="changeQty(-1)" class="btn btn-link text-slate-400 p-0 hover:text-indigo-600"><i class="fas fa-minus"></i></button>
+                        <span id="qty-val" class="font-bold text-lg min-w-8 text-center">1</span>
+                        <button onclick="changeQty(1)" class="btn btn-link text-slate-400 p-0 hover:text-indigo-600"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center small text-slate-400 mb-10">
+                    <span>In Stock: <span class="fw-bold">{{ product.stock_quantity }} units</span></span>
+                    <span>Ships: Instant digital order + Physical Pickup</span>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <button id="add-to-cart-btn" onclick="createOrder()" class="btn btn-primary w-full py-5 rounded-pill font-extrabold tracking-widest text-lg shadow-xl shadow-indigo-600/30">
+                            PROCEED TO PAYSTACK SECURE CHECKOUT
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-light border-0 shadow-sm rounded-4 flex items-center gap-4 p-5">
+                <div class="w-12 h-12 bg-emerald-500/10 text-emerald-600 rounded-circle flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-xl"></i>
+                </div>
+                <div class="small">
+                    <span class="d-block fw-bold mb-1">Institutional Guarantee</span>
+                    <span class="text-slate-500">Official item provided by {{ current_user.school.name }}. Securely processed via Paystack.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let qty = 1;
+const stock = {{ product.stock_quantity }};
+
+function changeQty(n) {
+    qty = Math.max(1, Math.min(stock, qty + n));
+    document.getElementById('qty-val').innerText = qty;
+}
+
+function createOrder() {
+    const btn = document.getElementById('add-to-cart-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> GENERATING PAYSTACK LINK...';
+
+    fetch('{{ url_for("market.create_order") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            items: [{
+                product_id: {{ product.id }},
+                quantity: qty
+            }]
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.status === 'success') {
+            window.location.href = data.payment_url;
+        } else {
+            alert(data.message);
+            btn.disabled = false;
+            btn.innerHTML = 'PROCEED TO PAYSTACK SECURE CHECKOUT';
+        }
+    })
+    .catch(e => {
+        alert("Institutional Network Error. Please try again.");
+        btn.disabled = false;
+        btn.innerHTML = 'PROCEED TO PAYSTACK SECURE CHECKOUT';
+    });
+}
+</script>
+
+<style>
+.product-img-large { height: 500px; background: white; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.05); }
+.bg-soft-primary { background-color: rgba(59, 130, 246, 0.08) !important; color: #1d4ed8; }
+.p-20 { padding: 5rem; }
+</style>
+{% endblock %}

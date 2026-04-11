@@ -11,6 +11,39 @@ from utils.decorators import admin_required
 staff_bp = Blueprint('staff', __name__, url_prefix='/staff')
 
 
+@staff_bp.route('/<int:id>/upload-photo', methods=['POST'])
+@admin_required
+def upload_photo(id):
+    """Upload / replace a staff member's profile photo."""
+    staff = Staff.query.get_or_404(id)
+    if staff.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('staff.index'))
+
+    file = request.files.get('photo')
+    if not file or file.filename == '':
+        flash('No file selected.', 'error')
+        return redirect(url_for('staff.view', id=id))
+
+    from utils.uploads import save_upload, delete_upload, allowed_image
+    if not allowed_image(file.filename):
+        flash('Only image files are allowed (PNG, JPG, GIF, WEBP).', 'error')
+        return redirect(url_for('staff.view', id=id))
+
+    if staff.photo_url and staff.photo_url.startswith('/uploads/'):
+        delete_upload(staff.photo_url)
+
+    url = save_upload(file, subfolder='staff')
+    if not url:
+        flash('Upload failed.', 'error')
+        return redirect(url_for('staff.view', id=id))
+
+    staff.photo_url = url
+    db.session.commit()
+    flash('Photo updated.', 'success')
+    return redirect(url_for('staff.view', id=id))
+
+
 @staff_bp.route('/')
 @login_required
 def index():

@@ -40,3 +40,11 @@ WTForms==3.1.1
 groq==0.4.2
 openai==1.6.1
 requests==2.31.0
+
+# 2FA (TOTP - Google Authenticator compatible)
+pyotp==2.9.0
+qrcode[pil]==7.4.2
+
+# Scheduled Tasks (Weekly PDF Briefings)
+APScheduler==3.10.4
+Flask-APScheduler==1.13.1

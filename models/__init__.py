@@ -290,7 +290,11 @@ class User(db.Model, UserMixin, TimestampMixin):
     # Profile link - polymorphic
     staff_id = db.Column(db.Integer, db.ForeignKey('staff.id', ondelete='SET NULL'))
     parent_id = db.Column(db.Integer, db.ForeignKey('parents.id', ondelete='SET NULL'))
-    
+
+    # 2FA (TOTP — Google Authenticator compatible)
+    totp_secret  = db.Column(db.String(64))           # None = 2FA not set up
+    totp_enabled = db.Column(db.Boolean, default=False)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     

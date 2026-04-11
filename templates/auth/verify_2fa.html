@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Enter 2FA Code{% endblock %}
+{% block content %}
+<div style="max-width:400px;margin:4rem auto;padding:0 1rem;">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Two-Factor Verification</h2>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <p style="color:var(--text-secondary);font-size:var(--font-size-sm);">
+        Open your authenticator app and enter the 6-digit code.
+      </p>
+
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label class="form-label">Authentication Code</label>
+          <input type="text" name="token" class="form-input"
+                 inputmode="numeric" autocomplete="one-time-code"
+                 maxlength="6" placeholder="000000" required autofocus
+                 style="font-size:1.5rem;letter-spacing:.25em;text-align:center;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:.5rem;">
+          Verify
+        </button>
+      </form>
+
+      <a href="{{ url_for('auth.logout') }}"
+         style="text-align:center;font-size:var(--font-size-sm);color:var(--text-muted);">
+        Cancel and log out
+      </a>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

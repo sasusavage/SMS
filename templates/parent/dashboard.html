@@ -177,4 +177,13 @@
         });
     });
 </script>
+
+{# DSAR — Data Export footer link #}
+<div style="text-align:center;padding:2rem 1rem 4rem;font-size:var(--font-size-xs);color:var(--text-muted);">
+    Under the Ghana Data Protection Act you have the right to access your data.
+    <a href="{{ url_for('parent.data_export') }}"
+       style="color:var(--primary-600);text-decoration:underline;margin-left:.25rem;">
+        Download your data export
+    </a>
+</div>
 {% endblock %}

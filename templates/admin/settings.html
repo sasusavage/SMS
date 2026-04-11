@@ -114,6 +114,27 @@
             </button>
         </div>
     </form>
+
+    <!-- 2FA Card -->
+    <div class="card mt-8">
+        <div class="card-header">
+            <h3 class="card-title">Two-Factor Authentication</h3>
+            {% if current_user.totp_enabled %}
+            <span class="badge badge-success">Enabled</span>
+            {% else %}
+            <span class="badge badge-neutral">Disabled</span>
+            {% endif %}
+        </div>
+        <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <p style="color:var(--text-secondary);font-size:var(--font-size-sm);max-width:520px;">
+                Add an extra layer of security to your account. When enabled, you'll need
+                a 6-digit code from Google Authenticator on every login.
+            </p>
+            <a href="{{ url_for('auth.setup_2fa') }}" class="btn btn-secondary">
+                {% if current_user.totp_enabled %}Manage 2FA{% else %}Set Up 2FA{% endif %}
+            </a>
+        </div>
+    </div>
 </div>
 
 <style>

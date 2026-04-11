@@ -1,7 +1,7 @@
 """
 Parent Portal Routes - Read-only access for parents
 """
-from flask import Blueprint, render_template, g, flash, redirect, url_for
+from flask import Blueprint, render_template, g, flash, redirect, url_for, Response
 from flask_login import login_required, current_user
 
 from models import (
@@ -180,3 +180,92 @@ def notifications():
     db.session.commit()
     
     return render_template('parent/notifications.html', notifications=notifs)
+
+
+# =============================================================================
+# DSAR — Data Subject Access Request (Ghana Data Protection Act compliance)
+# =============================================================================
+@parent_bp.route('/data-export')
+@parent_required
+def data_export():
+    """
+    Generate a JSON export of everything the platform holds about this parent
+    and their children. Satisfies Ghana DPA 'right of access' requests.
+    """
+    import json
+    from datetime import date
+
+    parent = current_user.parent_profile
+    if not parent:
+        flash('Parent profile not found.', 'error')
+        return redirect(url_for('parent.dashboard'))
+
+    children = Student.query.filter_by(parent_id=parent.id).all()
+
+    def _date(d):
+        return d.isoformat() if d else None
+
+    payload = {
+        'export_generated_at': date.today().isoformat(),
+        'parent': {
+            'father_name':    parent.father_name,
+            'father_phone':   parent.father_phone,
+            'mother_name':    parent.mother_name,
+            'mother_phone':   parent.mother_phone,
+            'guardian_name':  parent.guardian_name,
+            'guardian_phone': parent.guardian_phone,
+            'address':        parent.address,
+            'account_email':  current_user.email,
+        },
+        'children': [],
+    }
+
+    for child in children:
+        assessments = Assessment.query.filter_by(student_id=child.id).all()
+        invoices    = FeeInvoice.query.filter_by(student_id=child.id).all()
+        attendance  = Attendance.query.filter_by(student_id=child.id).all()
+
+        payload['children'].append({
+            'name':           child.full_name,
+            'student_id':     child.student_id,
+            'date_of_birth':  _date(child.date_of_birth),
+            'gender':         child.gender.value if child.gender else None,
+            'nationality':    child.nationality,
+            'blood_group':    child.blood_group,
+            'allergies':      child.allergies,
+            'medical_conditions': child.medical_conditions,
+            'assessments': [
+                {
+                    'subject':     a.class_subject.subject.name if a.class_subject else None,
+                    'classwork':   float(a.classwork_score or 0),
+                    'homework':    float(a.homework_score or 0),
+                    'project':     float(a.project_score or 0),
+                    'exam':        float(a.exam_score or 0),
+                    'total':       float(a.total_score or 0),
+                }
+                for a in assessments
+            ],
+            'fee_invoices': [
+                {
+                    'invoice_number': inv.invoice_number,
+                    'total_amount':   float(inv.total_amount),
+                    'amount_paid':    float(inv.amount_paid),
+                    'balance':        float(inv.balance),
+                    'status':         inv.status.value if inv.status else None,
+                }
+                for inv in invoices
+            ],
+            'attendance_records': [
+                {'date': _date(att.date), 'status': att.status.value}
+                for att in attendance
+            ],
+        })
+
+    json_bytes = json.dumps(payload, indent=2, ensure_ascii=False).encode('utf-8')
+    return Response(
+        json_bytes,
+        mimetype='application/json',
+        headers={
+            'Content-Disposition': f'attachment; filename=my_data_export_{date.today().isoformat()}.json'
+        }
+    )

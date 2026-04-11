@@ -1,0 +1,72 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Order History - SmartSchool Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h2 mb-2 font-bold text-slate-800">My Institutional Orders</h1>
+            <p class="text-muted small">Tracking your purchases for uniform, books, and fees.</p>
+        </div>
+    </div>
+
+    <div class="card glass-order-card border-0 shadow-sm p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr class="text-slate-500 x-small uppercase tracking-widest border-b border-light">
+                        <th class="pb-3">ORDER ID</th>
+                        <th class="pb-3">DATE</th>
+                        <th class="pb-3">ITEMS</th>
+                        <th class="pb-3 text-end">TOTAL</th>
+                        <th class="pb-3">STATUS</th>
+                        <th class="pb-3 text-center">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-light">
+                    {% for order in orders %}
+                    <tr>
+                        <td class="py-4">
+                            <span class="font-mono text-xs fw-bold px-3 py-1 bg-slate-100 rounded-pill">#ORD-{{ order.id }}</span>
+                        </td>
+                        <td class="py-4 small fw-medium text-slate-600">{{ order.created_at.strftime('%d %b, %Y') }}</td>
+                        <td class="py-4 x-small text-slate-500">
+                            {% for item in order.items %}
+                            <div class="mb-1 fw-bold text-slate-700">{{ item.product.name }} (x{{ item.quantity }})</div>
+                            {% endfor %}
+                        </td>
+                        <td class="py-4 text-end fw-bold text-indigo-600">GHS {{ "{:,.2f}".format(order.total_amount|float) }}</td>
+                        <td class="py-4">
+                            <span class="badge rounded-pill text-[9px] uppercase tracking-widest px-3 py-1 
+                                {% if order.status.value == 'completed' %}bg-success-500/20 text-success-600 border border-success-500/20{% else %}bg-amber-500/10 text-amber-600 border border-amber-500/10{% endif %}">
+                                {{ order.status.value }}
+                            </span>
+                        </td>
+                        <td class="py-4 text-center">
+                            <button class="btn btn-outline-light btn-sm text-slate-500 p-2 hover:bg-slate-100 rounded-lg">
+                                <i class="fas fa-file-invoice text-xs"></i> RECEIPT
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-20 opacity-50">
+                            <i class="fas fa-receipt text-5xl mb-4 text-slate-300"></i>
+                            <p class="small">You haven't made any marketplace orders yet.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-order-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); border-radius: 1.5rem; }
+.bg-success-500/20 { background-color: rgba(34, 197, 94, 0.1) !important; color: #166534; }
+.bg-amber-500/10 { background-color: rgba(245, 158, 11, 0.1) !important; color: #92400e; }
+.x-small { font-size: 0.7rem; }
+</style>
+{% endblock %}

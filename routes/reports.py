@@ -7,7 +7,6 @@ from flask_login import login_required, current_user
 from services.report_service import ReportService
 from models import Student, ClassEnrollment, Term
 import os
-from pypdf import PdfWriter
 
 reports_bp = Blueprint('reports', __name__, url_prefix='/reports')
 from models import Class, Term, AcademicYear, db
@@ -60,6 +59,7 @@ def bulk_generate_reports(class_id, term_id):
             flash('No students found in this class.', 'warning')
             return redirect(request.referrer)
         
+        from pypdf import PdfWriter
         writer = PdfWriter()
         pdf_paths = []
         

@@ -10,7 +10,7 @@ from models import (
     db, Student, Parent, Class, ClassEnrollment, AcademicYear,
     StudentStatus, Gender, User, UserRole, School
 )
-from app import admin_required, staff_required
+from utils.decorators import admin_required, staff_required
 
 students_bp = Blueprint('students', __name__, url_prefix='/students')
 
@@ -22,6 +22,9 @@ def generate_ids(class_id):
     school_id = current_user.school_id
     school = School.query.get(school_id)
     class_obj = Class.query.get_or_404(class_id)
+    if class_obj.school_id != school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('classes.index'))
     
     # Students in class
     if not g.current_academic_year:
@@ -235,8 +238,18 @@ def edit(id):
 def enroll(id):
     """Enroll student in a class."""
     student = Student.query.get_or_404(id)
-    
+    if student.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('students.index'))
+
     class_id = request.form.get('class_id', type=int)
+
+    # Validate class belongs to same school
+    if class_id:
+        target_class = Class.query.get(class_id)
+        if not target_class or target_class.school_id != current_user.school_id:
+            flash('Invalid class selection.', 'error')
+            return redirect(url_for('students.view', id=id))
     
     if not class_id or not g.current_academic_year:
         flash('Invalid enrollment request.', 'error')
@@ -270,7 +283,10 @@ def enroll(id):
 def update_status(id):
     """Update student status."""
     student = Student.query.get_or_404(id)
-    
+    if student.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('students.index'))
+
     new_status = request.form.get('status')
     if new_status:
         student.status = StudentStatus(new_status)

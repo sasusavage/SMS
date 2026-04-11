@@ -8,7 +8,7 @@ from models import (
     db, UserRole, Student, Parent, ClassEnrollment, Assessment, 
     TerminalReport, FeeInvoice, Attendance, Term
 )
-from app import parent_required
+from utils.decorators import parent_required
 
 parent_bp = Blueprint('parent', __name__, url_prefix='/parent')
 

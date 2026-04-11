@@ -1,137 +1,322 @@
 {% extends "layouts/dashboard.html" %}
+{% block title %}SaaS Control Center | SmartSchool{% endblock %}
 
-{% block title %}SaaS Control Center | NaCCA SMS{% endblock %}
+{% block breadcrumb %}
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <span class="breadcrumb-current">SaaS Control Center</span>
+</nav>
+{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div class="dashboard-header flex justify-between items-center mb-8">
-        <div>
-            <h1 class="text-3xl font-bold text-white tracking-tight">SaaS Control Center</h1>
-            <p class="text-slate-400">Platform-wide health and revenue monitoring.</p>
+
+{# ── PAGE HEADER ─────────────────────────────────────────────────────────── #}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">SaaS Control Center</h1>
+        <p class="page-subtitle">Platform-wide governance, revenue, and AI telemetry.</p>
+    </div>
+    <div class="flex gap-3 items-center flex-wrap">
+        <div class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+             style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:var(--success-500);">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--success-500);
+                         animation:pulse 2s infinite;display:inline-block;"></span>
+            SYSTEM {{ stats.system_health }}
         </div>
-        <div class="flex gap-4">
-            <div class="px-4 py-2 bg-success-500/10 border border-success-500/20 rounded-xl text-success-400 flex items-center gap-2 text-sm font-bold">
-                <div class="w-2 h-2 rounded-full bg-success-500 animate-pulse"></div>
-                SYSTEM HEALTH: {{ stats.system_health }}
-            </div>
+        <button onclick="openModal('onboardModal')" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Onboard School
+        </button>
+    </div>
+</div>
+
+{# ── KPI STAT CARDS ──────────────────────────────────────────────────────── #}
+<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:var(--space-8);">
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
         </div>
+        <div class="stat-value">{{ stats.total_schools }}</div>
+        <div class="stat-label">Active Schools</div>
     </div>
 
-    <!-- Global Metrics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="glass-card p-6 border-l-4 border-primary-500">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Schools</p>
-            <h3 class="text-3xl font-bold text-white">{{ stats.total_schools }}</h3>
-            <p class="text-xs text-slate-400 mt-2"><i class="fas fa-plus mr-1"></i> 2 newly added this month</p>
+    <div class="stat-card success">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
         </div>
-        <div class="glass-card p-6 border-l-4 border-secondary-500">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Active Students</p>
-            <h3 class="text-3xl font-bold text-white">{{ stats.active_students }}</h3>
-            <p class="text-xs text-slate-400 mt-2">Across all school instances</p>
-        </div>
-        <div class="glass-card p-6 border-l-4 border-accent-500">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Platform Revenue</p>
-            <h3 class="text-3xl font-bold text-white">GHS {{ "{:,.2f}".format(stats.platform_total_revenue) }}</h3>
-            <p class="text-xs text-success-400 mt-2"><i class="fas fa-chart-line mr-1"></i> +12% from last term</p>
-        </div>
-        <div class="glass-card p-6 border-l-4 border-error-500">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">SMS Credits Left</p>
-            <h3 class="text-3xl font-bold text-white">{{ stats.remaining_sms_credits }}</h3>
-            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
-                <div class="bg-error-500 h-full" style="width: 45%;"></div>
-            </div>
-        </div>
+        <div class="stat-value">{{ "{:,}".format(stats.active_students) }}</div>
+        <div class="stat-label">Active Students</div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- SaaS School Governance (NEW) -->
-        <div class="lg:col-span-2 glass-card p-10 border-l-4 border-primary-500 bg-gradient-to-br from-slate-900 to-primary-950/20">
-            <h3 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-                <i class="fas fa-layer-group text-primary-400"></i> SaaS School Governance
+    <div class="stat-card warning">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="stat-value">GHS {{ "{:,.0f}".format(stats.platform_total_revenue) }}</div>
+        <div class="stat-label">Platform Revenue</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="stat-value">{{ "{:,}".format(stats.ai_tokens_today) }}</div>
+        <div class="stat-label">AI Tokens Today</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 13.7 19.79 19.79 0 0 1 1.14 5.07 2 2 0 0 1 3.11 3h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 10.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 18.92z"/></svg>
+        </div>
+        <div class="stat-value">{{ "{:,}".format(stats.remaining_sms_credits) }}</div>
+        <div class="stat-label">SMS Credits Left</div>
+    </div>
+</div>
+
+{# ── MAIN GRID ────────────────────────────────────────────────────────────── #}
+<div class="grid gap-6" style="grid-template-columns:1fr 340px;">
+
+    {# LEFT — School Governance Table #}
+    <div class="card" style="overflow:hidden;">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:middle;"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                School Governance
             </h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="text-slate-500 text-[10px] uppercase tracking-widest border-b border-white/5">
-                            <th class="pb-4">School Profile</th>
-                            <th class="pb-4">AI</th>
-                            <th class="pb-4">Elite AI</th>
-                            <th class="pb-4">Market</th>
-                            <th class="pb-4">PWA</th>
-                            <th class="pb-4">Voice AI</th>
-                            <th class="pb-4">SMS</th>
-                            <th class="pb-4">Finance</th>
-                            <th class="pb-4">Status</th>
-                            <th class="pb-4">Control</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/5">
-                        {% for sch in schools_full %}
-                        <tr class="group hover:bg-white/5 transition-colors">
-                            <td class="py-5">
-                                <h4 class="text-sm font-bold text-white">{{ sch.name }}</h4>
-                                <p class="text-[10px] text-slate-500">{{ sch.email }}</p>
-                            </td>
-                            <td class="py-5">
-                                <i class="fas {% if sch.module_config.is_ai_enabled %}fa-check-circle text-success-500{% else %}fa-minus-circle text-slate-700{% endif %}"></i>
-                            </td>
-                            <td class="py-5">
-                                <i class="fas {% if sch.module_config.is_predictive_ai_enabled %}fa-check-circle text-primary-500{% else %}fa-minus-circle text-slate-700{% endif %}"></i>
-                            </td>
-                            <td class="py-5">
-                                <i class="fas {% if sch.module_config.is_marketplace_enabled %}fa-check-circle text-accent-500{% else %}fa-minus-circle text-slate-700{% endif %}"></i>
-                            </td>
-                            <td class="py-5">
-                                <i class="fas {% if sch.module_config.is_pwa_enabled %}fa-check-circle text-primary-500{% else %}fa-minus-circle text-slate-700{% endif %}"></i>
-                            </td>
-                            <td class="py-5">
-                                <i class="fas {% if sch.module_config.is_voice_ai_enabled %}fa-check-circle text-accent-500{% else %}fa-minus-circle text-slate-700{% endif %}"></i>
-                            </td>
-                            <td class="py-5">
-                                <i class="fas {% if sch.module_config.is_sms_enabled %}fa-check-circle text-success-500{% else %}fa-minus-circle text-slate-700{% endif %}"></i>
-                            </td>
-                            <td class="py-5">
-                                <i class="fas {% if sch.module_config.is_finance_enabled %}fa-check-circle text-success-500{% else %}fa-minus-circle text-slate-700{% endif %}"></i>
-                            </td>
-                            <td class="py-5">
-                                <span class="px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest 
-                                    {% if sch.is_account_suspended %}bg-error-500/20 text-error-400{% else %}bg-success-500/20 text-success-400{% endif %}">
-                                    {{ 'Suspended' if sch.is_account_suspended else 'Active' }}
-                                </span>
-                            </td>
-                            <td class="py-5">
-                                <button class="px-4 py-2 bg-slate-800 rounded-lg text-[10px] font-bold hover:bg-slate-700 transition-all">MANAGE</button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <span class="badge badge-primary">{{ schools_full|length }} tenants</span>
         </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>School</th>
+                        <th style="text-align:center;">AI</th>
+                        <th style="text-align:center;">Predict</th>
+                        <th style="text-align:center;">Market</th>
+                        <th style="text-align:center;">PWA</th>
+                        <th>Status</th>
+                        <th style="text-align:center;">Kill-Switch</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sch in schools_full %}
+                    {% set mc = sch.module_config %}
+                    <tr class="group">
+                        <td>
+                            <div style="font-weight:600;color:var(--slate-100);">{{ sch.name }}</div>
+                            <div style="font-size:var(--font-size-xs);color:var(--slate-500);">{{ sch.email }}</div>
+                        </td>
 
-        <div class="lg:col-span-1 glass-card p-8 bg-gradient-to-br from-slate-900 to-primary-950/20 border-primary-500/30">
-            <h3 class="text-xl font-bold text-white mb-6">AI Credit Manager</h3>
-            <div class="space-y-6">
-                {% for sname, tokens in ai_usage %}
-                <div class="p-4 rounded-xl bg-white/5 border border-white/5">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold text-slate-300">{{ sname }}</span>
-                        <span class="text-[10px] text-primary-400 font-mono">{{ tokens }} tokens</span>
+                        {# Module toggles — CSRF-safe fetch calls #}
+                        {% for field, label in [
+                            ('is_ai_enabled','AI'),
+                            ('is_predictive_ai_enabled','Predict'),
+                            ('is_marketplace_enabled','Market'),
+                            ('is_pwa_enabled','PWA')
+                        ] %}
+                        <td style="text-align:center;">
+                            {% set is_on = mc and mc[field] if mc else false %}
+                            <button
+                                onclick="toggleModule({{ sch.id }},'{{ field }}',this)"
+                                title="Toggle {{ label }}"
+                                style="width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;
+                                       position:relative;transition:background .2s;outline:none;
+                                       background:{{ 'var(--primary-500)' if (mc and mc|attr(field)) else 'var(--slate-700)' }};"
+                                data-state="{{ '1' if (mc and mc|attr(field)) else '0' }}">
+                                <span style="position:absolute;top:2px;width:16px;height:16px;
+                                             border-radius:50%;background:#fff;transition:left .2s;
+                                             left:{{ '18px' if (mc and mc|attr(field)) else '2px' }};"></span>
+                            </button>
+                        </td>
+                        {% endfor %}
+
+                        <td>
+                            <span class="badge {% if sch.is_account_suspended %}badge-error{% else %}badge-success{% endif %}">
+                                <span style="width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px;
+                                             background:{{ 'var(--error-500)' if sch.is_account_suspended else 'var(--success-500)' }};"></span>
+                                {{ 'Suspended' if sch.is_account_suspended else 'Active' }}
+                            </span>
+                        </td>
+
+                        <td style="text-align:center;">
+                            <form action="{{ url_for('admin.suspend_school', school_id=sch.id) }}" method="POST"
+                                  onsubmit="return confirm('{{ 'Reinstate' if sch.is_account_suspended else 'Suspend' }} {{ sch.name }}?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="reason" value="SaaS Admin Override">
+                                <button type="submit"
+                                    class="btn btn-ghost btn-sm"
+                                    style="color:{{ 'var(--success-500)' if sch.is_account_suspended else 'var(--error-500)' }};">
+                                    {% if sch.is_account_suspended %}
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                                    {% else %}
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    {% endif %}
+                                    {{ 'Reinstate' if sch.is_account_suspended else 'Suspend' }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:var(--space-10);color:var(--slate-500);">
+                            No schools onboarded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# RIGHT — AI Credit Manager + Quick Links #}
+    <div class="flex flex-col gap-4">
+
+        {# AI Usage #}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">AI Credit Manager</h3>
+            </div>
+            <div class="card-body">
+                {% for school_name, tokens in ai_usage %}
+                <div style="margin-bottom:var(--space-4);">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-1);
+                                font-size:var(--font-size-xs);color:var(--slate-400);">
+                        <span>{{ school_name[:24] }}</span>
+                        <span>{{ "{:,}".format(tokens or 0) }} tok</span>
                     </div>
-                    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                        {% set used_pct = (tokens / 10) if tokens < 1000 else 100 %}
-                        <div class="bg-primary-500 h-full" style="width: {{ used_pct }}%;"></div>
+                    {% set total_known = stats.ai_tokens_today if stats.ai_tokens_today > 0 else 1 %}
+                    {% set pct = [(tokens or 0) / total_known * 100, 100] | min | round(0) %}
+                    <div style="height:6px;background:var(--slate-800);border-radius:9999px;overflow:hidden;">
+                        <div style="height:100%;width:{{ pct }}%;
+                                    background:linear-gradient(90deg,var(--primary-500),var(--primary-400));
+                                    border-radius:9999px;"></div>
                     </div>
                 </div>
                 {% else %}
-                <p class="text-slate-500 text-sm text-center py-4">No AI usage recorded yet.</p>
+                <p style="color:var(--slate-500);font-size:var(--font-size-sm);">No AI activity recorded.</p>
                 {% endfor %}
+            </div>
+        </div>
 
-                <a href="{{ url_for('admin.ai_conversations') }}" class="btn btn-primary w-full py-3 text-xs font-bold tracking-widest">
-                    AUDIT ALL CHATS
+        {# Quick Links #}
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Quick Actions</h3></div>
+            <div class="card-body flex flex-col gap-2">
+                <a href="{{ url_for('saas_admin.audit_logs') }}" class="btn btn-secondary" style="justify-content:center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Audit Logs
+                </a>
+                <a href="{{ url_for('saas_admin.ai_conversations') }}" class="btn btn-secondary" style="justify-content:center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    AI Conversations
+                </a>
+                <a href="{{ url_for('dashboard.predictive_dashboard') }}" class="btn btn-secondary" style="justify-content:center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    Predictive Engine
                 </a>
             </div>
         </div>
     </div>
 </div>
+
+{# ── ONBOARD MODAL (pure CSS/JS — no Bootstrap) ──────────────────────────── #}
+<div id="onboardModal" class="modal-overlay" onclick="if(event.target===this)closeModal('onboardModal')"
+     role="dialog" aria-modal="true" aria-labelledby="onboardTitle" style="display:none;">
+    <div class="modal-box" style="max-width:480px;width:92vw;">
+        <div class="modal-header">
+            <h2 id="onboardTitle" class="card-title">Deploy New School Instance</h2>
+            <button onclick="closeModal('onboardModal')" class="btn btn-ghost btn-sm" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form action="{{ url_for('saas_admin.onboard_school') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="modal-body flex flex-col gap-4">
+                <div class="form-group">
+                    <label class="form-label">School Name <span style="color:var(--error-500);">*</span></label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Accra Elite Academy" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Admin Email <span style="color:var(--error-500);">*</span></label>
+                    <input type="email" name="email" class="form-control" placeholder="admin@school.edu.gh" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">School Type</label>
+                    <select name="school_type" class="form-select">
+                        <option value="Private">Private</option>
+                        <option value="Public">Public</option>
+                        <option value="International">International</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('onboardModal')" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Initiate Onboarding</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// ── Modal helpers ──────────────────────────────────────────────────────────
+function openModal(id) {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+function closeModal(id) {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; document.body.style.overflow = ''; }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal('onboardModal'); });
+
+// ── Module kill-switch toggle (CSRF-safe) ─────────────────────────────────
+function toggleModule(schoolId, field, btn) {
+    const isOn = btn.dataset.state === '1';
+    const newState = !isOn;
+
+    fetch(`/saas-admin/toggle-module/${schoolId}/${field}`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            btn.dataset.state = newState ? '1' : '0';
+            btn.style.background = newState ? 'var(--primary-500)' : 'var(--slate-700)';
+            btn.querySelector('span').style.left = newState ? '18px' : '2px';
+        }
+    })
+    .catch(() => { /* silent — page reload on next nav will fix */ });
+}
+</script>
+
+<style>
+/* ── Modal ────────────────────────────────────────────────────────────────── */
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(2, 6, 23, 0.7);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-box {
+    background: var(--slate-900);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 40px 80px rgba(0,0,0,.5);
+    animation: slideUp .25s ease;
+    overflow: hidden;
+}
+.modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--space-6) var(--space-6) 0;
+}
+.modal-body  { padding: var(--space-6); }
+.modal-footer {
+    display: flex; justify-content: flex-end; gap: var(--space-3);
+    padding: 0 var(--space-6) var(--space-6);
+}
+
+/* ── Toggle button span transition ───────────────────────────────────────── */
+button[data-state] span { transition: left .2s ease; }
+</style>
 {% endblock %}

@@ -10,8 +10,13 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 
+from dotenv import load_dotenv
+
 from config import config
 from models import db, User, UserRole, School, AcademicYear, Term
+
+# Load environment variables early
+load_dotenv()
 
 # Initialize extensions
 login_manager = LoginManager()
@@ -56,13 +61,18 @@ def create_app(config_name='default'):
     @app.before_request
     def before_request():
         if current_user.is_authenticated:
+            # Super Admin has no school context — skip school-scoped lookups
+            if current_user.role == UserRole.SUPER_ADMIN:
+                g.current_academic_year = None
+                g.current_term = None
+                return
+
             # Load school status
             from models import School
             school = School.query.get(current_user.school_id)
-            
+
             # Global Suspension Guard
             if school and school.is_account_suspended:
-                # Allow access to support and logout
                 allowed_endpoints = ['auth.logout', 'admin.support_contact']
                 if request.endpoint not in allowed_endpoints:
                     flash(f"Account Suspended: {school.suspension_reason}", "error")
@@ -73,7 +83,7 @@ def create_app(config_name='default'):
                 school_id=current_user.school_id,
                 is_current=True
             ).first()
-            
+
             if g.current_academic_year:
                 g.current_term = Term.query.filter_by(
                     academic_year_id=g.current_academic_year.id,
@@ -85,6 +95,7 @@ def create_app(config_name='default'):
     # Register blueprints
     from routes.auth import auth_bp
     from routes.dashboard import dashboard_bp
+    from routes.saas_admin import saas_admin_bp
     from routes.students import students_bp
     from routes.staff import staff_bp
     from routes.classes import classes_bp
@@ -97,9 +108,10 @@ def create_app(config_name='default'):
     from routes.api_ai import ai_bp
     from routes.market import market_bp
     from routes.migration import migration_bp
-    
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(saas_admin_bp)
     app.register_blueprint(students_bp)
     app.register_blueprint(staff_bp)
     app.register_blueprint(classes_bp)
@@ -141,90 +153,7 @@ def create_app(config_name='default'):
     return app
 
 
-# =============================================================================
-# RBAC DECORATORS
-# =============================================================================
-def get_user_home():
-    """Get the home URL for the current user based on their role."""
-    if current_user.role == UserRole.PARENT:
-        return url_for('parent.dashboard')
-    return url_for('dashboard.index')
-
-
-def role_required(*roles):
-    """Decorator to require specific roles."""
-    def decorator(f):
-        @wraps(f)
-        @login_required
-        def decorated_function(*args, **kwargs):
-            if current_user.role not in roles:
-                flash('You do not have permission to access this page.', 'error')
-                return redirect(get_user_home())
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
-
-
-def admin_required(f):
-    """Decorator to require admin roles."""
-    @wraps(f)
-    @login_required
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_admin():
-            flash('Administrator access required.', 'error')
-            return redirect(get_user_home())
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-def teacher_required(f):
-    """Decorator to require teacher or higher roles."""
-    @wraps(f)
-    @login_required
-    def decorated_function(*args, **kwargs):
-        allowed = [UserRole.SUPER_ADMIN, UserRole.HEADTEACHER, UserRole.ADMIN, UserRole.TEACHER]
-        if current_user.role not in allowed:
-            flash('Teacher access required.', 'error')
-            return redirect(get_user_home())
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-def accounts_required(f):
-    """Decorator to require accounts officer or admin roles."""
-    @wraps(f)
-    @login_required
-    def decorated_function(*args, **kwargs):
-        allowed = [UserRole.SUPER_ADMIN, UserRole.HEADTEACHER, UserRole.ADMIN, UserRole.ACCOUNTS_OFFICER]
-        if current_user.role not in allowed:
-            flash('Accounts access required.', 'error')
-            return redirect(get_user_home())
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-def parent_required(f):
-    """Decorator to require parent role."""
-    @wraps(f)
-    @login_required
-    def decorated_function(*args, **kwargs):
-        if current_user.role != UserRole.PARENT:
-            flash('Parent access required.', 'error')
-            return redirect(get_user_home())
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-def staff_required(f):
-    """Decorator to require any staff role (not parent)."""
-    @wraps(f)
-    @login_required
-    def decorated_function(*args, **kwargs):
-        if current_user.role == UserRole.PARENT:
-            flash('Staff access required.', 'error')
-            return redirect(url_for('parent.dashboard'))
-        return f(*args, **kwargs)
-    return decorated_function
+# decorators have been moved to utils/decorators.py to avoid circular imports
 
 
 # =============================================================================

@@ -17,7 +17,7 @@
                 {% endfor %}
             </select>
             <div class="px-4 py-2 bg-primary-500/10 border border-primary-500/20 rounded-xl text-primary-400 flex items-center gap-2 text-sm font-bold">
-                <i class="fas fa-eye"></i> LIVE MONITORING
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> LIVE MONITORING
             </div>
         </div>
     </div>
@@ -30,7 +30,11 @@
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-xs font-bold text-white">{{ session.phone_number }}</span>
                     {% if session.user_feedback %}
-                        <i class="fas {% if session.user_feedback == 'good' %}fa-thumbs-up text-success-500{% else %}fa-thumbs-down text-error-500{% endif %} text-[9px]"></i>
+                        {% if session.user_feedback == 'good' %}
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                        {% else %}
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+                        {% endif %}
                     {% endif %}
                     <span class="text-[10px] text-slate-500">{{ session.last_interaction.strftime('%H:%M') }}</span>
                 </div>
@@ -69,14 +73,14 @@
                 <div class="flex flex-col items-center py-6 border-t border-white/5 opacity-80 mt-8">
                     <div class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2
                         {% if active.user_feedback == 'good' %}bg-success-500/20 text-success-400{% else %}bg-error-500/20 text-error-400{% endif %}">
-                        <i class="fas {% if active.user_feedback == 'good' %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                        {% if active.user_feedback == 'good' %}&#10003;{% else %}&#10007;{% endif %}
                         User Rating: {{ active.user_feedback }}
                     </div>
                 </div>
                 {% endif %}
                 {% else %}
                 <div class="h-full flex flex-col items-center justify-center text-slate-600">
-                    <i class="fas fa-robot fa-3x mb-4 opacity-20"></i>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity:.2;display:block;margin:0 auto 1rem;"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
                     <p>Select a session to view transcript</p>
                 </div>
                 {% endif %}

@@ -203,9 +203,17 @@ class StudentService:
                 db.session.add(enrollment)
                 action = 'CREATE_ENROLLMENT'
                 
+            # Note: school_id not directly available here; caller should pass it if needed.
+            # Using student's school_id resolved at commit time via the student object.
+            student_obj = Student.query.get(student_id)
+            s_school_id = student_obj.school_id if student_obj else None
             StudentService._log_action(
-                user_id, action, 'class_enrollment', student_id, 
-                old_values={'class_id': old_class}, 
+                school_id=s_school_id,
+                user_id=user_id,
+                action=action,
+                entity_type='class_enrollment',
+                entity_id=student_id,
+                old_values={'class_id': old_class},
                 new_values={'class_id': class_id}
             )
             
@@ -250,7 +258,14 @@ class StudentService:
             new_user.set_password(password)
             db.session.add(new_user)
             
-            StudentService._log_action(user_id, 'CREATE_PARENT_ACCOUNT', 'user', None, new_values={'email': email})
+            StudentService._log_action(
+                school_id=school_id,
+                user_id=user_id,
+                action='CREATE_PARENT_ACCOUNT',
+                entity_type='user',
+                entity_id=None,
+                new_values={'email': email}
+            )
 
             db.session.commit()
             return True, None

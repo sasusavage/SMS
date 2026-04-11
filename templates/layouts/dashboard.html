@@ -18,17 +18,40 @@
     </div>
 
     <nav class="sidebar-nav">
-        {% set is_admin = current_user.role in [UserRole.SUPER_ADMIN, UserRole.HEADTEACHER, UserRole.ADMIN] %}
+        {% set is_super_admin = current_user.role == UserRole.SUPER_ADMIN %}
+        {% set is_school_admin = current_user.role in [UserRole.HEADTEACHER, UserRole.ADMIN] %}
+        {% set is_admin = is_super_admin or is_school_admin %}
         {% set is_teacher = current_user.role == UserRole.TEACHER %}
         {% set is_accounts = current_user.role == UserRole.ACCOUNTS_OFFICER %}
         {% set is_parent = current_user.role == UserRole.PARENT %}
 
+        {% if is_super_admin %}
+        {# ── SUPER ADMIN NAV (Platform Owner Only) ── #}
+        <div class="nav-section">
+            <div class="nav-section-title">Platform Control</div>
+            <a href="{{ url_for('saas_admin.dashboard') }}"
+                class="nav-item {% if 'saas_admin' in request.endpoint %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                <span>Control Center</span>
+            </a>
+            <a href="{{ url_for('saas_admin.audit_logs') }}"
+                class="nav-item {% if request.endpoint == 'saas_admin.audit_logs' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span>Audit Ledger</span>
+            </a>
+            <a href="{{ url_for('saas_admin.ai_conversations') }}"
+                class="nav-item {% if request.endpoint == 'saas_admin.ai_conversations' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>AI Conversations</span>
+            </a>
+        </div>
+        {% else %}
+        {# ── SCHOOL STAFF / PARENT NAV ── #}
         <!-- Main Navigation -->
         <div class="nav-section">
             <div class="nav-section-title">Overview</div>
 
             {% if is_parent %}
-            <!-- Parent Dashboard -->
             <a href="{{ url_for('parent.dashboard') }}"
                 class="nav-item {% if request.endpoint == 'parent.dashboard' %}active{% endif %}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -41,7 +64,6 @@
                 <span>My Dashboard</span>
             </a>
             {% else %}
-            <!-- Staff Dashboard -->
             <a href="{{ url_for('dashboard.index') }}"
                 class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -125,7 +147,7 @@
         <div class="nav-section {% if finance_locked %}opacity-50 grayscale{% endif %}">
             <div class="nav-section-title flex justify-between items-center">
                 <span>Finance</span>
-                {% if finance_locked %}<i class="fas fa-lock text-[10px]"></i>{% endif %}
+                {% if finance_locked %}<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>{% endif %}
             </div>
 
             <a href="{% if finance_locked %}#{% else %}{{ url_for('fees.invoices') }}{% endif %}"
@@ -167,7 +189,6 @@
         <!-- Reports (All Staff) -->
         <div class="nav-section">
             <div class="nav-section-title">Reports</div>
-
             <a href="{{ url_for('reports.index') }}"
                 class="nav-item {% if 'reports' in request.endpoint %}active{% endif %}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -181,35 +202,37 @@
                 <span>Reports</span>
             </a>
         </div>
-        </div>
         {% endif %}
 
         <!-- Elite Sections (Predictive & Market) -->
+        {% set predictive_on = module_config and module_config.is_predictive_ai_enabled %}
+        {% set marketplace_on = module_config and module_config.is_marketplace_enabled %}
+
         {% if not is_parent and current_user.role in [UserRole.SUPER_ADMIN, UserRole.HEADTEACHER, UserRole.ADMIN] %}
-        <div class="nav-section {% if not module_config.is_predictive_ai_enabled %}locked-premium{% endif %}">
+        <div class="nav-section {% if not predictive_on %}locked-premium{% endif %}">
             <div class="nav-section-title">Elite Intelligence</div>
-            <a href="{{ url_for('dashboard.predictive_dashboard') if module_config.is_predictive_ai_enabled else '#' }}"
+            <a href="{{ url_for('dashboard.predictive_dashboard') if predictive_on else '#' }}"
                 class="nav-item {% if request.endpoint == 'dashboard.predictive_dashboard' %}active{% endif %}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                 </svg>
                 <span>Early Warning System</span>
-                {% if not module_config.is_predictive_ai_enabled %}<span class="badge-premium">ELITE</span>{% endif %}
+                {% if not predictive_on %}<span class="badge-premium">ELITE</span>{% endif %}
             </a>
         </div>
         {% endif %}
 
-        <div class="nav-section {% if not module_config.is_marketplace_enabled %}locked-premium{% endif %}">
+        <div class="nav-section {% if not marketplace_on %}locked-premium{% endif %}">
             <div class="nav-section-title">Commerce</div>
-            <a href="{{ url_for('market.browse') if module_config.is_marketplace_enabled else '#' }}"
+            <a href="{{ url_for('market.browse') if marketplace_on else '#' }}"
                 class="nav-item {% if 'market' in request.endpoint %}active{% endif %}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
                 </svg>
                 <span>School Store</span>
-                {% if not module_config.is_marketplace_enabled %}<span class="badge-premium">ELITE</span>{% endif %}
+                {% if not marketplace_on %}<span class="badge-premium">ELITE</span>{% endif %}
             </a>
         </div>
 
@@ -227,6 +250,7 @@
             </a>
         </div>
         {% endif %}
+        {% endif %}{# end is_super_admin else #}
     </nav>
 
     <!-- Sidebar Footer - User Profile -->
@@ -354,6 +378,38 @@
         {% block content %}{% endblock %}
     </main>
 </div>
+
+{% if current_user.role == UserRole.PARENT %}
+{# Mobile Bottom Nav — only injected for parents #}
+<nav class="parent-bottom-nav" aria-label="Parent quick navigation">
+    <div class="parent-bottom-nav-inner">
+        <a href="{{ url_for('parent.dashboard') }}"
+           class="parent-bottom-nav-item {% if request.endpoint == 'parent.dashboard' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/>
+                <rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+            </svg>
+            Home
+        </a>
+        <a href="{{ url_for('parent.notifications') }}"
+           class="parent-bottom-nav-item {% if request.endpoint == 'parent.notifications' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Alerts
+        </a>
+        <a href="{{ url_for('market.browse') }}"
+           class="parent-bottom-nav-item {% if 'market' in request.endpoint %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                <path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            Store
+        </a>
+    </div>
+</nav>
+{% endif %}
 
 <script>
     function toggleSidebar() {

@@ -195,6 +195,7 @@ class Class(db.Model, TimestampMixin):
     
     __table_args__ = (
         db.UniqueConstraint('school_id', 'name', name='uq_school_class_name'),
+        db.Index('idx_class_school_active', 'school_id', 'is_active'),
     )
 
 
@@ -460,6 +461,11 @@ class Student(db.Model, TimestampMixin):
         ).first()
         return enrollment.class_ if enrollment else None
 
+    __table_args__ = (
+        db.Index('idx_student_school_status', 'school_id', 'status'),
+        db.Index('idx_student_school_parent', 'school_id', 'parent_id'),
+    )
+
 
 class ClassEnrollment(db.Model, TimestampMixin):
     """Student enrollment in classes per academic year."""
@@ -478,6 +484,7 @@ class ClassEnrollment(db.Model, TimestampMixin):
     __table_args__ = (
         # A student can only be in one class per academic year
         db.UniqueConstraint('student_id', 'academic_year_id', name='uq_student_year_enrollment'),
+        db.Index('idx_enrollment_class_year', 'class_id', 'academic_year_id'),
     )
 
 
@@ -652,6 +659,7 @@ class FeeCategory(db.Model, TimestampMixin):
     
     __table_args__ = (
         db.UniqueConstraint('school_id', 'name', name='uq_school_fee_category'),
+        db.Index('idx_fee_category_school', 'school_id'),
     )
 
 
@@ -704,7 +712,13 @@ class FeeInvoice(db.Model, TimestampMixin):
     # Relationships
     items = db.relationship('FeeInvoiceItem', backref='invoice', lazy='dynamic', cascade='all, delete-orphan')
     payments = db.relationship('Payment', backref='invoice', lazy='dynamic')
-    
+
+    __table_args__ = (
+        db.Index('idx_invoice_school_term', 'school_id', 'term_id'),
+        db.Index('idx_invoice_school_student', 'school_id', 'student_id'),
+        db.Index('idx_invoice_school_status', 'school_id', 'status'),
+    )
+
     def update_balance(self):
         """Recalculate balance after payment."""
         self.balance = self.total_amount - self.discount_amount - self.amount_paid
@@ -839,6 +853,7 @@ class SubjectPerformanceView(db.Model):
     # assessment_id is unique per term/student/subject combo.
     assessment_id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer)
+    school_id = db.Column(db.Integer)
     term_id = db.Column(db.Integer)
     class_id = db.Column(db.Integer)
     subject_id = db.Column(db.Integer)
@@ -851,16 +866,17 @@ class SubjectPerformanceView(db.Model):
 
 
 class TerminalReportView(db.Model):
-    """SQLAlchemy Mapping for the Aggregated Terminal Report View"""
+    """SQLAlchemy Mapping for the Aggregated Terminal Report Materialized View."""
     __tablename__ = 'v_student_terminal_reports'
     __table_args__ = {'info': {'is_view': True}}
-    
+
     # Composite PK needed for the view mapping
     student_id = db.Column(db.Integer, primary_key=True)
     term_id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer)   # included in the MV SELECT for tenant scoping
     class_id = db.Column(db.Integer)
     academic_year_id = db.Column(db.Integer)
-    
+
     subjects_taken = db.Column(db.Integer)
     total_marks = db.Column(db.Float)
     average_score = db.Column(db.Float)
@@ -1161,14 +1177,17 @@ def init_db(app):
                         print(f"Schema Setup (Minor): Skipping {stmt.split()[:3]}... due to {str(e)[:50]}")
         
         # System Initialization Audit Log
-        init_log = AuditLog(
-            action='SYSTEM_INITIALIZATION',
-            entity_type='database',
-            new_values={'status': 'schema_ready', 'timestamp': str(datetime.utcnow())}
-        )
-        db.session.add(init_log)
-        
-        db.session.commit()
+        try:
+            init_log = AuditLog(
+                action='SYSTEM_INITIALIZATION',
+                entity_type='database',
+                new_values={'status': 'schema_ready', 'timestamp': str(datetime.utcnow())}
+            )
+            db.session.add(init_log)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"Audit Log Warning: Could not record system initialization: {e}")
         
         print("Database tables and NaCCA PostgreSQL Views created successfully!")
 

@@ -10,7 +10,7 @@ from models import (
     db, FeeCategory, FeeStructure, FeeInvoice, FeeInvoiceItem, Payment,
     Student, Class, ClassEnrollment, PaymentMethod, PaymentStatus, Expense
 )
-from app import accounts_required, admin_required
+from utils.decorators import accounts_required, admin_required
 from services.payment_service import PaymentService
 
 fees_bp = Blueprint('fees', __name__, url_prefix='/fees')
@@ -55,11 +55,12 @@ def invoices():
     if g.current_term:
         query = query.filter(FeeInvoice.term_id == g.current_term.id)
     invs = query.order_by(FeeInvoice.created_at.desc()).paginate(page=page, per_page=25)
-    
+
     # Use PaymentService for metrics
     metrics, _ = PaymentService.get_finance_analytics(current_user.school_id)
-    
-    return render_template('fees/invoices.html', 
+    classes = Class.query.filter_by(school_id=current_user.school_id, is_active=True).all()
+
+    return render_template('fees/invoices.html',
         invoices=invs,
         metrics=metrics,
         classes=classes
@@ -103,6 +104,9 @@ def add_expense():
 @accounts_required
 def view_invoice(id):
     inv = FeeInvoice.query.get_or_404(id)
+    if inv.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('fees.invoices'))
     return render_template('fees/view_invoice.html', invoice=inv)
 
 
@@ -155,6 +159,10 @@ def record_payment():
 @accounts_required
 def send_reminder(id):
     """Sends a fee reminder SMS to the parent."""
+    inv = FeeInvoice.query.get_or_404(id)
+    if inv.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('fees.invoices'))
     from services.notification_service import NotificationService
     NotificationService.trigger_fee_reminder(id)
     flash('Fee reminder SMS sent successfully!', 'success')
@@ -167,13 +175,14 @@ def delete_payment(id):
     from models import AuditLog
     pay = Payment.query.get_or_404(id)
     inv = pay.invoice
-    
-    if pay.school_id != current_user.school_id:
+
+    # Scope check — validate via invoice
+    if inv.school_id != current_user.school_id:
         flash('Access denied.', 'error')
         return redirect(url_for('fees.payments'))
-        
+
     old_amount = float(pay.amount)
-    ref = pay.reference or pay.receipt_number
+    ref = pay.transaction_reference or pay.receipt_number
     
     # 1. Audit Log
     log = AuditLog(

@@ -62,9 +62,20 @@ class ReportService:
         summary, subjects = ReportService.get_student_performance(student_id, term_id)
         trend = ReportService.get_performance_trend(student_id, term_id)
         
-        # Attendance stats
-        total_days = Attendance.query.filter_by(school_id=school.id, term_id=term_id).distinct(Attendance.date).count()
-        present_days = Attendance.query.filter_by(student_id=student_id, term_id=term_id, status=AttendanceStatus.PRESENT).count()
+        # Attendance stats — scoped to the term's date range
+        total_days = (
+            Attendance.query
+            .filter_by(school_id=school.id, student_id=student_id)
+            .filter(Attendance.date >= term.start_date, Attendance.date <= term.end_date)
+            .count()
+        )
+        present_days = (
+            Attendance.query
+            .filter_by(school_id=school.id, student_id=student_id,
+                       status=AttendanceStatus.PRESENT)
+            .filter(Attendance.date >= term.start_date, Attendance.date <= term.end_date)
+            .count()
+        )
         
         html_content = render_template(
             'reports/terminal_report.html',

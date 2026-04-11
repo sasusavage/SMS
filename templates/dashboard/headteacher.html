@@ -77,15 +77,13 @@
         </div>
         <div class="card-body">
             <div class="bar-chart">
-                {% set days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] %}
-                {% set attendance = [92, 88, 95, 91, 89] %}
-                {% for i in range(5) %}
+                {% for day in weekly_attendance %}
                 <div class="bar-item">
-                    <div class="bar-label">{{ days[i] }}</div>
+                    <div class="bar-label">{{ day.label }}</div>
                     <div class="bar-track">
-                        <div class="bar-fill js-dynamic-height" data-height="{{ attendance[i] }}"></div>
+                        <div class="bar-fill js-dynamic-height" data-height="{{ day.rate }}"></div>
                     </div>
-                    <div class="bar-value">{{ attendance[i] }}%</div>
+                    <div class="bar-value">{{ day.rate }}%</div>
                 </div>
                 {% endfor %}
             </div>
@@ -122,48 +120,38 @@
     </div>
 </div>
 
-<!-- Recent Announcements Table -->
+<!-- Recent Payments Table -->
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Recent Announcements</h3>
-        <a href="#" class="btn btn-ghost btn-sm">View All</a>
+        <h3 class="card-title">Recent Fee Payments</h3>
+        <a href="{{ url_for('fees.payments') }}" class="btn btn-ghost btn-sm">View All</a>
     </div>
     <div class="card-body" style="padding: 0;">
         <div class="table-wrapper">
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width: 50%;">Announcement</th>
-                        <th>Type</th>
+                        <th>Student</th>
+                        <th>Amount</th>
+                        <th>Method</th>
                         <th>Date</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for pay in recent_payments %}
                     <tr>
-                        <td style="font-weight: 500; color: var(--slate-100);">End of Term Examinations Schedule</td>
-                        <td><span class="badge badge-primary">Academic</span></td>
-                        <td style="color: var(--slate-400);">Feb 5, 2026</td>
-                        <td><span class="badge badge-success">Active</span></td>
+                        <td style="font-weight:500;color:var(--slate-100);">{{ pay.invoice.student.full_name }}</td>
+                        <td>GHS {{ "{:,.2f}".format(pay.amount) }}</td>
+                        <td style="color:var(--slate-400);text-transform:capitalize;">{{ pay.payment_method.value if pay.payment_method else '—' }}</td>
+                        <td style="color:var(--slate-400);">{{ pay.payment_date.strftime('%b %d, %Y') if pay.payment_date else '—' }}</td>
+                        <td><span class="badge badge-success">Completed</span></td>
                     </tr>
+                    {% else %}
                     <tr>
-                        <td style="font-weight: 500; color: var(--slate-100);">PTA Meeting - All Parents Invited</td>
-                        <td><span class="badge badge-warning">Event</span></td>
-                        <td style="color: var(--slate-400);">Feb 3, 2026</td>
-                        <td><span class="badge badge-success">Active</span></td>
+                        <td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">No recent payments recorded.</td>
                     </tr>
-                    <tr>
-                        <td style="font-weight: 500; color: var(--slate-100);">Fee Payment Deadline Reminder</td>
-                        <td><span class="badge badge-error">Finance</span></td>
-                        <td style="color: var(--slate-400);">Feb 1, 2026</td>
-                        <td><span class="badge badge-neutral">Expired</span></td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: 500; color: var(--slate-100);">Inter-School Sports Competition</td>
-                        <td><span class="badge badge-warning">Event</span></td>
-                        <td style="color: var(--slate-400);">Jan 28, 2026</td>
-                        <td><span class="badge badge-neutral">Expired</span></td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

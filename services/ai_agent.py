@@ -69,8 +69,8 @@ class SasuAIAgent:
         """Returns student name, class, and today's attendance status."""
         from models import Parent, Student, Attendance
         from datetime import date
-        
-        parent = Parent.query.filter_by(phone=phone, school_id=self.school_id).first()
+
+        parent = Parent.query.filter_by(primary_contact_phone=phone, school_id=self.school_id).first()
         if not parent: return "No linked parent account found."
         
         kids = Student.query.filter_by(parent_id=parent.id, school_id=self.school_id).all()
@@ -86,7 +86,7 @@ class SasuAIAgent:
     def check_fees(self, phone):
         """Returns outstanding balance and a secure Paystack link."""
         from models import Parent, Student, FeeInvoice
-        parent = Parent.query.filter_by(phone=phone, school_id=self.school_id).first()
+        parent = Parent.query.filter_by(primary_contact_phone=phone, school_id=self.school_id).first()
         if not parent: return "No parent account found."
         
         kids = Student.query.filter_by(parent_id=parent.id, school_id=self.school_id).all()
@@ -164,8 +164,11 @@ class SasuAIAgent:
         oi = OrderItem(order_id=order.id, product_id=product.id, quantity=qty, unit_price=product.base_price, subtotal=product.base_price * qty)
         db.session.add(oi)
         db.session.commit()
-        
+
+        self.log_ai_action("CREATE_ORDER", "order", order.id, f"WhatsApp order for product {product_id}")
         pay_url = f"https://paystack.com/pay/ORDER_{order.id}_ELITE"
+        return f"Order #{order.id} placed for {product.name} x{qty}. Total: GHS {order.total_amount:,.2f}\nPay here: {pay_url}"
+
     def process_voice_note(self, audio_file_path):
         """Transcribes WhatsApp voice notes using OpenAI Whisper."""
         from openai import OpenAI

@@ -1,76 +1,149 @@
 {% extends "layouts/dashboard.html" %}
 
-{% block title %}Reports - NaCCA SMS{% endblock %}
-
-{% block breadcrumb %}
-<nav class="breadcrumb">
-    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
-    <span class="breadcrumb-separator">/</span>
-    <span class="breadcrumb-current">Reports</span>
-</nav>
-{% endblock %}
+{% block title %}Report Hub - SmartSchool{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Reports</h1>
-    <p class="page-subtitle">Generate and download various reports</p>
+<div class="page-header" style="margin-bottom:2rem;">
+    <h1 class="page-title">NaCCA Report Dispatch Center</h1>
+    <p style="color:var(--text-muted);margin-top:.25rem;">Generate individual or bulk terminal reports for your students.</p>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-6);">
-    <!-- Terminal Reports -->
-    <div class="card">
-        <div class="card-body" style="text-align: center; padding: var(--space-8);">
-            <div
-                style="width: 64px; height: 64px; background: rgba(99, 102, 241, 0.1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="var(--primary-400)" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                </svg>
+<div style="display:grid;grid-template-columns:1fr 340px;gap:1.5rem;align-items:start;">
+
+    <!-- Bulk Dispatch Card -->
+    <div class="card" style="padding:2rem;">
+        <h2 style="font-size:1rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            Bulk Class Dispatch
+        </h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+            <div class="form-group">
+                <label class="form-label">Select Academic Class</label>
+                <select id="class_id" name="class_id" class="form-control">
+                    <option value="">-- All Classes --</option>
+                    {% for cls in classes %}
+                    <option value="{{ cls.id }}">{{ cls.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <h3 style="margin-bottom: var(--space-2);">Terminal Reports</h3>
-            <p style="color: var(--slate-400); margin-bottom: var(--space-5);">Generate end-of-term reports for students
-            </p>
-            <a href="{{ url_for('assessments.terminal_reports') }}" class="btn btn-primary">Generate Reports</a>
+            <div class="form-group">
+                <label class="form-label">Academic Term</label>
+                <select id="term_id" name="term_id" class="form-control">
+                    <option value="">-- Select Term --</option>
+                    {% for term in terms %}
+                    <option value="{{ term.id }}">{{ term.name }} ({{ term.academic_year.name }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div style="text-align:center;margin-bottom:2rem;">
+            <button type="button" onclick="generateBulk()" class="btn btn-primary" style="padding:.75rem 2.5rem;font-weight:700;letter-spacing:.05em;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem;vertical-align:middle;">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                </svg>
+                MERGE &amp; DOWNLOAD ALL
+            </button>
+        </div>
+
+        <div style="border-top:1px solid var(--border-color);padding-top:1.75rem;">
+            <p style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:1rem;font-weight:600;">Institutional Quality Assurance</p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+                <div style="background:var(--bg-secondary);border-radius:.75rem;padding:1rem;text-align:center;">
+                    <div style="font-size:1.5rem;font-weight:800;color:var(--primary-400);">100%</div>
+                    <div style="font-size:.75rem;color:var(--text-muted);margin-top:.25rem;">NaCCA Compliance</div>
+                </div>
+                <div style="background:var(--bg-secondary);border-radius:.75rem;padding:1rem;text-align:center;">
+                    <div style="font-size:1.5rem;font-weight:800;color:var(--success-400,#4ade80);">GHS 0</div>
+                    <div style="font-size:.75rem;color:var(--text-muted);margin-top:.25rem;">Printing Costs Saved</div>
+                </div>
+                <div style="background:var(--bg-secondary);border-radius:.75rem;padding:1rem;text-align:center;">
+                    <div style="font-size:1.5rem;font-weight:800;color:var(--warning-400,#facc15);">Auto</div>
+                    <div style="font-size:.75rem;color:var(--text-muted);margin-top:.25rem;">Digital Archiving</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Fee Reports -->
-    <div class="card">
-        <div class="card-body" style="text-align: center; padding: var(--space-8);">
-            <div
-                style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="var(--success-500)" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                </svg>
-            </div>
-            <h3 style="margin-bottom: var(--space-2);">Fee Reports</h3>
-            <p style="color: var(--slate-400); margin-bottom: var(--space-5);">View collection and outstanding balances
-            </p>
-            <a href="{{ url_for('fees.debtors') }}" class="btn btn-success">View Debtors</a>
-        </div>
-    </div>
+    <!-- Sidebar -->
+    <div style="display:flex;flex-direction:column;gap:1rem;">
 
-    <!-- Attendance Reports -->
-    <div class="card">
-        <div class="card-body" style="text-align: center; padding: var(--space-8);">
-            <div
-                style="width: 64px; height: 64px; background: rgba(245, 158, 11, 0.1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="var(--warning-500)" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
+        <!-- Individual Lookup -->
+        <div class="card" style="padding:1.5rem;">
+            <h3 style="font-size:.9rem;font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
                 </svg>
-            </div>
-            <h3 style="margin-bottom: var(--space-2);">Attendance Reports</h3>
-            <p style="color: var(--slate-400); margin-bottom: var(--space-5);">Student and staff attendance summaries
-            </p>
-            <button class="btn btn-secondary" disabled>Coming Soon</button>
+                Individual Lookup
+            </h3>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;">Generate a specific student's report directly from the Student Profile page.</p>
+            <a href="{{ url_for('students.index') }}" class="btn btn-secondary" style="width:100%;text-align:center;font-size:.85rem;font-weight:600;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.4rem;vertical-align:middle;">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                GO TO STUDENTS
+            </a>
         </div>
+
+        <!-- Info Note -->
+        <div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);border-radius:.75rem;padding:1rem;">
+            <div style="display:flex;gap:.6rem;align-items:flex-start;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:.1rem;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <p style="font-size:.8rem;color:var(--text-muted);margin:0;">Data syncs instantly with teachers' grade uploads. Reports reflect the latest approved scores.</p>
+            </div>
+        </div>
+
+        <!-- Format Guide -->
+        <div class="card" style="padding:1.5rem;">
+            <h3 style="font-size:.9rem;font-weight:700;margin-bottom:.75rem;">NaCCA Format</h3>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.6rem;">
+                <li style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--primary-400)" stroke="none"><circle cx="12" cy="12" r="5"/></svg>
+                    Classwork (30%) + Homework (10%)
+                </li>
+                <li style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--primary-400)" stroke="none"><circle cx="12" cy="12" r="5"/></svg>
+                    Project Work (10%) + End-of-Term Exam (50%)
+                </li>
+                <li style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--primary-400)" stroke="none"><circle cx="12" cy="12" r="5"/></svg>
+                    Grade scale: Highly Proficient → Emerging
+                </li>
+                <li style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--text-secondary);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--primary-400)" stroke="none"><circle cx="12" cy="12" r="5"/></svg>
+                    Class position auto-ranked per term
+                </li>
+            </ul>
+        </div>
+
     </div>
 </div>
+
+<script>
+function generateBulk() {
+    const classId = document.getElementById('class_id').value;
+    const termId = document.getElementById('term_id').value;
+    if (!classId || !termId) {
+        alert('Please select both a class and a term.');
+        return;
+    }
+    window.location.href = '/reports/bulk/class/' + classId + '/term/' + termId;
+}
+</script>
 {% endblock %}

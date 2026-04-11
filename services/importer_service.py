@@ -5,7 +5,7 @@ Handles validation, database insertion, and audit logging.
 import csv
 import io
 from datetime import datetime
-from models import db, Student, Staff, Parent, Gender, User, UserRole, UserMixin, AuditLog, StudentStatus
+from models import db, Student, Staff, Parent, Gender, User, UserRole, AuditLog, StudentStatus
 from werkzeug.security import generate_password_hash
 
 class ImporterService:

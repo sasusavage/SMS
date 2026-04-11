@@ -1,0 +1,64 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}System Audit Logs - SaaS Control{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom:2rem;">
+    <h1 class="page-title">Institutional Audit Ledger</h1>
+    <p style="color:var(--text-muted);margin-top:.25rem;">Security and operations monitoring across all school instances.</p>
+</div>
+
+<!-- Log Table -->
+<div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);">
+        <h3 style="font-size:.9rem;font-weight:700;margin:0;">Recent System Events</h3>
+    </div>
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User / Actor</th>
+                    <th>School</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td style="font-family:monospace;font-size:.75rem;color:var(--text-muted);white-space:nowrap;">
+                        {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                    </td>
+                    <td>
+                        <div style="font-weight:600;font-size:.875rem;">{{ log.user.full_name if log.user else 'SYSTEM ENGINE' }}</div>
+                        <div style="font-size:.7rem;color:var(--text-muted);">{{ log.user.role.value if log.user else 'AUTOMATED' }}</div>
+                    </td>
+                    <td style="font-size:.8rem;color:var(--text-secondary);">
+                        {{ log.school.name if log.school else 'SmartSchool HQ' }}
+                    </td>
+                    <td>
+                        <span style="background:rgba(99,102,241,.1);color:var(--primary-400);font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;">
+                            {{ log.action }}
+                        </span>
+                    </td>
+                    <td style="font-size:.75rem;color:var(--text-muted);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        {{ log.new_values|string if log.new_values else '—' }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align:center;padding:3rem;color:var(--text-muted);">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 1rem;opacity:.4;">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                        </svg>
+                        No system activity logs found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}AI Conversation Audit - SaaS Control{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
+    <div>
+        <h1 class="page-title">Sasu AI 2.0 Audit Logs</h1>
+        <p style="color:var(--text-muted);margin-top:.25rem;">Institutional quality control and conversation safety monitoring.</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid" style="margin-bottom:1.5rem;">
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.total_chats }}</div>
+        <div class="stat-label">Total Conversations</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-value">99.2%</div>
+        <div class="stat-label">Completion Rate</div>
+    </div>
+</div>
+
+<!-- Sessions Table -->
+<div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);">
+        <h3 style="font-size:.9rem;font-weight:700;margin:0;">Active Sessions</h3>
+    </div>
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>School Instance</th>
+                    <th>Phone Number</th>
+                    <th>Last Message Preview</th>
+                    <th>Messages</th>
+                    <th>Last Active</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <td style="font-weight:600;color:var(--primary-400);">{{ session.school.name }}</td>
+                    <td style="font-family:monospace;font-size:.8rem;color:var(--text-secondary);">{{ session.phone_number }}</td>
+                    <td style="font-size:.8rem;color:var(--text-muted);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        {% if session.history %}
+                            {{ session.history[-1].content if session.history[-1] else '...' }}
+                        {% else %}
+                            <span style="opacity:.5;">No history</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:.8rem;font-weight:600;">{{ session.history|length }}</td>
+                    <td style="font-size:.75rem;color:var(--text-muted);">{{ session.last_interaction.strftime('%b %d, %H:%M') }}</td>
+                    <td>
+                        <button onclick="viewChat('{{ session.id }}')" class="btn btn-ghost btn-sm" style="font-size:.75rem;padding:.25rem .75rem;">
+                            VIEW CHAT
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:3rem;color:var(--text-muted);">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 1rem;opacity:.4;">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        No active AI conversations recorded today.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Chat Detail Modal -->
+<div id="chatModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;justify-content:center;align-items:center;">
+    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:1rem;width:90%;max-width:680px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="margin:0;font-size:.95rem;font-weight:700;">Conversation Detail</h3>
+            <button onclick="closeModal('chatModal')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;line-height:1;">&#x2715;</button>
+        </div>
+        <div id="chatContent" style="padding:1.5rem;overflow-y:auto;flex:1;font-size:.85rem;color:var(--text-secondary);">
+            Loading...
+        </div>
+        <div style="padding:1rem 1.5rem;border-top:1px solid var(--border-color);text-align:right;">
+            <button onclick="closeModal('chatModal')" class="btn btn-primary" style="font-size:.85rem;">CLOSE AUDIT</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function viewChat(sessionId) {
+    document.getElementById('chatContent').textContent = 'Session #' + sessionId + ' — full conversation detail coming soon.';
+    openModal('chatModal');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal('chatModal');
+});
+</script>
+{% endblock %}

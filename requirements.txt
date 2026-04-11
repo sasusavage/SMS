@@ -19,11 +19,19 @@ email-validator==2.1.0
 # PDF Generation
 reportlab==4.0.7
 weasyprint==60.1
+pypdf==4.1.0
 
 # Utilities
 gunicorn==21.2.0
 python-dateutil==2.8.2
 Pillow==10.1.0
+
+# QR Codes
+qrcode[pil]==7.4.2
+
+# Data Import (Migration War Room)
+pandas==2.2.1
+openpyxl==3.1.2
 
 # Form Validation
 WTForms==3.1.1

@@ -10,6 +10,20 @@ import os
 from pypdf import PdfWriter
 
 reports_bp = Blueprint('reports', __name__, url_prefix='/reports')
+from models import Class, Term, AcademicYear, db
+from flask import render_template
+
+@reports_bp.route('/')
+@login_required
+def index():
+    """Report selection dashboard."""
+    classes = Class.query.filter_by(school_id=current_user.school_id, is_active=True).all()
+    current_year = AcademicYear.query.filter_by(school_id=current_user.school_id, is_current=True).first()
+    terms = []
+    if current_year:
+        terms = Term.query.filter_by(academic_year_id=current_year.id).all()
+    
+    return render_template('reports/index.html', classes=classes, terms=terms)
 
 @reports_bp.route('/student/<int:student_id>/term/<int:term_id>/download')
 @login_required

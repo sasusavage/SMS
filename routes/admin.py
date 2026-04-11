@@ -3,7 +3,7 @@ Standard Admin Routes for bulk tools and configuration.
 """
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
 from flask_login import login_required, current_user
-from app import admin_required
+from utils.decorators import admin_required
 from services.importer_service import ImporterService
 import os
 
@@ -83,21 +83,19 @@ def ai_conversations():
     sessions = AISession.query.filter_by(school_id=current_user.school_id).order_by(AISession.last_interaction.desc()).all()
     return render_template('admin/ai_monitor.html', sessions=sessions)
 
-@admin_bp.route('/support-contact')
-def support_contact():
-    """Landing page for suspended or restricted accounts."""
-    return render_template('admin/support_contact.html')
+
 
 @admin_bp.route('/suspend/<int:school_id>', methods=['POST'])
 @login_required
-@admin_required
 def suspend_school(school_id):
-    """SaaS Admin Kill-Switch."""
+    """Redirect legacy suspend URL to saas_admin blueprint."""
+    return redirect(url_for('saas_admin.suspend_school', school_id=school_id), 307)
+
+
+@admin_bp.route('/support-contact')
+@login_required
+def support_contact():
+    """Contact page shown when account is suspended or specialized help is needed."""
     from models import School
-    school = School.query.get_or_404(school_id)
-    school.is_account_suspended = not school.is_account_suspended
-    school.suspension_reason = request.form.get('reason') or "Administrative Suspension"
-    
-    from models import db
-    db.session.commit()
-    return redirect(url_for('dashboard.super_admin'))
+    school = School.query.get(current_user.school_id)
+    return render_template('admin/support_contact.html', school=school)

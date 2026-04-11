@@ -37,17 +37,21 @@ class PaymentService:
                 return False, "Invoice not found."
             
             # Prevent double processing
-            existing_payment = Payment.query.filter_by(reference=reference).first()
+            existing_payment = Payment.query.filter_by(transaction_reference=reference).first()
             if existing_payment:
                 return True, "Payment already recorded."
-            
+
+            # Generate receipt number
+            import uuid as _uuid
+            receipt_num = f"REC-{_uuid.uuid4().hex[:10].upper()}"
+
             # 2. Record Payment
             payment = Payment(
-                school_id=school_id,
+                receipt_number=receipt_num,
                 invoice_id=invoice.id,
                 amount=amount_ghs,
                 payment_method=PaymentMethod.ONLINE,
-                reference=reference,
+                transaction_reference=reference,
                 payer_name=payload.get('customer', {}).get('email'),
                 payer_phone=payload.get('customer', {}).get('phone'),
                 received_by_id=user_id,
@@ -83,9 +87,11 @@ class PaymentService:
     def get_finance_analytics(school_id, academic_year_id=None):
         """Calculates core financial KPIs for the dashboard."""
         try:
-            # 1. Total Income (Completed Payments)
-            income_query = db.session.query(func.sum(Payment.amount)).filter(
-                Payment.school_id == school_id,
+            # 1. Total Income (Completed Payments) — join through FeeInvoice for school scoping
+            income_query = db.session.query(func.sum(Payment.amount)).join(
+                FeeInvoice, Payment.invoice_id == FeeInvoice.id
+            ).filter(
+                FeeInvoice.school_id == school_id,
                 Payment.status == PaymentStatus.COMPLETED
             )
             total_income = income_query.scalar() or Decimal('0.00')

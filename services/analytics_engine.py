@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from sqlalchemy import func
-from models import db, School, Attendance, AttendanceStatus, Assessment, SchoolInsight, Class, Subject
+from models import db, School, Attendance, AttendanceStatus, Assessment, SchoolInsight, Class, Subject, ClassSubject
 
 def run_midnight_analytics():
     """Scan all schools for academic and behavioral patterns."""
@@ -71,10 +71,17 @@ def detect_academic_outliers(school_id):
     results = db.session.query(
         Class.name.label('class_name'),
         Subject.name.label('subject_name'),
-        func.avg(Assessment.classwork_score + Assessment.homework_score + Assessment.project_score + Assessment.exam_score).label('avg_score')
-    ).join(Assessment, Assessment.class_subject_id == Subject.id) \
-     .join(Class, Assessment.school_id == Class.school_id) \
-     .filter(Assessment.school_id == school_id, Assessment.created_at >= last_month) \
+        func.avg(
+            Assessment.classwork_score + Assessment.homework_score +
+            Assessment.project_score + Assessment.exam_score
+        ).label('avg_score')
+    ).join(ClassSubject, Assessment.class_subject_id == ClassSubject.id) \
+     .join(Subject, ClassSubject.subject_id == Subject.id) \
+     .join(Class, ClassSubject.class_id == Class.id) \
+     .filter(
+         Assessment.school_id == school_id,
+         Assessment.created_at >= last_month
+     ) \
      .group_by(Class.name, Subject.name).all()
      
     for res in results:

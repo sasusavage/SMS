@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+<div class="page-header flex justify-between items-start mb-6">
     <div>
         <h1 class="page-title">Students</h1>
         <p class="page-subtitle">Manage student records and enrollments</p>
@@ -26,14 +26,14 @@
 </div>
 
 <!-- Filters -->
-<div class="card" style="margin-bottom: var(--space-6);">
-    <div class="card-body" style="padding: var(--space-4) var(--space-6);">
-        <form method="GET" style="display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 200px;">
+<div class="card mb-6">
+    <div class="card-body px-6 py-4">
+        <form method="GET" class="flex gap-4 items-center flex-wrap">
+            <div class="flex-1 min-w-[200px]">
                 <input type="text" name="search" class="form-input" placeholder="Search by name or ID..."
                     value="{{ search }}">
             </div>
-            <div style="min-width: 180px;">
+            <div class="min-w-[180px]">
                 <select name="class_id" class="form-select">
                     <option value="">All Classes</option>
                     {% for cls in classes %}
@@ -42,7 +42,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div style="min-width: 150px;">
+            <div class="min-w-[150px]">
                 <select name="status" class="form-select">
                     <option value="active" {% if status_filter=='active' %}selected{% endif %}>Active</option>
                     <option value="all" {% if status_filter=='all' %}selected{% endif %}>All Status</option>
@@ -59,7 +59,7 @@
 
 <!-- Students Table -->
 <div class="card">
-    <div class="card-body" style="padding: 0;">
+    <div class="card-body p-0">
         <div class="table-wrapper">
             <table class="table">
                 <thead>
@@ -75,17 +75,16 @@
                 <tbody>
                     {% for student in students.items %}
                     <tr>
-                        <td><code style="color: var(--primary-400);">{{ student.student_id }}</code></td>
+                        <td><code class="text-primary-400">{{ student.student_id }}</code></td>
                         <td>
-                            <div style="display: flex; align-items: center; gap: var(--space-3);">
-                                <div class="user-avatar"
-                                    style="width: 32px; height: 32px; font-size: var(--font-size-xs);">
+                            <div class="flex items-center gap-3">
+                                <div class="user-avatar !w-8 !h-8 !text-xs">
                                     {{ student.first_name[0] }}{{ student.last_name[0] }}
                                 </div>
                                 <div>
-                                    <div style="font-weight: 500; color: var(--slate-100);">{{ student.full_name }}
+                                    <div class="font-medium text-slate-100">{{ student.full_name }}
                                     </div>
-                                    <div style="font-size: var(--font-size-xs); color: var(--slate-500);">{{
+                                    <div class="text-xs text-slate-500">{{
                                         student.date_of_birth.strftime('%b %d, %Y') if student.date_of_birth else 'N/A'
                                         }}</div>
                                 </div>
@@ -109,7 +108,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            <div style="display: flex; gap: var(--space-2);">
+                            <div class="flex gap-2">
                                 <a href="{{ url_for('students.view', id=student.id) }}"
                                     class="btn btn-ghost btn-sm">View</a>
                                 <a href="{{ url_for('students.edit', id=student.id) }}"
@@ -119,10 +118,10 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: var(--space-12); color: var(--slate-500);">
+                        <td colspan="6" class="text-center py-12 text-slate-500">
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="1"
-                                style="margin: 0 auto var(--space-4); opacity: 0.5;">
+                                class="mx-auto mb-4 opacity-50">
                                 <path d="M18 21a8 8 0 0 0-16 0" />
                                 <circle cx="10" cy="8" r="5" />
                             </svg>
@@ -136,11 +135,11 @@
     </div>
 
     {% if students.pages > 1 %}
-    <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="font-size: var(--font-size-sm); color: var(--slate-400);">
+    <div class="card-footer flex justify-between items-center px-6 py-4">
+        <div class="text-sm text-slate-400">
             Showing {{ students.items|length }} of {{ students.total }} students
         </div>
-        <div style="display: flex; gap: var(--space-2);">
+        <div class="flex gap-2">
             {% if students.has_prev %}
             <a href="{{ url_for('students.index', page=students.prev_num, search=search, class_id=class_filter, status=status_filter) }}"
                 class="btn btn-secondary btn-sm">Previous</a>
@@ -153,4 +152,4 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
+{% endblock %}

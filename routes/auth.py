@@ -15,6 +15,8 @@ def index():
     if current_user.is_authenticated:
         if current_user.role == UserRole.PARENT:
             return redirect(url_for('parent.dashboard'))
+        if current_user.role == UserRole.SUPER_ADMIN:
+            return redirect(url_for('saas_admin.dashboard'))
         return redirect(url_for('dashboard.index'))
     return render_template('index.html')
 
@@ -23,8 +25,12 @@ def index():
 def login():
     """User login."""
     if current_user.is_authenticated:
+        if current_user.role == UserRole.SUPER_ADMIN:
+            return redirect(url_for('saas_admin.dashboard'))
+        if current_user.role == UserRole.PARENT:
+            return redirect(url_for('parent.dashboard'))
         return redirect(url_for('dashboard.index'))
-    
+
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
@@ -47,6 +53,8 @@ def login():
             
             if user.role == UserRole.PARENT:
                 return redirect(url_for('parent.dashboard'))
+            if user.role == UserRole.SUPER_ADMIN:
+                return redirect(url_for('saas_admin.dashboard'))
             return redirect(url_for('dashboard.index'))
         
         flash('Invalid email or password.', 'error')

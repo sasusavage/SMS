@@ -4,8 +4,8 @@ Classes and Subjects Management Routes
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, g
 from flask_login import login_required, current_user
 
-from models import db, Class, Subject, Department, ClassSubject, Staff, ClassEnrollment
-from app import admin_required, staff_required
+from models import db, Class, Subject, Department, ClassSubject, Staff, ClassEnrollment, Student
+from utils.decorators import admin_required, staff_required
 
 classes_bp = Blueprint('classes', __name__, url_prefix='/classes')
 
@@ -161,7 +161,10 @@ def edit(id):
 def assign_subjects(id):
     """Assign subjects and teachers to a class."""
     cls = Class.query.get_or_404(id)
-    
+    if cls.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('classes.index'))
+
     if request.method == 'POST':
         if not g.current_academic_year:
             flash('No active academic year.', 'error')
@@ -228,6 +231,9 @@ def assign_subjects(id):
 def attendance(id):
     """Mark daily attendance for a class."""
     cls = Class.query.get_or_404(id)
+    if cls.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('classes.index'))
     if not g.current_academic_year or not g.current_term:
         flash('No active term or academic year found.', 'error')
         return redirect(url_for('classes.view', id=id))
@@ -266,12 +272,24 @@ def mark_attendance(id):
     from models import Attendance, AttendanceStatus
     from services.notification_service import NotificationService
     from datetime import date as dt_date
-    
+
     cls = Class.query.get_or_404(id)
+    if cls.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('classes.index'))
+
     student_ids = request.form.getlist('student_ids[]')
     statuses = request.form.getlist('statuses[]')
-    
+
+    # Build set of valid student IDs for this school to prevent cross-tenant writes
+    valid_student_ids = {
+        str(s.id) for s in Student.query.filter_by(school_id=current_user.school_id)
+                                        .with_entities(Student.id).all()
+    }
+
     for i, student_id in enumerate(student_ids):
+        if student_id not in valid_student_ids:
+            continue
         status_val = statuses[i] if i < len(statuses) else 'absent'
         status_enum = AttendanceStatus(status_val)
         

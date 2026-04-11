@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from sqlalchemy import func
 from models import db, School, Student, Assessment, Attendance, AttendanceStatus, FeeInvoice, SchoolInsight, UserRole, User
-from utils.sms_provider import send_sms
+from utils.sms_provider import SMSProvider
 
 class PredictiveEngine:
     """The 'Early Warning System' for Elite Tier Schools."""
@@ -45,8 +45,9 @@ class PredictiveEngine:
             
             # 2. Automated SMS to Parent
             if student.parent and student.parent.father_phone:
-                msg = f"Alert: {student.first_name} hasn't been in school for 3 days. Please contact the office immediately. - {student.school.name}"
-                send_sms(student.parent.father_phone, msg, school_id)
+                msg = (f"Alert: {student.first_name} hasn't been in school for 3 days. "
+                       f"Please contact the office immediately. — {student.school.name}")
+                SMSProvider.send_sms(school_id, student.parent.father_phone, msg)
 
         db.session.commit()
 

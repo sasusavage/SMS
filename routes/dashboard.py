@@ -1,7 +1,7 @@
 """
 Dashboard Routes - Role-based dashboards
 """
-from flask import Blueprint, render_template, g, redirect, url_for
+from flask import Blueprint, render_template, g, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import func
 from datetime import date
@@ -26,7 +26,7 @@ def index():
     if role == UserRole.PARENT:
         return redirect(url_for('parent.dashboard'))
     elif role == UserRole.SUPER_ADMIN:
-        return super_admin_dashboard()
+        return redirect(url_for('saas_admin.dashboard'))
     elif role == UserRole.HEADTEACHER:
         return headteacher_dashboard()
     elif role == UserRole.ADMIN:
@@ -38,38 +38,6 @@ def index():
     else:
         return render_template('dashboard/default.html')
 
-
-def super_admin_dashboard():
-    """Dashboard for SaaS Platform Owner."""
-    from models import School, Payment, PaymentStatus, AICreditUsage
-    from sqlalchemy import func
-    
-    stats = {
-        'total_schools': School.query.count(),
-        'active_students': Student.query.filter_by(status=StudentStatus.ACTIVE).count(),
-        'platform_total_revenue': db.session.query(func.sum(Payment.amount)).filter(
-            Payment.status == PaymentStatus.COMPLETED
-        ).scalar() or 0,
-        'remaining_sms_credits': 12500,
-        'ai_tokens_today': db.session.query(func.sum(AICreditUsage.tokens_used)).scalar() or 0,
-        'system_health': '99.9%'
-    }
-    
-    # AI Consumption per school
-    ai_top_consumers = db.session.query(
-        School.name, 
-        func.sum(AICreditUsage.tokens_used)
-    ).join(AICreditUsage).group_by(School.name).all()
-    
-    # Aggregated schools with their configs
-    schools_full = School.query.order_by(School.name).all()
-    
-    return render_template('dashboard/super_admin.html', 
-        stats=stats, 
-        recent_schools=recent_schools,
-        ai_usage=ai_top_consumers,
-        schools_full=schools_full
-    )
 
 
 def headteacher_dashboard():
@@ -132,11 +100,28 @@ def headteacher_dashboard():
     else:
         stats['attendance_rate'] = 0
     
+    # Weekly attendance (Mon–Fri of the current week)
+    from datetime import timedelta
+    monday = today - timedelta(days=today.weekday())
+    weekly_attendance = []
+    day_labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+    for i in range(5):
+        day = monday + timedelta(days=i)
+        row = db.session.query(
+            func.count(Attendance.id).label('total'),
+            func.sum(func.cast(Attendance.status == AttendanceStatus.PRESENT, db.Integer)).label('present'),
+        ).filter(
+            Attendance.school_id == school_id,
+            Attendance.date == day
+        ).first()
+        rate = round((row.present / row.total) * 100, 1) if row and row.total else 0
+        weekly_attendance.append({'label': day_labels[i], 'rate': rate})
+
     # Recent activities
     recent_payments = Payment.query.join(FeeInvoice).join(Student).filter(
         Student.school_id == school_id
     ).order_by(Payment.created_at.desc()).limit(5).all()
-    
+
     # Gender distribution
     gender_stats = db.session.query(
         Student.gender,
@@ -145,13 +130,39 @@ def headteacher_dashboard():
         Student.school_id == school_id,
         Student.status == StudentStatus.ACTIVE
     ).group_by(Student.gender).all()
-    
+
     return render_template(
         'dashboard/headteacher.html',
         stats=stats,
         recent_payments=recent_payments,
-        gender_stats=dict(gender_stats)
+        gender_stats=dict(gender_stats),
+        weekly_attendance=weekly_attendance
     )
+
+
+@dashboard_bp.route('/saas/onboard', methods=['POST'])
+@login_required
+def onboard_school():
+    """Redirect legacy URL to new saas_admin blueprint."""
+    return redirect(url_for('saas_admin.onboard_school'), 307)
+
+
+@dashboard_bp.route('/saas/audit-logs')
+@login_required
+def saas_audit_logs():
+    return redirect(url_for('saas_admin.audit_logs'))
+
+
+@dashboard_bp.route('/saas/ai-conversations')
+@login_required
+def saas_ai_conversations():
+    return redirect(url_for('saas_admin.ai_conversations'))
+
+
+@dashboard_bp.route('/saas/toggle-module/<int:school_id>/<string:module_field>', methods=['POST'])
+@login_required
+def toggle_module(school_id, module_field):
+    return redirect(url_for('saas_admin.toggle_module', school_id=school_id, module_field=module_field), 307)
 
 
 @dashboard_bp.route('/predictive')

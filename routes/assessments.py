@@ -9,7 +9,8 @@ from models import (
     db, Assessment, ClassSubject, Student, Class, Subject, Term,
     ClassEnrollment, TerminalReport, UserRole, refresh_terminal_reports
 )
-from app import teacher_required, admin_required, staff_required
+from services.grading_service import GradingService
+from utils.decorators import teacher_required, admin_required, staff_required
 
 assessments_bp = Blueprint('assessments', __name__, url_prefix='/assessments')
 
@@ -55,7 +56,13 @@ def index():
 def entry(class_subject_id):
     """Score entry page for a specific class subject."""
     class_subject = ClassSubject.query.get_or_404(class_subject_id)
-    
+
+    # Verify class belongs to this school
+    parent_class = Class.query.get(class_subject.class_id)
+    if not parent_class or parent_class.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('assessments.index'))
+
     # Verify access
     if not current_user.is_admin():
         staff = current_user.staff_profile
@@ -103,9 +110,17 @@ def save_scores():
     class_subject = ClassSubject.query.get(class_subject_id)
     if not class_subject:
         return jsonify({'success': False, 'message': 'Subject not found'}), 404
-    
-    # Determine grading level from class
+
+    # Verify class_subject belongs to this school
     class_obj = Class.query.get(class_subject.class_id)
+    if not class_obj or class_obj.school_id != current_user.school_id:
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+
+    # Pre-load valid student IDs for this school to reject cross-tenant inserts
+    valid_student_ids = {
+        s.id for s in Student.query.filter_by(school_id=current_user.school_id)
+                                   .with_entities(Student.id).all()
+    }
     grading_level = class_obj.level.upper() if class_obj else 'PRIMARY'
     if grading_level not in ['PRIMARY', 'JHS', 'SHS']:
         grading_level = 'PRIMARY'
@@ -114,7 +129,11 @@ def save_scores():
     
     for score_data in scores:
         student_id = score_data.get('student_id')
-        
+
+        # Reject any student_id that doesn't belong to this school
+        if student_id not in valid_student_ids:
+            continue
+
         # Find or create assessment record
         assessment = Assessment.query.filter_by(
             student_id=student_id,
@@ -124,6 +143,7 @@ def save_scores():
         
         if not assessment:
             assessment = Assessment(
+                school_id=current_user.school_id,
                 student_id=student_id,
                 class_subject_id=class_subject_id,
                 term_id=g.current_term.id,
@@ -137,14 +157,14 @@ def save_scores():
         assessment.project_score = min(max(float(score_data.get('project', 0) or 0), 0), 10)
         assessment.exam_score = min(max(float(score_data.get('exam', 0) or 0), 0), 50)
         
-        # Calculate total and grade
+        # Calculate total and grade via service layer
         assessment.calculate_total()
-        calculate_grade_for_assessment(assessment, grading_level)
-        
+        GradingService.apply_grade(assessment, grading_level)
+
         saved_count += 1
-    
-    # Calculate class positions
-    calculate_class_positions(class_subject_id, g.current_term.id)
+
+    # Calculate class positions via service layer
+    GradingService.calculate_class_positions(class_subject_id, g.current_term.id)
     
     db.session.commit()
     
@@ -158,38 +178,7 @@ def save_scores():
     })
 
 
-def calculate_grade_for_assessment(assessment, level='PRIMARY'):
-    """Calculate grade based on NaCCA standards."""
-    grading_scale = current_app.config.get('NACCA_GRADING_SCALE', {}).get(level, {})
-    
-    if assessment.total_score is None:
-        assessment.calculate_total()
-    
-    for (min_score, max_score), (grade, remark) in grading_scale.items():
-        if min_score <= assessment.total_score <= max_score:
-            assessment.grade = grade
-            assessment.grade_remark = remark
-            return
-    
-    assessment.grade = None
-    assessment.grade_remark = None
-
-
-def calculate_class_positions(class_subject_id, term_id):
-    """Calculate and update class positions for a subject."""
-    assessments = Assessment.query.filter_by(
-        class_subject_id=class_subject_id,
-        term_id=term_id
-    ).order_by(Assessment.total_score.desc()).all()
-    
-    position = 1
-    prev_score = None
-    
-    for i, assessment in enumerate(assessments):
-        if prev_score is not None and assessment.total_score != prev_score:
-            position = i + 1
-        assessment.class_position = position
-        prev_score = assessment.total_score
+# Grade calculation and position ranking logic lives in services/grading_service.py
 
 
 # =============================================================================
@@ -220,10 +209,10 @@ def api_calculate_grade():
     grade = None
     remark = None
     
-    for (min_score, max_score), (g, r) in grading_scale.items():
+    for (min_score, max_score), (grd, rmk) in grading_scale.items():
         if min_score <= total <= max_score:
-            grade = g
-            remark = r
+            grade = grd
+            remark = rmk
             break
     
     return jsonify({
@@ -241,6 +230,9 @@ def api_calculate_grade():
 def view_class(class_id):
     """View all assessments for a class."""
     class_obj = Class.query.get_or_404(class_id)
+    if class_obj.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('assessments.index'))
     
     if not g.current_term:
         flash('No active term found.', 'warning')
@@ -289,6 +281,9 @@ def view_class(class_id):
 def view_student(student_id):
     """View all assessments for a specific student."""
     student = Student.query.get_or_404(student_id)
+    if student.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('assessments.index'))
     
     if not g.current_term or not g.current_academic_year:
         flash('No active academic term.', 'warning')
@@ -400,7 +395,10 @@ def terminal_reports():
 def generate_reports(class_id):
     """Generate terminal reports for all students in a class."""
     class_obj = Class.query.get_or_404(class_id)
-    
+    if class_obj.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('assessments.terminal_reports'))
+
     # Verify access: must be admin or the class teacher
     if not current_user.is_admin():
         staff = current_user.staff_profile
@@ -429,6 +427,7 @@ def generate_reports(class_id):
         
         if not report:
             report = TerminalReport(
+                school_id=current_user.school_id,
                 student_id=enrollment.student_id,
                 term_id=g.current_term.id,
                 class_enrollment_id=enrollment.id
@@ -466,8 +465,8 @@ def generate_reports(class_id):
         
         generated_count += 1
     
-    # Calculate class positions based on average score
-    calculate_terminal_positions(class_id, g.current_term.id)
+    # Calculate class positions via service layer
+    GradingService.calculate_terminal_positions(class_id, g.current_term.id)
     
     db.session.commit()
     
@@ -477,24 +476,6 @@ def generate_reports(class_id):
     flash(f'Successfully generated {generated_count} terminal reports!', 'success')
     return redirect(url_for('assessments.terminal_reports'))
 
-
-def calculate_terminal_positions(class_id, term_id):
-    """Calculate overall class positions for terminal reports."""
-    from models import ClassEnrollment
-    
-    reports = TerminalReport.query.join(ClassEnrollment).filter(
-        ClassEnrollment.class_id == class_id,
-        TerminalReport.term_id == term_id
-    ).order_by(TerminalReport.average_score.desc()).all()
-    
-    position = 1
-    prev_score = None
-    
-    for i, report in enumerate(reports):
-        if prev_score is not None and report.average_score != prev_score:
-            position = i + 1
-        report.class_position = position
-        prev_score = report.average_score
 
 
 @assessments_bp.route('/reports/publish/<int:class_id>', methods=['POST'])
@@ -510,6 +491,9 @@ def publish_reports(class_id):
     
     # Verify access: must be admin or the class teacher
     cls = Class.query.get_or_404(class_id)
+    if cls.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('assessments.terminal_reports'))
     if not current_user.is_admin():
         staff = current_user.staff_profile
         if not staff or cls.class_teacher_id != staff.id:

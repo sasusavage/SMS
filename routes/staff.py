@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from datetime import date
 
 from models import db, Staff, User, UserRole, Department, Gender
-from app import admin_required
+from utils.decorators import admin_required
 
 staff_bp = Blueprint('staff', __name__, url_prefix='/staff')
 
@@ -176,7 +176,10 @@ def edit(id):
 def toggle_status(id):
     """Toggle staff active status."""
     staff = Staff.query.get_or_404(id)
-    
+    if staff.school_id != current_user.school_id:
+        flash('Access denied.', 'error')
+        return redirect(url_for('staff.index'))
+
     staff.is_active = not staff.is_active
     
     # Also toggle user account if exists

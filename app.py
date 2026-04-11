@@ -9,7 +9,12 @@ from flask import Flask, render_template, redirect, url_for, flash, request, jso
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
-from flask_apscheduler import APScheduler
+try:
+    from flask_apscheduler import APScheduler
+    _scheduler_available = True
+except ImportError:
+    APScheduler = None
+    _scheduler_available = False
 
 from dotenv import load_dotenv
 
@@ -23,7 +28,7 @@ load_dotenv()
 login_manager = LoginManager()
 migrate = Migrate()
 csrf = CSRFProtect()
-scheduler = APScheduler()
+scheduler = APScheduler() if _scheduler_available else None
 
 
 def create_app(config_name='default'):
@@ -158,27 +163,28 @@ def create_app(config_name='default'):
         run_midnight_analytics()
         print("Sasu AI: School Insights generated for all active schools.")
 
-    # ── APScheduler: scheduled jobs ──────────────────────────────────────────
-    app.config['SCHEDULER_API_ENABLED'] = False
-    scheduler.init_app(app)
+    # ── APScheduler: scheduled jobs (only if flask_apscheduler is installed) ──
+    if _scheduler_available and scheduler:
+        app.config['SCHEDULER_API_ENABLED'] = False
+        scheduler.init_app(app)
 
-    @scheduler.task('cron', id='weekly_briefing', day_of_week='fri', hour=16, minute=0,
-                    misfire_grace_time=900)
-    def weekly_briefing_job():
-        """Every Friday 4 PM: send weekly vitals PDF to each school's headteacher."""
-        with app.app_context():
-            from services.report_service import send_weekly_vitals
-            send_weekly_vitals()
+        @scheduler.task('cron', id='weekly_briefing', day_of_week='fri', hour=16, minute=0,
+                        misfire_grace_time=900)
+        def weekly_briefing_job():
+            """Every Friday 4 PM: send weekly vitals to each school's headteacher."""
+            with app.app_context():
+                from services.report_service import send_weekly_vitals
+                send_weekly_vitals()
 
-    @scheduler.task('cron', id='midnight_analytics', hour=0, minute=5,
-                    misfire_grace_time=300)
-    def midnight_analytics_job():
-        """Daily 00:05: run predictive analytics for all schools."""
-        with app.app_context():
-            from services.analytics_engine import run_midnight_analytics
-            run_midnight_analytics()
+        @scheduler.task('cron', id='midnight_analytics', hour=0, minute=5,
+                        misfire_grace_time=300)
+        def midnight_analytics_job():
+            """Daily 00:05: run predictive analytics for all schools."""
+            with app.app_context():
+                from services.analytics_engine import run_midnight_analytics
+                run_midnight_analytics()
 
-    scheduler.start()
+        scheduler.start()
 
     return app
 

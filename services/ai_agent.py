@@ -2,7 +2,10 @@ import os
 import json
 from decimal import Decimal
 from datetime import datetime
-from groq import Groq
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
 from models import db, School, FeeInvoice, TerminalReportView, SubjectPerformanceView, Attendance, Student, AISession, AIBotConfig, SupportTicket, AICreditUsage, AuditLog, SchoolInsight, AICorrection, Product, ProductCategory, Order, OrderItem, PaymentStatus, User
 from sqlalchemy import func
 
@@ -11,7 +14,7 @@ class SasuAIAgent:
     
     def __init__(self, school_id):
         self.school_id = school_id
-        self.client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+        self.client = Groq(api_key=os.environ.get("GROQ_API_KEY")) if Groq else None
         self.school = School.query.get(school_id)
         self.config = AIBotConfig.query.filter_by(school_id=school_id).first()
         

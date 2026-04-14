@@ -2,6 +2,23 @@
 
 {% block title %}SmartSchool - Best School Management System in Ghana | Sasu AI{% endblock %}
 
+{% block extra_css %}
+<!-- Tailwind CDN for landing page only -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Font Awesome for landing page icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+    @keyframes pulse-slow { 0%,100%{opacity:1} 50%{opacity:.5} }
+    @keyframes fade-in { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slide-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .animate-pulse-slow{animation:pulse-slow 4s ease-in-out infinite}
+    .animate-fade-in{animation:fade-in .6s ease forwards}
+    .animate-slide-up{animation:slide-up .8s ease forwards}
+    /* override base.html light-theme body styles for landing page */
+    body { background:#020617 !important; color:#f1f5f9 !important; }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="min-h-screen bg-slate-950 text-slate-100 font-inter selection:bg-indigo-500/30">
     <!-- Navigation -->

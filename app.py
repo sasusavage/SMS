@@ -97,11 +97,15 @@ def _auto_seed_if_empty(app):
                           is_current=True)
         db.session.add(ay)
         db.session.flush()
-        for i, tn in enumerate(["First Term", "Second Term", "Third Term"], 1):
+        term_dates = [
+            (date(2025, 9, 1),  date(2025, 12, 20)),
+            (date(2026, 1, 7),  date(2026, 4, 4)),
+            (date(2026, 4, 28), date(2026, 7, 20)),
+        ]
+        for i, (tn, (sd, ed)) in enumerate(zip(["First Term", "Second Term", "Third Term"], term_dates), 1):
             db.session.add(Term(
                 academic_year_id=ay.id, name=tn, term_number=i,
-                start_date=date(2025, 9 + (i-1)*4, 1),
-                end_date=date(2026, 1 + (i-1)*4, 20) if i < 3 else date(2026, 7, 20),
+                start_date=sd, end_date=ed,
                 is_current=(i == 2)
             ))
 
@@ -327,11 +331,14 @@ def create_app(config_name='default'):
         db.session.add(ay)
         db.session.flush()
 
-        for i, tn in enumerate(["First Term", "Second Term", "Third Term"], 1):
+        term_dates = [
+            (date(2025, 9, 1),  date(2025, 12, 20)),
+            (date(2026, 1, 7),  date(2026, 4, 4)),
+            (date(2026, 4, 28), date(2026, 7, 20)),
+        ]
+        for i, (tn, (sd, ed)) in enumerate(zip(["First Term", "Second Term", "Third Term"], term_dates), 1):
             t = Term(academic_year_id=ay.id, name=tn, term_number=i,
-                     start_date=date(2025, 9 + (i-1)*4, 1),
-                     end_date=date(2025, 12 + (i-1)*4, 20) if i < 3 else date(2026, 7, 20),
-                     is_current=(i == 2))
+                     start_date=sd, end_date=ed, is_current=(i == 2))
             db.session.add(t)
 
         db.session.commit()

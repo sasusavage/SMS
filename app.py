@@ -31,6 +31,87 @@ csrf = CSRFProtect()
 scheduler = APScheduler() if _scheduler_available else None
 
 
+def _auto_seed_if_empty(app):
+    """On first boot: create tables, Super Admin, demo school. Skips if users exist."""
+    try:
+        from models import init_db, ModuleConfig, SubscriptionPlan, Subscription
+        from decimal import Decimal
+        from datetime import date
+
+        init_db(app)
+
+        if User.query.first():
+            return  # already seeded
+
+        # 1. SaaS HQ (Super Admin container)
+        hq = School(name="SmartSchool SaaS HQ", email="superadmin@smartschool.com",
+                     motto="Powering Ghanaian Education", school_type="SaaS Platform")
+        db.session.add(hq)
+        db.session.flush()
+
+        sa = User(school_id=hq.id, email="superadmin@smartschool.com",
+                  role=UserRole.SUPER_ADMIN, is_active=True)
+        sa.set_password("smart_saas_2026")
+        db.session.add(sa)
+        db.session.add(ModuleConfig(school_id=hq.id, is_ai_enabled=True,
+                                     is_sms_enabled=True, is_finance_enabled=True))
+
+        # 2. Subscription plans
+        plans = [
+            SubscriptionPlan(name="Basic", price=Decimal('49.00'), student_limit=100,
+                             features={'core': True, 'reports': True}),
+            SubscriptionPlan(name="Standard", price=Decimal('149.00'), student_limit=500,
+                             features={'core': True, 'reports': True, 'fees': True, 'sms': True}),
+            SubscriptionPlan(name="Elite", price=Decimal('499.00'), student_limit=5000,
+                             features={'all': True, 'ai': True, 'marketplace': True,
+                                       'predictive': True, 'voice': True}),
+        ]
+        db.session.add_all(plans)
+        db.session.flush()
+
+        # 3. Demo school (Elite)
+        demo = School(name="Demo International School", email="admin@demo.smartschool.com",
+                       city="Accra", region="Greater Accra", phone="0241234567",
+                       motto="Excellence in Education", school_type="Primary & JHS",
+                       established_year=2005)
+        db.session.add(demo)
+        db.session.flush()
+        db.session.add(Subscription(school_id=demo.id, plan_id=plans[2].id,
+                                     status='active',
+                                     end_date=date.today().replace(year=date.today().year + 1)))
+        db.session.add(ModuleConfig(school_id=demo.id, is_ai_enabled=True,
+                                     is_sms_enabled=True, is_finance_enabled=True))
+
+        for role, email, pw in [
+            (UserRole.HEADTEACHER, "head@demo.smartschool.com", "head123"),
+            (UserRole.ADMIN,       "admin@demo.smartschool.com", "admin123"),
+            (UserRole.TEACHER,     "teacher@demo.smartschool.com", "teacher123"),
+        ]:
+            u = User(school_id=demo.id, email=email, role=role, is_active=True)
+            u.set_password(pw)
+            db.session.add(u)
+
+        # Academic Year + Terms
+        ay = AcademicYear(school_id=demo.id, name="2025/2026",
+                          start_date=date(2025, 9, 1), end_date=date(2026, 7, 31),
+                          is_current=True)
+        db.session.add(ay)
+        db.session.flush()
+        for i, tn in enumerate(["First Term", "Second Term", "Third Term"], 1):
+            db.session.add(Term(
+                academic_year_id=ay.id, name=tn, term_number=i,
+                start_date=date(2025, 9 + (i-1)*4, 1),
+                end_date=date(2026, 1 + (i-1)*4, 20) if i < 3 else date(2026, 7, 20),
+                is_current=(i == 2)
+            ))
+
+        db.session.commit()
+        print("[AutoSeed] Production seed complete — Super Admin + Demo School created.")
+    except Exception as exc:
+        db.session.rollback()
+        print(f"[AutoSeed] Skipped or failed: {exc}")
+
+
 def create_app(config_name='default'):
     """Application factory."""
     app = Flask(__name__)
@@ -154,7 +235,11 @@ def create_app(config_name='default'):
     
     # Create upload folder
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    
+
+    # ── Auto-seed on first boot (no users in DB) ────────────────────────────
+    with app.app_context():
+        _auto_seed_if_empty(app)
+
     # CLI Commands
     @app.cli.command("run-analytics")
     def run_analytics_command():

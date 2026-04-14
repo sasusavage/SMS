@@ -1,0 +1,232 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}{{ school.name }} — School Detail | SmartSchool{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('saas_admin.dashboard') }}" class="breadcrumb-link">SaaS Control Center</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ school.name }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+
+{# ── PAGE HEADER ─────────────────────────────────────────────────────────── #}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ school.name }}</h1>
+        <p class="page-subtitle">{{ school.email }} &nbsp;·&nbsp; {{ school.school_type or 'School' }}</p>
+    </div>
+    <div class="flex gap-3 items-center">
+        <span class="badge {% if school.is_account_suspended %}badge-error{% else %}badge-success{% endif %}" style="font-size:var(--font-size-sm);padding:6px 14px;">
+            {{ 'Suspended' if school.is_account_suspended else 'Active' }}
+        </span>
+        <a href="{{ url_for('saas_admin.dashboard') }}" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back
+        </a>
+    </div>
+</div>
+
+{# ── KPI ROW ─────────────────────────────────────────────────────────────── #}
+<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:var(--space-8);">
+    <div class="stat-card success">
+        <div class="stat-value">{{ "{:,}".format(student_count) }}</div>
+        <div class="stat-label">Active Students</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ users|length }}</div>
+        <div class="stat-label">Staff Accounts</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value">{{ "{:,}".format(ai_tokens) }}</div>
+        <div class="stat-label">AI Tokens Used</div>
+    </div>
+    <div class="stat-card">
+        {% set sub = school.subscription %}
+        <div class="stat-value">{{ sub.plan.name if sub and sub.plan else '—' }}</div>
+        <div class="stat-label">Current Plan</div>
+    </div>
+</div>
+
+{# ── TWO COLUMN GRID ─────────────────────────────────────────────────────── #}
+<div class="grid gap-6" style="grid-template-columns:1fr 320px;">
+
+    {# LEFT — Staff Accounts #}
+    <div class="flex flex-col gap-6">
+        <div class="card" style="overflow:hidden;">
+            <div class="card-header">
+                <h3 class="card-title">Staff Accounts</h3>
+                <span class="badge badge-primary">{{ users|length }}</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u.email }}</td>
+                            <td><span class="badge badge-secondary">{{ u.role.value }}</span></td>
+                            <td>
+                                <span class="badge {% if u.is_active %}badge-success{% else %}badge-error{% endif %}">
+                                    {{ 'Active' if u.is_active else 'Inactive' }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:var(--space-8);">No staff accounts.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Recent Audit Logs #}
+        <div class="card" style="overflow:hidden;">
+            <div class="card-header">
+                <h3 class="card-title">Recent Activity</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr><th>Time</th><th>Action</th><th>Entity</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td style="white-space:nowrap;font-size:var(--font-size-xs);color:var(--text-muted);">
+                                {{ log.timestamp.strftime('%d %b %H:%M') if log.timestamp else '—' }}
+                            </td>
+                            <td style="font-size:var(--font-size-sm);">{{ log.action }}</td>
+                            <td style="font-size:var(--font-size-sm);color:var(--text-muted);">{{ log.entity_type }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:var(--space-8);">No activity recorded.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {# RIGHT — Plan + Module Config #}
+    <div class="flex flex-col gap-4">
+
+        {# Subscription Plan #}
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Subscription Plan</h3></div>
+            <div class="card-body">
+                {% set sub = school.subscription %}
+                {% if sub %}
+                <div style="margin-bottom:var(--space-4);">
+                    <div style="font-size:var(--font-size-xs);color:var(--text-muted);margin-bottom:2px;">Current</div>
+                    <div style="font-weight:700;font-size:var(--font-size-lg);">{{ sub.plan.name if sub.plan else '—' }}</div>
+                    {% if sub.plan %}<div style="font-size:var(--font-size-sm);color:var(--text-muted);">GHS {{ "{:,.2f}".format(sub.plan.price) }}/yr</div>{% endif %}
+                    <div style="font-size:var(--font-size-xs);color:var(--text-muted);margin-top:4px;">
+                        Expires: {{ sub.end_date.strftime('%d %b %Y') if sub.end_date else '—' }}
+                    </div>
+                </div>
+                {% else %}
+                <p style="color:var(--text-muted);font-size:var(--font-size-sm);margin-bottom:var(--space-4);">No active subscription.</p>
+                {% endif %}
+
+                <form action="{{ url_for('saas_admin.assign_plan', school_id=school.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group" style="margin-bottom:var(--space-3);">
+                        <label class="form-label" style="font-size:var(--font-size-sm);">Assign / Change Plan</label>
+                        <select name="plan_id" class="form-select">
+                            {% for p in plans %}
+                            <option value="{{ p.id }}" {% if sub and sub.plan_id == p.id %}selected{% endif %}>
+                                {{ p.name }} — GHS {{ "{:,.2f}".format(p.price) }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Update Plan</button>
+                </form>
+            </div>
+        </div>
+
+        {# Module Config #}
+        {% set mc = school.module_config %}
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Module Config</h3></div>
+            <div class="card-body flex flex-col gap-3">
+                {% for field, label in [
+                    ('is_ai_enabled','AI Chatbot'),
+                    ('is_sms_enabled','SMS Notifications'),
+                    ('is_finance_enabled','Finance Module'),
+                    ('is_predictive_ai_enabled','Predictive AI'),
+                    ('is_marketplace_enabled','Marketplace'),
+                    ('is_pwa_enabled','PWA / Offline')
+                ] %}
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:var(--font-size-sm);">{{ label }}</span>
+                    <button onclick="toggleModule({{ school.id }},'{{ field }}',this)"
+                            style="width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;
+                                   position:relative;transition:background .2s;outline:none;
+                                   background:{{ 'var(--primary-500)' if (mc and mc|attr(field)) else 'var(--slate-300)' }};"
+                            data-state="{{ '1' if (mc and mc|attr(field)) else '0' }}">
+                        <span style="position:absolute;top:2px;width:16px;height:16px;
+                                     border-radius:50%;background:#fff;transition:left .2s;
+                                     left:{{ '18px' if (mc and mc|attr(field)) else '2px' }};"></span>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# Suspend / Reinstate #}
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:var(--error-500);">Danger Zone</h3></div>
+            <div class="card-body">
+                {% if school.is_account_suspended %}
+                <form action="{{ url_for('saas_admin.reinstate_school', school_id=school.id) }}" method="POST"
+                      onsubmit="return confirm('Reinstate {{ school.name }}?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn" style="width:100%;background:var(--success-500);color:#fff;">
+                        Reinstate School
+                    </button>
+                </form>
+                {% else %}
+                <form action="{{ url_for('saas_admin.suspend_school', school_id=school.id) }}" method="POST"
+                      onsubmit="return confirm('Suspend {{ school.name }}? This will lock all users out.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group" style="margin-bottom:var(--space-3);">
+                        <label class="form-label" style="font-size:var(--font-size-sm);">Suspension Reason</label>
+                        <input type="text" name="reason" class="form-control" placeholder="e.g. Payment overdue" required>
+                    </div>
+                    <button type="submit" class="btn" style="width:100%;background:var(--error-500);color:#fff;">
+                        Suspend School
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleModule(schoolId, field, btn) {
+    fetch(`/saas-admin/toggle-module/${schoolId}/${field}`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const on = data.new_state;
+            btn.dataset.state = on ? '1' : '0';
+            btn.style.background = on ? 'var(--primary-500)' : 'var(--slate-300)';
+            btn.querySelector('span').style.left = on ? '18px' : '2px';
+        }
+    });
+}
+</script>
+{% endblock %}

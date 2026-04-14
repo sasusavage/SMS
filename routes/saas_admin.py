@@ -6,7 +6,7 @@ Only accessible to UserRole.SUPER_ADMIN.
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import func
-from models import db, UserRole, Student, StudentStatus, Payment, PaymentStatus, School, AICreditUsage, AuditLog, AISession, ModuleConfig
+from models import db, UserRole, Student, StudentStatus, Payment, PaymentStatus, School, AICreditUsage, AuditLog, AISession, ModuleConfig, SubscriptionPlan, Subscription
 
 saas_admin_bp = Blueprint('saas_admin', __name__, url_prefix='/saas-admin')
 
@@ -45,11 +45,22 @@ def dashboard():
     ).join(AICreditUsage).group_by(School.name).all()
 
     schools_full = School.query.order_by(School.name).all()
+    plans = SubscriptionPlan.query.order_by(SubscriptionPlan.price).all()
+
+    # Per-school student counts
+    student_counts = dict(
+        db.session.query(Student.school_id, func.count(Student.id))
+        .filter(Student.status == StudentStatus.ACTIVE)
+        .group_by(Student.school_id)
+        .all()
+    )
 
     return render_template('dashboard/super_admin.html',
         stats=stats,
         ai_usage=ai_top_consumers,
-        schools_full=schools_full
+        schools_full=schools_full,
+        plans=plans,
+        student_counts=student_counts,
     )
 
 
@@ -64,6 +75,7 @@ def onboard_school():
     name = request.form.get('name')
     email = request.form.get('email')
     school_type = request.form.get('school_type', 'Private')
+    plan_id = request.form.get('plan_id', type=int)
 
     if not name or not email:
         flash('School Name and Email are required.', 'error')
@@ -80,9 +92,16 @@ def onboard_school():
         is_finance_enabled=True
     )
     db.session.add(config)
+
+    if plan_id:
+        from datetime import date
+        sub = Subscription(school_id=new_school.id, plan_id=plan_id, status='active',
+                           end_date=date.today().replace(year=date.today().year + 1))
+        db.session.add(sub)
+
     db.session.commit()
 
-    flash(f'School "{name}" onboarded successfully! Elite Tier modules initialized.', 'success')
+    flash(f'School "{name}" onboarded successfully!', 'success')
     return redirect(url_for('saas_admin.dashboard'))
 
 
@@ -161,3 +180,52 @@ def reinstate_school(school_id):
     db.session.commit()
     flash(f'"{school.name}" has been reinstated.', 'success')
     return redirect(url_for('saas_admin.dashboard'))
+
+
+@saas_admin_bp.route('/school/<int:school_id>')
+@login_required
+def school_detail(school_id):
+    """Per-school detail view — users, students, subscription, modules."""
+    guard = _require_super_admin()
+    if guard:
+        return guard
+
+    from models import User, AcademicYear
+    school = School.query.get_or_404(school_id)
+    users = User.query.filter_by(school_id=school_id).order_by(User.role).all()
+    student_count = Student.query.filter_by(school_id=school_id, status=StudentStatus.ACTIVE).count()
+    plans = SubscriptionPlan.query.order_by(SubscriptionPlan.price).all()
+    ai_tokens = db.session.query(func.sum(AICreditUsage.tokens_used)).filter_by(school_id=school_id).scalar() or 0
+    recent_logs = AuditLog.query.filter_by(school_id=school_id).order_by(AuditLog.timestamp.desc()).limit(20).all()
+    return render_template('saas_admin/school_detail.html',
+        school=school, users=users, student_count=student_count,
+        plans=plans, ai_tokens=ai_tokens, recent_logs=recent_logs)
+
+
+@saas_admin_bp.route('/assign-plan/<int:school_id>', methods=['POST'])
+@login_required
+def assign_plan(school_id):
+    """Change or assign a subscription plan for a school."""
+    guard = _require_super_admin()
+    if guard:
+        return guard
+
+    from datetime import date
+    plan_id = request.form.get('plan_id', type=int)
+    if not plan_id:
+        flash('No plan selected.', 'error')
+        return redirect(url_for('saas_admin.school_detail', school_id=school_id))
+
+    plan = SubscriptionPlan.query.get_or_404(plan_id)
+    sub = Subscription.query.filter_by(school_id=school_id).first()
+    if sub:
+        sub.plan_id = plan_id
+        sub.status = 'active'
+        sub.end_date = date.today().replace(year=date.today().year + 1)
+    else:
+        sub = Subscription(school_id=school_id, plan_id=plan_id, status='active',
+                           end_date=date.today().replace(year=date.today().year + 1))
+        db.session.add(sub)
+    db.session.commit()
+    flash(f'Plan updated to {plan.name}.', 'success')
+    return redirect(url_for('saas_admin.school_detail', school_id=school_id))

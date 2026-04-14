@@ -90,12 +90,14 @@
                 <thead>
                     <tr>
                         <th>School</th>
+                        <th>Plan</th>
+                        <th style="text-align:right;">Students</th>
                         <th style="text-align:center;">AI</th>
                         <th style="text-align:center;">Predict</th>
                         <th style="text-align:center;">Market</th>
                         <th style="text-align:center;">PWA</th>
                         <th>Status</th>
-                        <th style="text-align:center;">Kill-Switch</th>
+                        <th style="text-align:center;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,8 +105,22 @@
                     {% set mc = sch.module_config %}
                     <tr class="group">
                         <td>
-                            <div style="font-weight:600;color:var(--slate-100);">{{ sch.name }}</div>
-                            <div style="font-size:var(--font-size-xs);color:var(--slate-500);">{{ sch.email }}</div>
+                            <a href="{{ url_for('saas_admin.school_detail', school_id=sch.id) }}"
+                               style="font-weight:600;color:var(--primary-500);text-decoration:none;">{{ sch.name }}</a>
+                            <div style="font-size:var(--font-size-xs);color:var(--text-muted);">{{ sch.email }}</div>
+                        </td>
+                        <td>
+                            {% set sub = sch.subscription %}
+                            {% if sub and sub.plan %}
+                            <span class="badge {% if sub.plan.name == 'Elite' %}badge-warning{% elif sub.plan.name == 'Standard' %}badge-primary{% else %}badge-secondary{% endif %}">
+                                {{ sub.plan.name }}
+                            </span>
+                            {% else %}
+                            <span class="badge" style="background:var(--slate-200);color:var(--text-muted);">No Plan</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:right;font-variant-numeric:tabular-nums;">
+                            {{ "{:,}".format(student_counts.get(sch.id, 0)) }}
                         </td>
 
                         {# Module toggles — CSRF-safe fetch calls #}
@@ -115,7 +131,6 @@
                             ('is_pwa_enabled','PWA')
                         ] %}
                         <td style="text-align:center;">
-                            {% set is_on = mc and mc[field] if mc else false %}
                             <button
                                 onclick="toggleModule({{ sch.id }},'{{ field }}',this)"
                                 title="Toggle {{ label }}"
@@ -139,26 +154,31 @@
                         </td>
 
                         <td style="text-align:center;">
-                            <form action="{{ url_for('admin.suspend_school', school_id=sch.id) }}" method="POST"
-                                  onsubmit="return confirm('{{ 'Reinstate' if sch.is_account_suspended else 'Suspend' }} {{ sch.name }}?');">
+                            {% if sch.is_account_suspended %}
+                            <form action="{{ url_for('saas_admin.reinstate_school', school_id=sch.id) }}" method="POST"
+                                  onsubmit="return confirm('Reinstate {{ sch.name }}?');">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <input type="hidden" name="reason" value="SaaS Admin Override">
-                                <button type="submit"
-                                    class="btn btn-ghost btn-sm"
-                                    style="color:{{ 'var(--success-500)' if sch.is_account_suspended else 'var(--error-500)' }};">
-                                    {% if sch.is_account_suspended %}
+                                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--success-500);">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
-                                    {% else %}
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                    {% endif %}
-                                    {{ 'Reinstate' if sch.is_account_suspended else 'Suspend' }}
+                                    Reinstate
                                 </button>
                             </form>
+                            {% else %}
+                            <form action="{{ url_for('saas_admin.suspend_school', school_id=sch.id) }}" method="POST"
+                                  onsubmit="return confirm('Suspend {{ sch.name }}?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="reason" value="SaaS Admin Override">
+                                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--error-500);">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    Suspend
+                                </button>
+                            </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" style="text-align:center;padding:var(--space-10);color:var(--slate-500);">
+                        <td colspan="10" style="text-align:center;padding:var(--space-10);color:var(--text-muted);">
                             No schools onboarded yet.
                         </td>
                     </tr>
@@ -246,6 +266,15 @@
                         <option value="Private">Private</option>
                         <option value="Public">Public</option>
                         <option value="International">International</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Subscription Plan</label>
+                    <select name="plan_id" class="form-select">
+                        <option value="">— No plan yet —</option>
+                        {% for p in plans %}
+                        <option value="{{ p.id }}">{{ p.name }} — GHS {{ "{:,.2f}".format(p.price) }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>

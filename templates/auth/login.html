@@ -1,373 +1,289 @@
 {% extends "base.html" %}
-
-{% block title %}Sign In - SmartSchool{% endblock %}
-
-{% block body_class %}auth-page{% endblock %}
+{% block title %}Sign In — SmartSchool{% endblock %}
 
 {% block extra_css %}
 <style>
-    .auth-page {
-        min-height: 100vh;
-        display: flex;
-        background: linear-gradient(135deg, var(--slate-950) 0%, var(--slate-900) 100%);
-    }
+/* ── Login page reset — light background ── */
+body { background: #f8fafc !important; color: #0f172a !important; }
 
-    .auth-sidebar {
-        flex: 1;
-        display: none;
-        background: linear-gradient(135deg, var(--primary-900) 0%, var(--slate-950) 100%);
-        padding: var(--space-16);
-        position: relative;
-        overflow: hidden;
-    }
+.login-wrap {
+    min-height: 100vh;
+    display: flex;
+}
 
-    @media (min-width: 1024px) {
-        .auth-sidebar {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-    }
+/* Left panel — indigo brand */
+.login-brand {
+    flex: 0 0 440px;
+    background: linear-gradient(160deg, #3730a3 0%, #4f46e5 60%, #6366f1 100%);
+    padding: 56px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.login-brand::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+@media (max-width: 900px) { .login-brand { display: none; } }
 
-    .auth-sidebar::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
-        animation: rotate 30s linear infinite;
-    }
+.login-brand-inner { position: relative; z-index: 1; }
+.login-brand-logo {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 56px;
+}
+.login-brand-logo-icon {
+    width: 42px; height: 42px; background: rgba(255,255,255,0.15);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.login-brand-logo-text {
+    font-size: 1.25rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: -0.02em;
+}
+.login-brand-logo-text span { color: #a5b4fc; }
 
-    @keyframes rotate {
-        from {
-            transform: rotate(0deg);
-        }
+.login-brand h1 {
+    font-size: 2rem; font-weight: 800; color: #fff; line-height: 1.2;
+    letter-spacing: -0.03em; margin-bottom: 16px;
+}
+.login-brand p { font-size: 0.9375rem; color: #c7d2fe; line-height: 1.7; margin-bottom: 48px; }
 
-        to {
-            transform: rotate(360deg);
-        }
-    }
+.login-feature {
+    display: flex; align-items: flex-start; gap: 14px; margin-bottom: 24px;
+}
+.login-feature-dot {
+    width: 36px; height: 36px; min-width: 36px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+}
+.login-feature-dot svg { width: 18px; height: 18px; stroke: #a5b4fc; }
+.login-feature h4 { font-size: 0.875rem; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.login-feature p  { font-size: 0.8125rem; color: #a5b4fc; line-height: 1.5; }
 
-    .auth-sidebar-content {
-        position: relative;
-        z-index: 1;
-    }
+/* Right panel — form */
+.login-form-panel {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px 24px;
+    background: #f8fafc;
+}
+.login-form-box {
+    width: 100%; max-width: 420px;
+}
 
-    .auth-sidebar h1 {
-        font-size: var(--font-size-4xl);
-        font-weight: 700;
-        margin-bottom: var(--space-4);
-        background: linear-gradient(135deg, white 0%, var(--primary-300) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+.login-mobile-logo {
+    display: none;
+    align-items: center; gap: 10px; margin-bottom: 32px;
+}
+@media (max-width: 900px) { .login-mobile-logo { display: flex; } }
+.login-mobile-logo-icon {
+    width: 38px; height: 38px; background: #4f46e5; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+}
+.login-mobile-logo-text {
+    font-size: 1.125rem; font-weight: 800; color: #0f172a; text-transform: uppercase;
+}
+.login-mobile-logo-text span { color: #4f46e5; }
 
-    .auth-sidebar p {
-        font-size: var(--font-size-lg);
-        color: var(--slate-400);
-        max-width: 400px;
-        line-height: 1.7;
-    }
+.login-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+.login-card-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+.login-card-sub  { font-size: 0.875rem; color: #64748b; margin-bottom: 32px; }
 
-    .auth-features {
-        margin-top: var(--space-12);
-    }
+/* Flash messages */
+.flash-msg {
+    padding: 12px 16px; border-radius: 10px; font-size: 0.875rem;
+    margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+}
+.flash-msg.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+.flash-msg.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.flash-msg.warning { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+.flash-msg.info    { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
 
-    .auth-feature {
-        display: flex;
-        align-items: flex-start;
-        gap: var(--space-4);
-        margin-bottom: var(--space-6);
-    }
+/* Form elements */
+.form-field { margin-bottom: 20px; }
+.form-field label {
+    display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 6px;
+}
+.form-field input {
+    width: 100%; height: 46px; padding: 0 14px;
+    border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-size: 0.9375rem; color: #0f172a; background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+    outline: none;
+}
+.form-field input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+}
+.form-field input::placeholder { color: #94a3b8; }
 
-    .auth-feature-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: var(--radius-lg);
-        background: rgba(99, 102, 241, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
+.form-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+}
+.form-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.form-row label input[type="checkbox"] {
+    width: 16px; height: 16px; accent-color: #4f46e5;
+}
+.form-row label span { font-size: 0.8125rem; color: #64748b; }
+.form-row a { font-size: 0.8125rem; color: #4f46e5; text-decoration: none; }
+.form-row a:hover { color: #4338ca; }
 
-    .auth-feature-icon svg {
-        width: 24px;
-        height: 24px;
-        stroke: var(--primary-400);
-    }
+.btn-signin {
+    width: 100%; height: 48px; background: #4f46e5; color: #fff;
+    border: none; border-radius: 10px; font-size: 0.9375rem; font-weight: 700;
+    cursor: pointer; transition: background .15s, box-shadow .15s;
+    box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+}
+.btn-signin:hover { background: #4338ca; box-shadow: 0 6px 20px rgba(79,70,229,0.4); }
 
-    .auth-feature h3 {
-        font-size: var(--font-size-base);
-        font-weight: 600;
-        margin-bottom: var(--space-1);
-    }
+.divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0; color: #94a3b8; font-size: 0.8125rem;
+}
+.divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: #e2e8f0;
+}
 
-    .auth-feature p {
-        font-size: var(--font-size-sm);
-        color: var(--slate-500);
-    }
-
-    .auth-main {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: var(--space-8);
-    }
-
-    .auth-container {
-        width: 100%;
-        max-width: 420px;
-    }
-
-    .auth-logo {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        margin-bottom: var(--space-8);
-    }
-
-    .auth-logo-icon {
-        width: 48px;
-        height: 48px;
-        background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-        border-radius: var(--radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .auth-logo-icon svg {
-        width: 28px;
-        height: 28px;
-        stroke: white;
-    }
-
-    .auth-logo-text {
-        font-size: var(--font-size-2xl);
-        font-weight: 700;
-    }
-
-    .auth-logo-text span {
-        color: var(--primary-400);
-    }
-
-    .auth-card {
-        background: var(--slate-900);
-        border: 1px solid var(--slate-800);
-        border-radius: var(--radius-2xl);
-        padding: var(--space-8);
-    }
-
-    .auth-header {
-        margin-bottom: var(--space-6);
-    }
-
-    .auth-header h2 {
-        font-size: var(--font-size-2xl);
-        font-weight: 700;
-        margin-bottom: var(--space-2);
-    }
-
-    .auth-header p {
-        color: var(--slate-400);
-    }
-
-    .auth-form .form-group {
-        margin-bottom: var(--space-5);
-    }
-
-    .auth-form .form-input {
-        height: 48px;
-    }
-
-    .auth-options {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: var(--space-6);
-    }
-
-    .remember-me {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        cursor: pointer;
-    }
-
-    .remember-me input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--primary-500);
-    }
-
-    .remember-me span {
-        font-size: var(--font-size-sm);
-        color: var(--slate-400);
-    }
-
-    .forgot-link {
-        font-size: var(--font-size-sm);
-        color: var(--primary-400);
-    }
-
-    .forgot-link:hover {
-        color: var(--primary-300);
-    }
-
-    .auth-submit {
-        width: 100%;
-        height: 48px;
-        font-size: var(--font-size-base);
-    }
-
-    .auth-divider {
-        display: flex;
-        align-items: center;
-        gap: var(--space-4);
-        margin: var(--space-6) 0;
-        color: var(--slate-500);
-        font-size: var(--font-size-sm);
-    }
-
-    .auth-divider::before,
-    .auth-divider::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background-color: var(--slate-800);
-    }
-
-    .parent-login-btn {
-        width: 100%;
-        background-color: var(--slate-800);
-        border: 1px solid var(--slate-700);
-        color: var(--slate-100);
-        height: 48px;
-    }
-
-    .parent-login-btn:hover {
-        background-color: var(--slate-700);
-    }
+.btn-parent {
+    width: 100%; height: 46px;
+    background: #f8fafc; color: #475569;
+    border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none; transition: border-color .15s, color .15s;
+}
+.btn-parent:hover { border-color: #4f46e5; color: #4f46e5; }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="auth-page">
-    <!-- Left Sidebar with Features -->
-    <div class="auth-sidebar">
-        <div class="auth-sidebar-content">
-            <h1>NaCCA School<br>Management System</h1>
-            <p>A comprehensive solution for Ghanaian schools following NaCCA standards. Manage students, staff,
-                assessments, and fees all in one place.</p>
+<div class="login-wrap">
 
-            <div class="auth-features">
-                <div class="auth-feature">
-                    <div class="auth-feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 11l3 3L22 4" />
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3>NaCCA Grading</h3>
-                        <p>Automatic grade calculation based on Ghana Education Standards</p>
-                    </div>
-                </div>
-
-                <div class="auth-feature">
-                    <div class="auth-feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3>Fee Management</h3>
-                        <p>Track payments, generate invoices, and manage debts</p>
-                    </div>
-                </div>
-
-                <div class="auth-feature">
-                    <div class="auth-feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M18 21a8 8 0 0 0-16 0" />
-                            <circle cx="10" cy="8" r="5" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3>Parent Portal</h3>
-                        <p>Secure access for parents to track their children's progress</p>
-                    </div>
-                </div>
-            </div>
+  {# ── LEFT BRAND PANEL ── #}
+  <div class="login-brand">
+    <div class="login-brand-inner">
+      <div class="login-brand-logo">
+        <div class="login-brand-logo-icon">
+          <img src="{{ url_for('static', filename='img/icon.png') }}" style="width:24px;height:24px;" alt="S">
         </div>
-    </div>
+        <span class="login-brand-logo-text">Smart<span>School</span></span>
+      </div>
 
-    <!-- Login Form -->
-    <div class="auth-main">
-        <div class="auth-container">
-            <div class="auth-logo">
-                <div class="auth-logo-icon">
-                    <img src="{{ url_for('static', filename='img/icon.png') }}" class="w-8 h-8" alt="S">
-                </div>
-                <span class="auth-logo-text text-white uppercase">Smart<span class="text-indigo-400">School</span></span>
-            </div>
+      <h1>NaCCA School<br>Management<br>System</h1>
+      <p>A complete solution for Ghanaian schools. Manage students, staff, fees, and terminal reports — all in one place.</p>
 
-            <div class="auth-card">
-                <div class="auth-header">
-                    <h2>Welcome back</h2>
-                    <p>Sign in to your account to continue</p>
-                </div>
-
-                <form class="auth-form" method="POST" action="{{ url_for('auth.login') }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                    <div class="form-group">
-                        <label class="form-label" for="email">Email Address</label>
-                        <input type="email" id="email" name="email" class="form-input" placeholder="name@school.edu.gh"
-                            required autocomplete="email">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="password">Password</label>
-                        <input type="password" id="password" name="password" class="form-input"
-                            placeholder="Enter your password" required autocomplete="current-password">
-                    </div>
-
-                    <div class="auth-options">
-                        <label class="remember-me">
-                            <input type="checkbox" name="remember" value="1">
-                            <span>Remember me</span>
-                        </label>
-                        <a href="{{ url_for('auth.forgot_password') }}" class="forgot-link">Forgot password?</a>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary auth-submit">
-                        Sign In
-                    </button>
-                </form>
-
-                <div class="auth-divider">
-                    <span>or</span>
-                </div>
-
-                <a href="{{ url_for('auth.parent_login') }}" class="btn parent-login-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 21a8 8 0 0 0-16 0" />
-                        <circle cx="10" cy="8" r="5" />
-                    </svg>
-                    Parent Portal Login
-                </a>
-            </div>
+      <div class="login-feature">
+        <div class="login-feature-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
+        <div>
+          <h4>NaCCA Grading</h4>
+          <p>Automatic grade calculation following Ghana Education Standards, Primary through SHS.</p>
+        </div>
+      </div>
+
+      <div class="login-feature">
+        <div class="login-feature-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div>
+          <h4>Fee Management</h4>
+          <p>Track every payment, generate invoices, and collect fees via Paystack online.</p>
+        </div>
+      </div>
+
+      <div class="login-feature">
+        <div class="login-feature-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <h4>Sasu AI on WhatsApp</h4>
+          <p>Parents get instant answers on fees and grades via WhatsApp — in English, Twi, or Pidgin.</p>
+        </div>
+      </div>
     </div>
+  </div>
+
+  {# ── RIGHT FORM PANEL ── #}
+  <div class="login-form-panel">
+    <div class="login-form-box">
+
+      {# Mobile logo #}
+      <div class="login-mobile-logo">
+        <div class="login-mobile-logo-icon">
+          <img src="{{ url_for('static', filename='img/icon.png') }}" style="width:22px;height:22px;" alt="S">
+        </div>
+        <span class="login-mobile-logo-text">Smart<span>School</span></span>
+      </div>
+
+      <div class="login-card">
+        <h2 class="login-card-title">Welcome back</h2>
+        <p class="login-card-sub">Sign in to your school account to continue</p>
+
+        {# Flash messages #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+          <div class="flash-msg {{ category }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              {% if category == 'error' %}<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+              {% else %}<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>{% endif %}
+            </svg>
+            {{ message }}
+          </div>
+          {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="form-field">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="admin@yourschool.edu.gh" required autocomplete="email">
+          </div>
+
+          <div class="form-field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+          </div>
+
+          <div class="form-row">
+            <label>
+              <input type="checkbox" name="remember" value="1">
+              <span>Remember me</span>
+            </label>
+            <a href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn-signin">Sign In</button>
+        </form>
+
+        <div class="divider"><span>or</span></div>
+
+        <a href="{{ url_for('auth.parent_login') }}" class="btn-parent">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/>
+          </svg>
+          Parent Portal Login
+        </a>
+      </div>
+
+      <p style="text-align:center;margin-top:20px;font-size:0.8125rem;color:#94a3b8;">
+        © 2026 SmartSchool · <a href="/" style="color:#4f46e5;text-decoration:none;">Back to Home</a>
+      </p>
+    </div>
+  </div>
+
 </div>
 {% endblock %}

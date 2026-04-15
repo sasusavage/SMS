@@ -30,13 +30,23 @@
         <div class="nav-section">
             <div class="nav-section-title">Platform Control</div>
             <a href="{{ url_for('saas_admin.dashboard') }}"
-                class="nav-item {% if 'saas_admin' in request.endpoint %}active{% endif %}">
+                class="nav-item {% if request.endpoint in ['saas_admin.dashboard'] %}active{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
                 <span>Control Center</span>
             </a>
+            <a href="{{ url_for('saas_admin.schools_list') }}"
+                class="nav-item {% if request.endpoint in ['saas_admin.schools_list','saas_admin.school_detail'] %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>All Schools</span>
+            </a>
+            <a href="{{ url_for('saas_admin.revenue') }}"
+                class="nav-item {% if request.endpoint == 'saas_admin.revenue' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>Revenue</span>
+            </a>
             <a href="{{ url_for('saas_admin.audit_logs') }}"
                 class="nav-item {% if request.endpoint == 'saas_admin.audit_logs' %}active{% endif %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                 <span>Audit Ledger</span>
             </a>
             <a href="{{ url_for('saas_admin.ai_conversations') }}"
@@ -332,6 +342,22 @@
             </div>
         </div>
     </header>
+
+    <!-- Impersonation Banner -->
+    {% if session.get('impersonating_school_id') %}
+    <div style="background:#f59e0b;color:#0f172a;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:0.875rem;font-weight:600;z-index:100;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Viewing as Super Admin: <strong>{{ session.get('impersonating_school_name') }}</strong>
+        </div>
+        <a href="{{ url_for('saas_admin.exit_school') }}"
+           style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.15);color:#0f172a;padding:6px 14px;border-radius:8px;text-decoration:none;font-weight:700;transition:background .15s;"
+           onmouseover="this.style.background='rgba(0,0,0,0.25)'" onmouseout="this.style.background='rgba(0,0,0,0.15)'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Exit School
+        </a>
+    </div>
+    {% endif %}
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}

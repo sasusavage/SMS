@@ -1,0 +1,87 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}Revenue — SmartSchool{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{{ url_for('saas_admin.dashboard') }}" class="breadcrumb-link">Control Center</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Revenue</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Revenue Overview</h1>
+        <p class="page-subtitle">Platform-wide fee collections and subscription ARR</p>
+    </div>
+</div>
+
+{# KPI Cards #}
+<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:var(--space-8);">
+    <div class="stat-card success">
+        <div class="stat-value">GHS {{ "{:,.0f}".format(total_revenue) }}</div>
+        <div class="stat-label">Total Fees Collected</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value">GHS {{ "{:,.0f}".format(total_arr) }}</div>
+        <div class="stat-label">Annual Recurring Revenue</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ plan_revenue|selectattr('schools')|list|length }}</div>
+        <div class="stat-label">Paying Subscribers</div>
+    </div>
+</div>
+
+<div class="grid gap-6" style="grid-template-columns:1fr 1fr;">
+
+    {# Per-school revenue #}
+    <div class="card" style="overflow:hidden;">
+        <div class="card-header">
+            <h3 class="card-title">Revenue by School</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr><th>School</th><th style="text-align:right;">Collected (GHS)</th></tr></thead>
+                <tbody>
+                    {% for name, total in school_revenue %}
+                    <tr>
+                        <td style="font-size:var(--font-size-sm);">{{ name }}</td>
+                        <td style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums;">
+                            {{ "{:,.2f}".format(total or 0) }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="2" style="text-align:center;color:var(--text-muted);padding:var(--space-10);">No payment data yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# Per-plan ARR #}
+    <div class="card" style="overflow:hidden;">
+        <div class="card-header">
+            <h3 class="card-title">Revenue by Plan (ARR)</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr><th>Plan</th><th style="text-align:right;">Schools</th><th style="text-align:right;">ARR (GHS)</th></tr></thead>
+                <tbody>
+                    {% for name, schools, arr in plan_revenue %}
+                    <tr>
+                        <td>
+                            <span class="badge {% if name == 'Elite' %}badge-warning{% elif name == 'Standard' %}badge-primary{% else %}badge-secondary{% endif %}">{{ name }}</span>
+                        </td>
+                        <td style="text-align:right;">{{ schools }}</td>
+                        <td style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums;">{{ "{:,.2f}".format(arr or 0) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:var(--space-10);">No subscription data yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

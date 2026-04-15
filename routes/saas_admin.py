@@ -3,7 +3,7 @@ SaaS Admin Routes — Platform Owner Only
 Handles the global SmartSchool control panel.
 Only accessible to UserRole.SUPER_ADMIN.
 """
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session
 from flask_login import login_required, current_user
 from sqlalchemy import func
 from models import db, UserRole, Student, StudentStatus, Payment, PaymentStatus, School, AICreditUsage, AuditLog, AISession, ModuleConfig, SubscriptionPlan, Subscription
@@ -72,16 +72,20 @@ def onboard_school():
     if guard:
         return guard
 
-    name = request.form.get('name')
-    email = request.form.get('email')
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
     school_type = request.form.get('school_type', 'Private')
     plan_id = request.form.get('plan_id', type=int)
+    city = request.form.get('city', '').strip() or None
+    region = request.form.get('region', '').strip() or None
+    phone = request.form.get('phone', '').strip() or None
 
     if not name or not email:
         flash('School Name and Email are required.', 'error')
-        return redirect(url_for('saas_admin.dashboard'))
+        return redirect(request.referrer or url_for('saas_admin.dashboard'))
 
-    new_school = School(name=name, email=email, school_type=school_type, is_active=True)
+    new_school = School(name=name, email=email, school_type=school_type,
+                        city=city, region=region, phone=phone, is_active=True)
     db.session.add(new_school)
     db.session.flush()
 
@@ -102,7 +106,67 @@ def onboard_school():
     db.session.commit()
 
     flash(f'School "{name}" onboarded successfully!', 'success')
-    return redirect(url_for('saas_admin.dashboard'))
+    return redirect(url_for('saas_admin.schools_list'))
+
+
+@saas_admin_bp.route('/schools')
+@login_required
+def schools_list():
+    """Full paginated list of all schools with search."""
+    guard = _require_super_admin()
+    if guard:
+        return guard
+
+    q = request.args.get('q', '').strip()
+    query = School.query
+    if q:
+        query = query.filter(School.name.ilike(f'%{q}%'))
+    schools = query.order_by(School.name).all()
+    plans = SubscriptionPlan.query.order_by(SubscriptionPlan.price).all()
+    student_counts = dict(
+        db.session.query(Student.school_id, func.count(Student.id))
+        .filter(Student.status == StudentStatus.ACTIVE)
+        .group_by(Student.school_id).all()
+    )
+    return render_template('saas_admin/schools_list.html',
+        schools=schools, plans=plans, student_counts=student_counts, q=q)
+
+
+@saas_admin_bp.route('/revenue')
+@login_required
+def revenue():
+    """Platform revenue breakdown per school and per plan."""
+    guard = _require_super_admin()
+    if guard:
+        return guard
+
+    # Revenue per school
+    school_revenue = db.session.query(
+        School.name,
+        func.coalesce(func.sum(Payment.amount), 0).label('total')
+    ).outerjoin(Payment, Payment.school_id == School.id) \
+     .filter((Payment.status == PaymentStatus.COMPLETED) | (Payment.id == None)) \
+     .group_by(School.id, School.name) \
+     .order_by(func.sum(Payment.amount).desc().nullslast()) \
+     .all()
+
+    # Revenue per plan
+    plan_revenue = db.session.query(
+        SubscriptionPlan.name,
+        func.count(Subscription.id).label('schools'),
+        func.coalesce(func.sum(SubscriptionPlan.price), 0).label('arr')
+    ).outerjoin(Subscription, Subscription.plan_id == SubscriptionPlan.id) \
+     .filter((Subscription.status == 'active') | (Subscription.id == None)) \
+     .group_by(SubscriptionPlan.id, SubscriptionPlan.name, SubscriptionPlan.price) \
+     .all()
+
+    total_revenue = db.session.query(func.sum(Payment.amount)).filter(
+        Payment.status == PaymentStatus.COMPLETED).scalar() or 0
+    total_arr = sum(r.arr for r in plan_revenue)
+
+    return render_template('saas_admin/revenue.html',
+        school_revenue=school_revenue, plan_revenue=plan_revenue,
+        total_revenue=total_revenue, total_arr=total_arr)
 
 
 @saas_admin_bp.route('/audit-logs')
@@ -229,3 +293,63 @@ def assign_plan(school_id):
     db.session.commit()
     flash(f'Plan updated to {plan.name}.', 'success')
     return redirect(url_for('saas_admin.school_detail', school_id=school_id))
+
+
+# =============================================================================
+# IMPERSONATION — Enter any school as its headteacher (no password needed)
+# =============================================================================
+
+@saas_admin_bp.route('/enter-school/<int:school_id>', methods=['POST'])
+@login_required
+def enter_school(school_id):
+    """Super Admin enters a school's dashboard context without a password."""
+    guard = _require_super_admin()
+    if guard:
+        return guard
+
+    from models import User
+    school = School.query.get_or_404(school_id)
+
+    # Find the headteacher or first admin of the school
+    from models import UserRole as UR
+    staff_user = (
+        User.query.filter_by(school_id=school_id, role=UR.HEADTEACHER, is_active=True).first()
+        or User.query.filter_by(school_id=school_id, role=UR.ADMIN, is_active=True).first()
+        or User.query.filter_by(school_id=school_id, is_active=True).first()
+    )
+
+    if not staff_user:
+        flash(f'No active users found in {school.name}.', 'error')
+        return redirect(url_for('saas_admin.school_detail', school_id=school_id))
+
+    # Save the super admin's real user id so we can exit later
+    session['impersonating_school_id'] = school_id
+    session['impersonating_school_name'] = school.name
+    session['real_user_id'] = current_user.id
+
+    from flask_login import login_user
+    login_user(staff_user)
+    flash(f'You are now viewing {school.name} as {staff_user.role.value}. Click "Exit School" to return.', 'info')
+    return redirect(url_for('dashboard.index'))
+
+
+@saas_admin_bp.route('/exit-school')
+def exit_school():
+    """Return from impersonation back to the Super Admin account."""
+    real_user_id = session.pop('real_user_id', None)
+    session.pop('impersonating_school_id', None)
+    session.pop('impersonating_school_name', None)
+
+    if real_user_id:
+        from models import User
+        from flask_login import login_user
+        real_user = User.query.get(real_user_id)
+        if real_user:
+            login_user(real_user)
+            flash('You have exited the school and returned to your Super Admin account.', 'success')
+            return redirect(url_for('saas_admin.dashboard'))
+
+    # Fallback — just logout
+    from flask_login import logout_user
+    logout_user()
+    return redirect(url_for('auth.login'))

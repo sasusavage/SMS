@@ -1580,3 +1580,285 @@ input[type="email"], input[type="password"], input[type="search"],
         padding-bottom: calc(60px + env(safe-area-inset-bottom, 0) + 1rem);
     }
 }
+
+/* ============================================================================
+   DESIGN-FILE OVERRIDES — SmartSchool.html (claude.ai/design 2026-04-25)
+   Aligns every component to the exported design spec exactly.
+   ============================================================================ */
+
+/* ── Header height ───────────────────────────────────────────────────────── */
+:root { --header-height: 60px; }
+
+/* ── Sidebar nav items — left-border indicator, precise padding ───────────── */
+.nav-item {
+    border-radius: 0 !important;
+    padding: 9px 20px !important;
+    font-size: 13px !important;
+    color: #475569 !important;
+    position: relative;
+}
+.nav-item:hover {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+}
+.nav-item.active {
+    background: #eef2ff !important;
+    color: #4f46e5 !important;
+    font-weight: 600 !important;
+}
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    background: #4f46e5;
+    border-radius: 0 3px 3px 0;
+}
+.nav-item svg { width: 18px !important; height: 18px !important; }
+.nav-item.active svg { color: #4f46e5 !important; }
+
+/* ── Nav section label ───────────────────────────────────────────────────── */
+.nav-section-title {
+    padding: 6px 20px 4px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: .08em !important;
+    color: #94a3b8 !important;
+    margin-bottom: 0 !important;
+}
+.nav-section { padding: 8px 0 !important; margin-bottom: 0 !important; }
+
+/* ── Sidebar logo ────────────────────────────────────────────────────────── */
+.sidebar-logo-icon {
+    width: 34px !important; height: 34px !important;
+    border-radius: 8px !important;
+    background: #4f46e5 !important;
+}
+.sidebar-logo-text { font-size: 15px !important; font-weight: 800 !important; }
+.sidebar-header { padding: 18px 20px 14px !important; }
+
+/* ── Header icon buttons ─────────────────────────────────────────────────── */
+.header-icon-btn {
+    width: 34px !important; height: 34px !important;
+    background: #f1f5f9 !important;
+    border-radius: 8px !important;
+    border: none !important;
+    min-height: unset !important;
+}
+.header-icon-btn:hover { background: #e2e8f0 !important; }
+.header-icon-btn svg { width: 18px !important; height: 18px !important; }
+.mobile-menu-btn { min-height: unset !important; }
+
+/* ── Header search ───────────────────────────────────────────────────────── */
+.header-search {
+    display: flex; align-items: center; gap: 8px;
+    background: #f1f5f9; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 0 12px; width: 240px;
+}
+.header-search svg { position: static !important; transform: none !important; color: #94a3b8; }
+.header-search input {
+    background: none !important; border: none !important; outline: none !important;
+    height: 34px !important; font-size: 13px !important; color: #0f172a !important;
+    padding: 0 !important; width: 100% !important; min-height: unset !important;
+    box-shadow: none !important;
+}
+
+/* ── Main content padding ────────────────────────────────────────────────── */
+.main-content { padding: 28px !important; }
+@media (max-width: 768px) { .main-content { padding: 16px !important; } }
+
+/* ── Page header & title ─────────────────────────────────────────────────── */
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px !important;
+}
+.page-title { font-size: 22px !important; font-weight: 700 !important; margin-bottom: 0 !important; }
+.page-subtitle { font-size: 14px !important; margin-top: 4px !important; color: #64748b !important; }
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.card {
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05) !important;
+    border: 1px solid #e2e8f0 !important;
+}
+.card-header {
+    padding: 16px 24px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+.card-title { font-size: 14px !important; font-weight: 600 !important; }
+.card-body  { padding: 24px !important; }
+
+/* ── Stat cards — no top accent bar ─────────────────────────────────────── */
+.stat-card {
+    border-radius: 12px !important;
+    padding: 20px 24px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.stat-card::before { display: none !important; }
+.stat-icon {
+    width: 40px !important; height: 40px !important;
+    border-radius: 10px !important;
+    margin-bottom: 0 !important;
+    flex-shrink: 0;
+}
+.stat-icon svg { width: 20px !important; height: 20px !important; }
+.stat-value { font-size: 26px !important; font-weight: 700 !important; line-height: 1.1 !important; }
+.stat-label { font-size: 13px !important; color: #64748b !important; }
+
+/* ── Tables — no TH background, subtle row dividers ─────────────────────── */
+.table th {
+    padding: 10px 16px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    letter-spacing: .06em !important;
+    background: transparent !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+.table td {
+    padding: 12px 16px !important;
+    color: #334155 !important;
+    border-bottom: 1px solid #f8fafc !important;
+}
+.table tbody tr:hover { background: #f8fafc !important; }
+.table tbody tr:last-child td { border-bottom: none !important; }
+
+/* ── Badges — exact semantic colors from design ──────────────────────────── */
+.badge {
+    padding: 2px 10px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: .02em !important;
+    border-radius: 999px !important;
+}
+.badge-primary  { background: #e0e7ff !important; color: #3730a3 !important; }
+.badge-success  { background: #dcfce7 !important; color: #166534 !important; }
+.badge-warning  { background: #fef9c3 !important; color: #854d0e !important; }
+.badge-error    { background: #fee2e2 !important; color: #991b1b !important; }
+.badge-secondary, .badge-neutral { background: #f1f5f9 !important; color: #475569 !important; }
+.badge-info     { background: #dbeafe !important; color: #1e40af !important; }
+
+/* ── Buttons — flat primary, 600 weight ─────────────────────────────────── */
+.btn {
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    height: 36px !important;
+    font-size: 13px !important;
+    padding: 0 14px !important;
+    min-height: unset !important;
+}
+.btn-primary {
+    background: #4f46e5 !important;
+    box-shadow: 0 1px 2px rgba(79,70,229,.3) !important;
+}
+.btn-primary:hover { background: #4338ca !important; transform: none !important; }
+.btn-secondary {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1px solid #e2e8f0 !important;
+}
+.btn-secondary:hover { background: #e2e8f0 !important; }
+.btn-ghost { background: transparent !important; color: #64748b !important; }
+.btn-ghost:hover { background: #f1f5f9 !important; color: #334155 !important; }
+.btn-sm {
+    height: 28px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+}
+.btn svg { width: 16px !important; height: 16px !important; }
+
+/* ── Form inputs (including .form-control) ───────────────────────────────── */
+.form-control,
+.form-input {
+    width: 100%;
+    padding: 8px 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    color: #0f172a !important;
+    background: #f8fafc !important;
+    transition: border-color .15s, box-shadow .15s !important;
+    height: 38px !important;
+    min-height: unset !important;
+    font-family: inherit !important;
+    outline: none !important;
+}
+.form-control:focus, .form-input:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1) !important;
+    background: #fff !important;
+}
+.form-control::placeholder, .form-input::placeholder { color: #94a3b8 !important; }
+
+.form-select {
+    padding: 8px 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    color: #0f172a !important;
+    background-color: #f8fafc !important;
+    height: 38px !important;
+    min-height: unset !important;
+}
+.form-select:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1) !important;
+}
+.form-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .04em !important;
+    margin-bottom: 6px !important;
+}
+
+/* ── Badge premium (elite tier) ──────────────────────────────────────────── */
+.badge-premium {
+    background: linear-gradient(135deg,#fbbf24,#f59e0b) !important;
+    color: #fff !important;
+    font-size: 9px !important;
+    padding: 2px 7px !important;
+    border-radius: 999px !important;
+    letter-spacing: .04em !important;
+    box-shadow: none !important;
+}
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.modal-overlay {
+    background: rgba(15,23,42,.45) !important;
+    backdrop-filter: blur(4px) !important;
+}
+.modal-box {
+    background: #fff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 24px 64px rgba(0,0,0,.15) !important;
+    border: none !important;
+}
+.modal-header {
+    padding: 20px 24px 0 !important;
+    border-bottom: none !important;
+}
+.modal-body  { padding: 20px 24px !important; }
+.modal-footer { padding: 0 24px 24px !important; gap: 8px !important; }
+
+/* ── Alerts ──────────────────────────────────────────────────────────────── */
+.alert-success { background: #f0fdf4 !important; color: #166534 !important; border-color: #bbf7d0 !important; }
+.alert-error   { background: #fef2f2 !important; color: #991b1b !important; border-color: #fecaca !important; }
+.alert-warning { background: #fffbeb !important; color: #92400e !important; border-color: #fde68a !important; }
+.alert-info    { background: #eff6ff !important; color: #1e40af !important; border-color: #bfdbfe !important; }
+
+/* ── Sidebar overlay (mobile) ────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .sidebar-overlay {
+        background: rgba(15,23,42,.4) !important;
+        backdrop-filter: blur(2px) !important;
+    }
+}

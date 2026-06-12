@@ -30,8 +30,10 @@ def _metadata():
 def upgrade():
     bind = op.get_bind()
     meta = _metadata()
-    # checkfirst=False: this is the baseline; tables must not already exist.
-    meta.create_all(bind=bind, checkfirst=False)
+    # checkfirst=True: create only tables that don't already exist, so a
+    # re-run on a partially-created DB (e.g. an interrupted first deploy)
+    # is safe instead of raising DuplicateTable.
+    meta.create_all(bind=bind, checkfirst=True)
 
 
 def downgrade():

@@ -9,3 +9,4 @@ SQLAlchemy==2.0.36
 alembic==1.15.2
 psycopg2-binary==2.9.11
 python-dotenv==1.0.0
+gunicorn==23.0.0

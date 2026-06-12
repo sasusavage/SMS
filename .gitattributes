@@ -1,0 +1,9 @@
+# Force LF on shell scripts so they run on the Linux deploy host even though
+# the repo is edited on Windows (CRLF would break the bash shebang).
+*.sh text eol=lf
+start.sh text eol=lf
+
+# Normalize Python/text to LF for consistency
+*.py text eol=lf
+*.toml text eol=lf
+Procfile text eol=lf

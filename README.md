@@ -59,6 +59,40 @@ python -m flask --app app run        # or: python app.py
 - Unique constraints are school-scoped (e.g. `admission_no` unique per school)
 - Cross-tenant access belongs to super admins via `/platform` only
 
+## Deploying on Coolify (Nixpacks)
+
+This repo is Coolify-ready via Nixpacks — no Dockerfile needed.
+
+**1. Create the app in Coolify**
+- New Resource → Application → your Git repo (`sasusavage/SMS`), branch `main`
+- Build pack: **Nixpacks** (auto-detected). Coolify reads `nixpacks.toml` /
+  `Procfile`, which run `start.sh`.
+
+**2. Attach a database**
+- Add a PostgreSQL service in Coolify (or use an existing one), then copy its
+  connection string.
+
+**3. Set environment variables** (Coolify → your app → Environment Variables):
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | `postgresql://user:pass@host:5432/dbname` (from your Coolify Postgres) |
+| `SECRET_KEY` | a long random string (required in production — app won't start without it) |
+| `FLASK_CONFIG` | `production` |
+| `PORT` | usually set by Coolify automatically; `start.sh` defaults to 8000 |
+| `WEB_CONCURRENCY` | optional, gunicorn workers (default 3) |
+
+**4. Deploy.** On each deploy `start.sh`:
+1. runs `flask db upgrade` (creates/updates tables — idempotent),
+2. runs `seed_if_empty.py` (seeds demo data only on an empty DB),
+3. starts gunicorn on `0.0.0.0:$PORT`.
+
+**5. First login:** use the seeded super admin (blank school code,
+`sasuisaac332@gmail.com`) or a demo school admin. **Change all seeded
+passwords immediately.**
+
+> Note: never commit `.env` — set real secrets in Coolify's env var UI.
+
 ## Not built yet (later steps)
 Config CRUD/wizard (Step 2), people (Step 3), attendance (Step 4),
 scores & results engine (Step 5), report cards (Step 6), portals (Step 7),

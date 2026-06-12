@@ -1,0 +1,9 @@
+# Nixpacks build config for Coolify.
+# Python is auto-detected from requirements.txt. We only override the start
+# command so migrations + conditional seed run before gunicorn.
+
+[phases.setup]
+nixPkgs = ["python311", "gcc"]
+
+[start]
+cmd = "bash start.sh"

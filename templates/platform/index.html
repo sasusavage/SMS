@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Platform — SchoolBrain{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Platform administration</h2>
+  <p>Logged in as super admin: {{ current_user.name }}</p>
+  <h3>Schools ({{ schools|length }})</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Template</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for s in schools %}
+      <tr>
+        <td>{{ s.id }}</td><td>{{ s.name }}</td><td>{{ s.slug }}</td>
+        <td>{{ s.curriculum_template_used or '—' }}</td>
+        <td>{{ s.status.value if s.status else '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">No schools yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p style="margin-top:16px"><em>Suspend / activate / subscriptions / metrics land in Step 8.</em></p>
+</div>
+{% endblock %}

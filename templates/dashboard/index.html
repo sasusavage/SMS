@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SchoolBrain{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Welcome, {{ current_user.name }}</h2>
+  <p>Role: <strong>{{ role }}</strong></p>
+  <p>This is the Step 1 foundation dashboard. Role-specific features
+     (config, students, attendance, scores, reports) arrive in later steps.</p>
+</div>
+{% endblock %}

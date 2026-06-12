@@ -1,0 +1,58 @@
+{
+  "key": "cambridge",
+  "display_name": "Cambridge (Early Years → A-Level)",
+  "country": "United Kingdom",
+  "terms_per_year": 3,
+  "term_names": ["Michaelmas", "Lent", "Trinity"],
+  "level_groups": [
+    {"name": "Early Years", "sequence": 1,
+     "levels": ["Reception", "Year 1", "Year 2"]},
+    {"name": "Primary", "sequence": 2,
+     "levels": ["Year 3", "Year 4", "Year 5", "Year 6"]},
+    {"name": "Lower Secondary", "sequence": 3,
+     "levels": ["Year 7", "Year 8", "Year 9"]},
+    {"name": "IGCSE", "sequence": 4,
+     "levels": ["Year 10", "Year 11"]},
+    {"name": "Sixth Form", "sequence": 5,
+     "levels": ["Year 12", "Year 13"]}
+  ],
+  "subjects": [
+    {"name": "English", "code": "ENG", "is_core": true},
+    {"name": "Mathematics", "code": "MATH", "is_core": true},
+    {"name": "Biology", "code": "BIO", "is_core": false},
+    {"name": "Chemistry", "code": "CHEM", "is_core": false},
+    {"name": "Physics", "code": "PHY", "is_core": false},
+    {"name": "History", "code": "HIST", "is_core": false},
+    {"name": "Geography", "code": "GEO", "is_core": false},
+    {"name": "Computer Science", "code": "CS", "is_core": false},
+    {"name": "French", "code": "FR", "is_core": false},
+    {"name": "Art & Design", "code": "ART", "is_core": false}
+  ],
+  "grading_scheme": {
+    "name": "IGCSE A*–G",
+    "is_default": true,
+    "boundaries": [
+      {"min_score": 90, "max_score": 100, "grade_label": "A*", "remark": "Outstanding", "grade_point": null, "is_pass": true},
+      {"min_score": 80, "max_score": 89, "grade_label": "A", "remark": "Excellent", "grade_point": null, "is_pass": true},
+      {"min_score": 70, "max_score": 79, "grade_label": "B", "remark": "Very Good", "grade_point": null, "is_pass": true},
+      {"min_score": 60, "max_score": 69, "grade_label": "C", "remark": "Good", "grade_point": null, "is_pass": true},
+      {"min_score": 50, "max_score": 59, "grade_label": "D", "remark": "Satisfactory", "grade_point": null, "is_pass": true},
+      {"min_score": 40, "max_score": 49, "grade_label": "E", "remark": "Pass", "grade_point": null, "is_pass": true},
+      {"min_score": 30, "max_score": 39, "grade_label": "F", "remark": "Marginal", "grade_point": null, "is_pass": false},
+      {"min_score": 20, "max_score": 29, "grade_label": "G", "remark": "Minimal", "grade_point": null, "is_pass": false},
+      {"min_score": 0, "max_score": 19, "grade_label": "U", "remark": "Ungraded", "grade_point": null, "is_pass": false}
+    ]
+  },
+  "assessment_components": [
+    {"name": "Coursework", "weight_percent": 40, "applies_to_level_group": null},
+    {"name": "Examination", "weight_percent": 60, "applies_to_level_group": null}
+  ],
+  "report_settings": {
+    "show_class_position": false,
+    "show_grade_point": false,
+    "show_skills_ratings": false,
+    "teacher_comment_required": true,
+    "head_comment_required": true,
+    "next_term_begins_label": "Term resumes:"
+  }
+}

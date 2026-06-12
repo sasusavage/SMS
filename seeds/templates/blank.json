@@ -1,0 +1,19 @@
+{
+  "key": "blank",
+  "display_name": "Blank (build from scratch)",
+  "country": null,
+  "terms_per_year": 3,
+  "term_names": ["Term 1", "Term 2", "Term 3"],
+  "level_groups": [],
+  "subjects": [],
+  "grading_scheme": null,
+  "assessment_components": [],
+  "report_settings": {
+    "show_class_position": true,
+    "show_grade_point": false,
+    "show_skills_ratings": false,
+    "teacher_comment_required": true,
+    "head_comment_required": true,
+    "next_term_begins_label": "Next term begins:"
+  }
+}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block topbar_title %}Attendance{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="card-title">
+    <h1 class="mb-0">Daily attendance</h1>
+    <a class="btn secondary" href="{{ url_for('teacher.attendance_summary', class_id=selected_class_id) }}">Monthly summary</a>
+  </div>
+</div>
+
+<div class="card">
+  <form method="get" class="form-inline">
+    <div class="form-group"><label>Class</label>
+      <select name="class_id" onchange="this.form.submit()">
+        <option value="">— choose a class —</option>
+        {% for c in classes %}<option value="{{ c.id }}" {{ 'selected' if selected_class_id == c.id }}>{{ c.name }}</option>{% endfor %}
+      </select></div>
+    <div class="form-group"><label>Date</label>
+      <input type="date" name="date" value="{{ on_date.isoformat() }}" max="{{ today.isoformat() }}" onchange="this.form.submit()"></div>
+    <noscript><button class="btn">Load</button></noscript>
+  </form>
+</div>
+
+{% if not classes %}
+  <div class="card"><p class="muted mb-0">You have no classes to take attendance for.</p></div>
+{% elif selected_class_id is none %}
+  <div class="card"><p class="muted mb-0">Choose a class above to begin.</p></div>
+{% elif not roster %}
+  <div class="card"><p class="muted mb-0">This class has no students.</p></div>
+{% else %}
+<div class="card">
+  <form method="post" action="{{ url_for('teacher.attendance_grid', class_id=selected_class_id, date=on_date.isoformat()) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Adm. no</th><th>Student</th>
+          {% for st in statuses %}<th>{{ st|capitalize }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for s in roster %}
+          {% set cur = existing.get(s.id, 'present') %}
+          <tr>
+            <td>{{ s.admission_no }}</td>
+            <td>{{ s.last_name }}, {{ s.first_name }}</td>
+            {% for st in statuses %}
+            <td><label class="checkbox-row" style="margin:0">
+              <input type="radio" name="status_{{ s.id }}" value="{{ st }}" {{ 'checked' if cur == st }}>
+            </label></td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-4"><button type="submit" class="btn">Save attendance</button></div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

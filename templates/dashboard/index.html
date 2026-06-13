@@ -14,13 +14,22 @@
     <a class="btn" href="{{ url_for('admin_people.students') }}">Students</a>
     <a class="btn secondary" href="{{ url_for('admin_people.users') }}">Users</a>
     <a class="btn secondary" href="{{ url_for('admin_people.assignments') }}">Teacher assignments</a>
+    <a class="btn secondary" href="{{ url_for('teacher.attendance_grid') }}">Attendance</a>
     <a class="btn secondary" href="{{ url_for('admin_config.index') }}">Configuration</a>
+  </div>
+</div>
+{% elif role == 'teacher' %}
+<div class="card">
+  <h3>Quick actions</h3>
+  <div class="row-gap mt-4">
+    <a class="btn" href="{{ url_for('teacher.attendance_grid') }}">Mark attendance</a>
+    <a class="btn secondary" href="{{ url_for('teacher.attendance_summary') }}">Attendance summary</a>
   </div>
 </div>
 {% endif %}
 
 <div class="card">
-  <p class="muted mb-0">Role-specific features (students, attendance, scores,
-     reports) arrive in later steps.</p>
+  <p class="muted mb-0">More features (scores, results, report cards, portals)
+     arrive in later steps.</p>
 </div>
 {% endblock %}

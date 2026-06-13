@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Attendance summary{% endblock %}
+{% block topbar_title %}Attendance{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="card-title">
+    <h1 class="mb-0">Monthly attendance summary</h1>
+    <a class="btn secondary" href="{{ url_for('teacher.attendance_grid', class_id=selected_class_id) }}">Mark attendance</a>
+  </div>
+</div>
+
+<div class="card">
+  <form method="get" class="form-inline">
+    <div class="form-group"><label>Class</label>
+      <select name="class_id">
+        <option value="">— choose a class —</option>
+        {% for c in classes %}<option value="{{ c.id }}" {{ 'selected' if selected_class_id == c.id }}>{{ c.name }}</option>{% endfor %}
+      </select></div>
+    <div class="form-group" style="flex:0 0 110px"><label>Year</label><input type="number" name="year" value="{{ year }}"></div>
+    <div class="form-group" style="flex:0 0 130px"><label>Month</label>
+      <select name="month">{% for m in months %}<option value="{{ m }}" {{ 'selected' if month == m }}>{{ m }}</option>{% endfor %}</select></div>
+    <button class="btn">View</button>
+  </form>
+</div>
+
+{% if summary %}
+<div class="card">
+  <h3>{{ klass.name }} — {{ month }}/{{ year }}</h3>
+  <div class="row-gap">
+    <span class="badge success">Present: {{ summary.totals.present }}</span>
+    <span class="badge danger">Absent: {{ summary.totals.absent }}</span>
+    <span class="badge warning">Late: {{ summary.totals.late }}</span>
+    <span class="badge info">Excused: {{ summary.totals.excused }}</span>
+    <span class="muted">{{ summary.days|length }} day(s) recorded</span>
+  </div>
+  <div class="table-wrap mt-4">
+    <table class="table">
+      <thead><tr><th>Adm. no</th><th>Student</th><th>Present</th><th>Absent</th><th>Late</th><th>Excused</th><th>Total</th></tr></thead>
+      <tbody>
+        {% for row in summary.students %}
+        <tr>
+          <td>{{ row.student.admission_no }}</td>
+          <td>{{ row.student.last_name }}, {{ row.student.first_name }}</td>
+          <td>{{ row.counts.present }}</td>
+          <td>{{ row.counts.absent }}</td>
+          <td>{{ row.counts.late }}</td>
+          <td>{{ row.counts.excused }}</td>
+          <td><strong>{{ row.total }}</strong></td>
+        </tr>
+        {% else %}<tr><td colspan="7" class="empty">No students in this class.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% elif selected_class_id is not none %}
+<div class="card"><p class="muted mb-0">No data for this selection.</p></div>
+{% else %}
+<div class="card"><p class="muted mb-0">Choose a class to view its monthly summary.</p></div>
+{% endif %}
+{% endblock %}

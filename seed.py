@@ -25,7 +25,7 @@ from models.operational import User, Student
 from models.config_tables import Class, Level, AcademicYear, Subject, Term
 from auth.security import hash_password
 from services.template_loader import apply_template
-from services import people
+from services import people, attendance
 
 
 # --- Credentials (demo only — change in production) ------------------------
@@ -222,6 +222,26 @@ def seed_people(school):
         for subj in subjects:
             people.assign_teacher(sid, teachers[0].id, klass.id, subj.id, term.id)
         print(f'  + teacher assignments ({len(subjects)})')
+
+    # Attendance: mark the last 5 weekdays with a realistic mix of statuses, so
+    # the daily grid AND the monthly summary have something to show.
+    if klass and students:
+        # Rotating pattern per student so totals aren't all identical.
+        pattern = ['present', 'present', 'present', 'absent', 'late',
+                   'present', 'excused']
+        marked_days = 0
+        d = date.today()
+        while marked_days < 5:
+            d -= timedelta(days=1)
+            if d.weekday() >= 5:   # skip Sat/Sun
+                continue
+            marks = {}
+            for i, st in enumerate(students):
+                marks[st.id] = pattern[(i + marked_days) % len(pattern)]
+            attendance.save_day_attendance(sid, klass.id, d, marks,
+                                           marked_by=teachers[0].id)
+            marked_days += 1
+        print(f'  + attendance marked for {marked_days} recent weekdays')
 
 
 def main():

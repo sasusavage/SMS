@@ -11,8 +11,10 @@
 <div class="card">
   <h3>Quick actions</h3>
   <div class="row-gap mt-4">
-    <a class="btn" href="{{ url_for('admin_config.index') }}">School configuration</a>
-    <a class="btn secondary" href="{{ url_for('onboarding.wizard') }}">Setup checklist</a>
+    <a class="btn" href="{{ url_for('admin_people.students') }}">Students</a>
+    <a class="btn secondary" href="{{ url_for('admin_people.users') }}">Users</a>
+    <a class="btn secondary" href="{{ url_for('admin_people.assignments') }}">Teacher assignments</a>
+    <a class="btn secondary" href="{{ url_for('admin_config.index') }}">Configuration</a>
   </div>
 </div>
 {% endif %}

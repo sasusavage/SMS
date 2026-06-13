@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Import students{% endblock %}
+{% block topbar_title %}People{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="{{ url_for('admin_people.students') }}">Students</a> / Import CSV</div>
+    <h1>Import students from CSV</h1>
+  </div>
+
+  <div class="card">
+    <p>Upload a UTF-8 CSV. You'll see a preview to review before anything is
+       saved. Required columns: <strong>admission_no, first_name, last_name</strong>.
+       Optional: other_names, gender, dob, guardian_name, guardian_phone.</p>
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label>Assign all imported students to class (optional)</label>
+        <select name="class_id"><option value="">— none —</option>{% for c in classes %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>
+      </div>
+      <div class="form-group">
+        <label>CSV file</label>
+        <input type="file" name="csv_file" accept=".csv" required>
+      </div>
+      <button type="submit" class="btn">Upload &amp; preview</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Example</h3>
+    <pre style="background:#f3f4f6;padding:12px;border-radius:8px;overflow:auto">admission_no,first_name,last_name,other_names,gender,dob,guardian_name,guardian_phone
+A001,Ama,Owusu,,F,2012-05-01,Mary Owusu,0240000000
+A002,Kofi,Mensah,Kojo,M,2011-03-15,John Mensah,0241111111</pre>
+  </div>
+</div>
+{% endblock %}

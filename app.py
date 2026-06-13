@@ -75,12 +75,14 @@ def _register_blueprints(app):
     from blueprints.platform import platform_bp
     from blueprints.admin_config import config_bp
     from blueprints.onboarding import onboarding_bp
+    from blueprints.admin_people import people_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(platform_bp)
     app.register_blueprint(config_bp)
     app.register_blueprint(onboarding_bp)
+    app.register_blueprint(people_bp)
 
 
 def _register_error_handlers(app):

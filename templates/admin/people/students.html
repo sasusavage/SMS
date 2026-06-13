@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block topbar_title %}People{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">People / Students</div>
+  <div class="card-title">
+    <h1 class="mb-0">Students</h1>
+    <a class="btn secondary" href="{{ url_for('admin_people.import_students') }}">Import CSV</a>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Add student</h3>
+  <form method="post" class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group" style="flex:0 0 130px"><label>Admission no.</label><input name="admission_no" required></div>
+    <div class="form-group"><label>First name</label><input name="first_name" required></div>
+    <div class="form-group"><label>Last name</label><input name="last_name" required></div>
+    <div class="form-group"><label>Other names</label><input name="other_names"></div>
+    <div class="form-group" style="flex:0 0 100px"><label>Gender</label><input name="gender"></div>
+    <div class="form-group" style="flex:0 0 150px"><label>DOB</label><input type="date" name="dob"></div>
+    <div class="form-group"><label>Class</label>
+      <select name="current_class_id"><option value="">—</option>{% for c in classes %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Guardian</label><input name="guardian_name"></div>
+    <div class="form-group"><label>Guardian phone</label><input name="guardian_phone"></div>
+    <button type="submit" class="btn">Add</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Adm. no</th><th>Name</th><th>Class</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>{{ s.admission_no }}</td>
+          <td>{{ s.last_name }}, {{ s.first_name }} {{ s.other_names or '' }}</td>
+          <td>{{ s.current_class.name if s.current_class else '—' }}</td>
+          <td>{% set st = s.status.value %}
+            <span class="badge {{ 'success' if st == 'active' else 'warning' if st == 'graduated' else 'danger' }}">{{ st }}</span></td>
+          <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_people.student_detail', student_id=s.id) }}">Open</a></td>
+        </tr>
+        {% else %}<tr><td colspan="5" class="empty">No students yet. Add one above or import a CSV.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Teacher assignments{% endblock %}
+{% block topbar_title %}People{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">People / Teacher assignments</div>
+  <h1>Teacher assignments</h1>
+  <p class="muted">Assign a teacher to a class + subject for a given term.</p>
+</div>
+
+<div class="card">
+  <h3>Add assignment</h3>
+  {% if teachers and classes and subjects and terms %}
+  <form method="post" class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group"><label>Teacher</label>
+      <select name="teacher_user_id" required>{% for t in teachers %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Class</label>
+      <select name="class_id" required>{% for c in classes %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Subject</label>
+      <select name="subject_id" required>{% for s in subjects %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Term</label>
+      <select name="term_id" required>{% for tm in terms %}<option value="{{ tm.id }}">{{ tm.name }}</option>{% endfor %}</select></div>
+    <button type="submit" class="btn">Assign</button>
+  </form>
+  {% else %}<p class="muted mb-0">You need at least one teacher, class, subject and term first.</p>{% endif %}
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Teacher</th><th>Class</th><th>Subject</th><th>Term</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for a in assignments %}
+        <tr>
+          <td>{{ a.teacher.name if a.teacher else '—' }}</td>
+          <td>{{ a.klass.name if a.klass else '—' }}</td>
+          <td>{{ a.subject.name if a.subject else '—' }}</td>
+          <td>{{ a.term.name if a.term else '—' }}</td>
+          <td class="actions"><form method="post" action="{{ url_for('admin_people.delete_assignment', assignment_id=a.id) }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger sm">Remove</button></form></td>
+        </tr>
+        {% else %}<tr><td colspan="5" class="empty">No assignments yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ student.first_name }} {{ student.last_name }}{% endblock %}
+{% block topbar_title %}People{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('admin_people.students') }}">Students</a> / {{ student.admission_no }}</div>
+  <h1>{{ student.first_name }} {{ student.last_name }} {{ student.other_names or '' }}</h1>
+  <p class="muted">Admission no. {{ student.admission_no }}</p>
+</div>
+
+<div class="card">
+  <h3>Details</h3>
+  <table class="table">
+    <tbody>
+      <tr><th>Gender</th><td>{{ student.gender or '—' }}</td><th>Date of birth</th><td>{{ student.dob or '—' }}</td></tr>
+      <tr><th>Guardian</th><td>{{ student.guardian_name or '—' }}</td><th>Guardian phone</th><td>{{ student.guardian_phone or '—' }}</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Class &amp; status</h3>
+  <form method="post" action="{{ url_for('admin_people.transfer_student', student_id=student.id) }}" class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group"><label>Class</label>
+      <select name="current_class_id">
+        <option value="">— none —</option>
+        {% for c in classes %}<option value="{{ c.id }}" {{ 'selected' if student.current_class_id == c.id }}>{{ c.name }}</option>{% endfor %}
+      </select></div>
+    <button type="submit" class="btn">Transfer</button>
+  </form>
+  <hr class="divider">
+  <form method="post" action="{{ url_for('admin_people.student_status', student_id=student.id) }}" class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group"><label>Status</label>
+      <select name="status">
+        {% for s in ['active','graduated','withdrawn'] %}<option value="{{ s }}" {{ 'selected' if student.status.value == s }}>{{ s }}</option>{% endfor %}
+      </select></div>
+    <button type="submit" class="btn secondary">Update status</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Linked parents</h3>
+  {% if parents %}
+  <form method="post" action="{{ url_for('admin_people.link_parent', student_id=student.id) }}" class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group"><label>Parent</label>
+      <select name="parent_user_id" required>{% for p in parents %}<option value="{{ p.id }}">{{ p.name }} ({{ p.email }})</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Relationship</label><input name="relationship" placeholder="Mother"></div>
+    <button type="submit" class="btn">Link parent</button>
+  </form>
+  {% else %}<p class="muted">No parent users yet. Create one under <a href="{{ url_for('admin_people.users') }}">Users</a>.</p>{% endif %}
+  <div class="table-wrap mt-4">
+    <table class="table">
+      <thead><tr><th>Parent</th><th>Relationship</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for l in links %}
+        <tr><td>{{ l.parent.name if l.parent else '—' }}</td><td>{{ l.relationship_label or '—' }}</td>
+          <td class="actions"><form method="post" action="{{ url_for('admin_people.unlink_parent', link_id=l.id) }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger sm">Unlink</button></form></td></tr>
+        {% else %}<tr><td colspan="3" class="empty">No parents linked.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

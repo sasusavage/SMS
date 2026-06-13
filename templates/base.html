@@ -16,6 +16,14 @@
        href="{{ url_for('dashboard.index') }}">Dashboard</a>
 
     {% if role == 'school_admin' %}
+      <div class="nav-section">People</div>
+      <a class="nav-link {{ 'active' if request.endpoint == 'admin_people.users' }}"
+         href="{{ url_for('admin_people.users') }}">Users</a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('admin_people.') and 'student' in request.endpoint }}"
+         href="{{ url_for('admin_people.students') }}">Students</a>
+      <a class="nav-link {{ 'active' if request.endpoint and 'assignment' in (request.endpoint or '') }}"
+         href="{{ url_for('admin_people.assignments') }}">Teacher assignments</a>
+
       <div class="nav-section">Setup</div>
       <a class="nav-link {{ 'active' if request.endpoint == 'onboarding.wizard' }}"
          href="{{ url_for('onboarding.wizard') }}">Setup checklist</a>

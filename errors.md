@@ -4,6 +4,33 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Step 3 — People testing (2026-06-13)
+
+Built users CRUD, students CRUD + CSV import (validate→preview→commit),
+parent-student linking, and teacher assignments. Added 30 tests (21 service +
+9 route). **Full suite now 103/103 passing.**
+
+### No functional bugs found
+Service-layer-first again paid off — routes wired correctly on first run.
+Verified: cross-tenant access returns 404 (reset password / student detail /
+toggle-active on another school's row), CSV detects in-file AND in-DB duplicate
+admission numbers, only valid CSV rows commit, role checks (can't link a
+non-parent, can't assign a non-teacher), and per-school uniqueness of email and
+admission_no.
+
+### Note — CSV import uses the session to carry data between preview and commit
+The uploaded CSV text is stashed in the Flask session between the preview and
+commit steps, and the commit RE-validates before writing (never trusts the
+preview). Re-validation means a row that became a duplicate between preview and
+commit is still skipped. Acceptable for Phase 1; if files get large, switch to
+a temp-file/staging-table approach.
+
+### Cleanup — replaced legacy Query.get() in a test
+- `User.query.get()` → `db.session.get(User, ...)`. No deprecation warnings.
+- **Status:** ✅ Done.
+
+---
+
 ## UI redesign (2026-06-13)
 
 Full restyle to a clean modern SaaS look (single static/css/app.css, app shell

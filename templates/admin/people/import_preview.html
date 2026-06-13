@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Import preview{% endblock %}
+{% block topbar_title %}People{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('admin_people.students') }}">Students</a> / Import / Preview</div>
+  <h1>Import preview</h1>
+</div>
+
+{% if not preview.headers_ok %}
+<div class="card">
+  <div class="flash danger">{{ preview.header_error }}</div>
+  <a class="btn secondary" href="{{ url_for('admin_people.import_students') }}">← Back to upload</a>
+</div>
+{% else %}
+<div class="card">
+  <div class="row-gap">
+    <span class="badge success">{{ preview.valid }} valid</span>
+    <span class="badge danger">{{ preview.invalid }} invalid</span>
+    <span class="muted">Only valid rows will be imported.</span>
+  </div>
+  <div class="row-gap mt-4">
+    <form method="post" action="{{ url_for('admin_people.import_students_commit') }}" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn" {{ 'disabled' if preview.valid == 0 }}>Import {{ preview.valid }} student(s)</button>
+    </form>
+    <a class="btn secondary" href="{{ url_for('admin_people.import_students') }}">Cancel</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Row</th><th>Adm. no</th><th>Name</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in preview.rows %}
+        <tr>
+          <td>{{ r.row }}</td>
+          <td>{{ r.data.admission_no }}</td>
+          <td>{{ r.data.first_name }} {{ r.data.last_name }}</td>
+          <td>
+            {% if r.errors %}
+              <span class="badge danger">error</span>
+              <span class="muted">{{ r.errors | join('; ') }}</span>
+            {% else %}<span class="badge success">ok</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

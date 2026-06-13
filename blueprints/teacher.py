@@ -18,7 +18,9 @@ from auth.security import require_role
 from services.audit import log_action
 from services import attendance
 from services.attendance import AttendanceError
-from models.config_tables import Class
+from services import results_engine
+from services.results_engine import ResultsError
+from models.config_tables import Class, Subject, Term
 
 teacher_bp = Blueprint('teacher', __name__, url_prefix='/teacher')
 
@@ -110,6 +112,68 @@ def attendance_summary():
                            selected_class_id=class_id, year=year, month=month,
                            summary=summary, klass=klass,
                            months=list(range(1, 13)))
+
+
+# ---------------------------------------------------------------------------
+# Score entry grid  (/teacher/scores)
+# ---------------------------------------------------------------------------
+@teacher_bp.route('/scores', methods=['GET', 'POST'])
+def scores():
+    sid = _sid()
+    classes = attendance.accessible_classes(sid, current_user)
+
+    class_id = _int(request.values.get('class_id'))
+    subject_id = _int(request.values.get('subject_id'))
+    term_id = _int(request.values.get('term_id'))
+
+    if class_id is not None and not attendance.teacher_can_access_class(
+            sid, current_user, class_id):
+        abort(404)
+
+    klass = (Class.query.filter_by(school_id=sid, id=class_id).first()
+             if class_id else None)
+    subjects = results_engine.subjects_for_class(sid, klass) if klass else []
+    terms = Term.query.filter_by(school_id=sid).order_by(Term.sequence).all()
+    components = []
+    if klass:
+        lg = results_engine._class_level_group_id(sid, klass)
+        components = results_engine.components_for(sid, lg)
+
+    ready = all(x is not None for x in (class_id, subject_id, term_id))
+
+    if request.method == 'POST' and ready:
+        roster = results_engine._roster(sid, class_id)
+        entries = []
+        for student in roster:
+            for comp in components:
+                field = f'score_{student.id}_{comp.id}'
+                if field in request.form:
+                    entries.append({'student_id': student.id,
+                                    'component_id': comp.id,
+                                    'score': request.form.get(field)})
+        try:
+            saved = results_engine.save_scores(
+                sid, class_id, subject_id, term_id, entries,
+                entered_by=current_user.id)
+            log_action('save_scores', entity='class', entity_id=class_id,
+                       meta={'subject_id': subject_id, 'term_id': term_id,
+                             'count': saved})
+            db.session.commit()
+            flash(f'Saved {saved} score cell(s).', 'success')
+        except ResultsError as e:
+            db.session.rollback()
+            flash(e.message, 'danger')
+        return redirect(url_for('teacher.scores', class_id=class_id,
+                                subject_id=subject_id, term_id=term_id))
+
+    roster = results_engine._roster(sid, class_id) if ready else []
+    grid = (results_engine.get_score_grid(sid, class_id, subject_id, term_id)
+            if ready else {})
+    return render_template('teacher/scores.html', classes=classes,
+                           selected_class_id=class_id, subjects=subjects,
+                           selected_subject_id=subject_id, terms=terms,
+                           selected_term_id=term_id, components=components,
+                           roster=roster, grid=grid, ready=ready)
 
 
 def _int(v):

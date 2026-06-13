@@ -21,6 +21,8 @@
          href="{{ url_for('teacher.attendance_grid') }}">Attendance</a>
       <a class="nav-link {{ 'active' if request.endpoint == 'teacher.attendance_summary' }}"
          href="{{ url_for('teacher.attendance_summary') }}">Attendance summary</a>
+      <a class="nav-link {{ 'active' if request.endpoint == 'teacher.scores' }}"
+         href="{{ url_for('teacher.scores') }}">Score entry</a>
     {% endif %}
 
     {% if role == 'school_admin' %}
@@ -31,6 +33,8 @@
          href="{{ url_for('admin_people.students') }}">Students</a>
       <a class="nav-link {{ 'active' if request.endpoint and 'assignment' in (request.endpoint or '') }}"
          href="{{ url_for('admin_people.assignments') }}">Teacher assignments</a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('admin_results.') }}"
+         href="{{ url_for('admin_results.index') }}">Results</a>
 
       <div class="nav-section">Setup</div>
       <a class="nav-link {{ 'active' if request.endpoint == 'onboarding.wizard' }}"

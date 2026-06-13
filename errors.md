@@ -4,6 +4,34 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Step 5 — Scores & Results testing (2026-06-13)
+
+Built the results engine (services/results_engine.py): score-entry upsert,
+weighted totals from configurable components, grade mapping via the default
+scheme, competition ranking (1,2,2,4) for class position, missing-score
+warnings, and the compute → review → publish/unpublish flow. Added 19 tests
+(13 engine + 6 route).
+
+### No functional bugs found
+Verified by tests: weights must sum to 100 (abort otherwise); missing component
+score treated as 0 with a warning; ties get equal rank and the next rank skips
+(1,1,3); position only computed when report_settings.show_class_position;
+recompute SKIPS already-published rows (publish is a real gate); score entry
+ignores students not on the roster and components not valid for the level group;
+scores constrained to 0–100; blank clears a cell; cross-tenant/teacher access to
+/admin/results is blocked (403/404).
+
+### Design notes
+- grade_label/remark/is_pass are SNAPSHOT into term_results at compute time
+  (per spec) — boundaries can change later without rewriting history.
+- Score grid posts a standard CSRF form (one input per student×component) rather
+  than raw JSON; simpler and consistent with the rest of the app. The spec
+  allowed JSON for grids but didn't require it.
+- Publishing is the visibility gate for Step 7 portals; nothing reads
+  unpublished results yet.
+
+---
+
 ## Step 4 — Attendance testing (2026-06-13)
 
 Built the daily attendance grid (upsert per student per day) + monthly summary

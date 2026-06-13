@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Score entry{% endblock %}
+{% block topbar_title %}Scores{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Score entry</h1>
+  <p class="muted">Enter raw component scores (0–100) for a class, subject and term.
+     The admin computes weighted results from these.</p>
+</div>
+
+<div class="card">
+  <form method="get" class="form-inline">
+    <div class="form-group"><label>Class</label>
+      <select name="class_id" onchange="this.form.submit()">
+        <option value="">— class —</option>
+        {% for c in classes %}<option value="{{ c.id }}" {{ 'selected' if selected_class_id == c.id }}>{{ c.name }}</option>{% endfor %}
+      </select></div>
+    <div class="form-group"><label>Subject</label>
+      <select name="subject_id" onchange="this.form.submit()">
+        <option value="">— subject —</option>
+        {% for s in subjects %}<option value="{{ s.id }}" {{ 'selected' if selected_subject_id == s.id }}>{{ s.name }}</option>{% endfor %}
+      </select></div>
+    <div class="form-group"><label>Term</label>
+      <select name="term_id" onchange="this.form.submit()">
+        <option value="">— term —</option>
+        {% for t in terms %}<option value="{{ t.id }}" {{ 'selected' if selected_term_id == t.id }}>{{ t.name }}</option>{% endfor %}
+      </select></div>
+    <noscript><button class="btn">Load</button></noscript>
+  </form>
+</div>
+
+{% if not ready %}
+  <div class="card"><p class="muted mb-0">Choose a class, subject and term to enter scores.</p></div>
+{% elif not roster %}
+  <div class="card"><p class="muted mb-0">This class has no students.</p></div>
+{% elif not components %}
+  <div class="card"><p class="muted mb-0">No assessment components configured for this level.</p></div>
+{% else %}
+<div class="card">
+  <form method="post" action="{{ url_for('teacher.scores', class_id=selected_class_id, subject_id=selected_subject_id, term_id=selected_term_id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Adm. no</th><th>Student</th>
+          {% for comp in components %}<th>{{ comp.name }} ({{ comp.weight_percent }}%)</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for s in roster %}
+          <tr>
+            <td>{{ s.admission_no }}</td>
+            <td>{{ s.last_name }}, {{ s.first_name }}</td>
+            {% for comp in components %}
+            {% set val = grid.get(s.id, {}).get(comp.id) %}
+            <td><input type="number" step="0.01" min="0" max="100" style="width:90px"
+                       name="score_{{ s.id }}_{{ comp.id }}"
+                       value="{{ val if val is not none else '' }}"></td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-4"><button type="submit" class="btn">Save scores</button></div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

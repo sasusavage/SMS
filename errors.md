@@ -4,6 +4,33 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Step 7 — Portals testing (2026-06-13)
+
+Built student + parent portals (services/portal.py + /portal blueprint),
+showing PUBLISHED data only. Added 15 tests (7 service + 8 route).
+
+### No functional bugs found — security boundaries verified
+The whole point of this step is isolation, and the tests prove it:
+- A student sees ONLY their own Student record (Student.user_id == login id).
+- A parent sees ONLY students linked via parent_students; unlinked child -> 404.
+- A student can't piggyback the parent report route to view another student.
+- Results/report cards are PUBLISHED-only; unpublished term -> 404 (no blank card).
+- Admins/teachers are blocked from /portal (403); students/parents are
+  redirected from /dashboard to their portal.
+- assert_can_view raises -> routes return 404 (never leak existence).
+
+### Design notes
+- Portal report card reuses report_card.build_report_card(include_unpublished=
+  False) — single source of truth, no divergent rendering.
+- Student portal requires Student.user_id to point at a student-role login.
+  seed.py now creates that login (student@<slug>.test / Test1234) and links it,
+  so both portals are testable out of the box.
+- _render_report re-checks assert_can_view (defence in depth) even though the
+  route already did — cheap and prevents any future route wiring mistake from
+  leaking data.
+
+---
+
 ## Step 6 — Report cards testing (2026-06-13)
 
 Built the report-settings-driven HTML report card + /teacher/comments +

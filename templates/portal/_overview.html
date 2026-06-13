@@ -1,0 +1,43 @@
+{# Shared student data view (profile + attendance + published report cards).
+   Expects:
+     overview {student, klass, attendance, terms}
+     term_links: list of (term_name, url) for published report cards #}
+{% set student = overview.student %}
+{% set a = overview.attendance %}
+
+<div class="card">
+  <h3>Profile</h3>
+  <table class="table">
+    <tbody>
+      <tr><th>Name</th><td>{{ student.first_name }} {{ student.last_name }} {{ student.other_names or '' }}</td>
+          <th>Admission no.</th><td>{{ student.admission_no }}</td></tr>
+      <tr><th>Class</th><td>{{ overview.klass.name if overview.klass else '—' }}</td>
+          <th>Gender</th><td>{{ student.gender or '—' }}</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Attendance</h3>
+  <div class="row-gap">
+    <span class="badge success">Present: {{ a.present }}</span>
+    <span class="badge danger">Absent: {{ a.absent }}</span>
+    <span class="badge warning">Late: {{ a.late }}</span>
+    <span class="badge info">Excused: {{ a.excused }}</span>
+    <span class="muted">{{ a.total }} day(s) recorded</span>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Report cards</h3>
+  {% if term_links %}
+  <div class="row-gap">
+    {% for name, url in term_links %}
+    <a class="btn secondary sm" href="{{ url }}">{{ name }}</a>
+    {% endfor %}
+  </div>
+  <p class="muted mt-4 mb-0">Only published results are shown.</p>
+  {% else %}
+  <p class="muted mb-0">No published results yet. Check back after your school publishes them.</p>
+  {% endif %}
+</div>

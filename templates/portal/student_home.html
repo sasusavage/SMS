@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}My portal — SchoolBrain{% endblock %}
+{% block topbar_title %}My portal{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Hi {{ student.first_name }}</h1>
+  <p class="muted">Your profile, attendance and published results.</p>
+</div>
+
+{% set overview = {'student': student, 'klass': klass, 'attendance': attendance, 'terms': terms} %}
+{% set term_links = [] %}
+{% for t in terms %}
+  {% set _ = term_links.append((t.name, url_for('portal.student_report', term_id=t.id))) %}
+{% endfor %}
+{% include 'portal/_overview.html' %}
+{% endblock %}

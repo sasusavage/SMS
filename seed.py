@@ -180,13 +180,19 @@ def seed_people(school):
             db.session.flush()
             print(f'  + class: {klass.name}')
 
-    # One student, in the class, linked to the parent.
+    # One student, in the class, linked to the parent. Give the student a login
+    # (student-role user) so the student portal is testable.
     student = people.create_student(
         sid, admission_no=f'{handle.upper()}001', first_name='Test',
         last_name='Student', gender='F', guardian_name='Test Parent',
         current_class_id=klass.id if klass else None)
+    student_user, _ = people.create_user(
+        sid, name='Test Student', email=f'student@{domain}', role='student',
+        password=TEST_PASSWORD)
+    student.user_id = student_user.id
+    db.session.flush()
     people.link_parent_student(sid, parent.id, student.id, 'Parent')
-    print('  + 1 student, linked to parent')
+    print('  + 1 student (with login), linked to parent')
 
     term = Term.query.filter_by(school_id=sid, is_current=True).first()
     if not (klass and term):
@@ -257,9 +263,10 @@ def main():
             print(f'  {s["name"]}  (school code: {slug})')
             print(f'    admin   | {s["admin"]["email"]} / {s["admin"]["password"]}')
             print(f'    teacher | teacher@{slug}.test / {TEST_PASSWORD}')
-            print(f'    parent  | parent@{slug}.test / {TEST_PASSWORD}')
-            print(f'    (1 student, 1 class, attendance + published results + '
-                  'report card)')
+            print(f'    parent  | parent@{slug}.test  / {TEST_PASSWORD}')
+            print(f'    student | student@{slug}.test / {TEST_PASSWORD}')
+            print(f'    (1 class, attendance + published results + report card; '
+                  'student & parent portals ready)')
             print()
 
 

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Report card — {{ student.first_name }} {{ student.last_name }}</title>
+  <style>
+    /* Self-contained so it renders identically in the browser and WeasyPrint. */
+    @page { size: A4; margin: 16mm; }
+    * { box-sizing: border-box; }
+    body { font-family: "Helvetica Neue", Arial, sans-serif; color: #1f2933;
+           font-size: 12px; margin: 0; }
+    .sheet { max-width: 800px; margin: 0 auto; padding: 24px; }
+    .rc-head { display: flex; justify-content: space-between; align-items: flex-start;
+               border-bottom: 3px solid #1f3a5f; padding-bottom: 12px; }
+    .rc-head h1 { font-size: 20px; margin: 0; color: #1f3a5f; }
+    .rc-head .meta { text-align: right; font-size: 11px; color: #52606d; }
+    .student-bar { display: flex; flex-wrap: wrap; gap: 6px 28px; margin: 16px 0;
+                   font-size: 12px; }
+    .student-bar div span { color: #7b8794; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #cbd2d9; padding: 6px 8px; text-align: left; }
+    th { background: #eef2f7; font-size: 11px; text-transform: uppercase;
+         letter-spacing: .03em; }
+    td.num, th.num { text-align: center; }
+    .summary { display: flex; gap: 28px; margin-top: 14px; font-size: 12px; }
+    .summary b { color: #1f3a5f; }
+    .section { margin-top: 18px; }
+    .section h3 { font-size: 13px; margin: 0 0 4px; color: #1f3a5f; }
+    .comment-box { border: 1px solid #cbd2d9; border-radius: 6px; padding: 8px 10px;
+                   min-height: 36px; }
+    .sign-row { display: flex; justify-content: space-between; margin-top: 36px;
+                font-size: 11px; }
+    .sign-row .sign { width: 45%; border-top: 1px solid #1f2933; padding-top: 4px;
+                      text-align: center; color: #52606d; }
+    .draft { background: #fff3cd; color: #7a5b00; padding: 6px 10px; border-radius: 6px;
+             font-size: 11px; margin-bottom: 12px; text-align: center; }
+    .toolbar { max-width: 800px; margin: 12px auto; text-align: right; }
+    .toolbar a { display: inline-block; padding: 7px 14px; border-radius: 6px;
+                 background: #4f46e5; color: #fff; text-decoration: none; font-size: 12px; }
+    .toolbar a.secondary { background: #fff; color: #1f2933; border: 1px solid #cbd2d9; }
+    @media print { .toolbar { display: none; } }
+  </style>
+</head>
+<body>
+{% set s = settings %}
+{% if not pdf %}
+<div class="toolbar">
+  <a class="secondary" href="javascript:window.print()">Print</a>
+  <a href="{{ url_for('reports.report_card_pdf', student_id=student.id, term_id=term.id) }}">Download PDF</a>
+</div>
+{% endif %}
+
+<div class="sheet">
+  {% if not published %}
+  <div class="draft">DRAFT — these results are not yet published. Students and parents cannot see this.</div>
+  {% endif %}
+
+  <div class="rc-head">
+    <div>
+      <h1>{{ school.name }}</h1>
+      <div style="font-size:11px;color:#52606d">{{ school.address or '' }}{% if school.phone %} · {{ school.phone }}{% endif %}</div>
+    </div>
+    <div class="meta">
+      <div><strong>TERMINAL REPORT</strong></div>
+      <div>{{ academic_year.name if academic_year }} · {{ term.name }}</div>
+    </div>
+  </div>
+
+  <div class="student-bar">
+    <div><span>Name:</span> <strong>{{ student.last_name }}, {{ student.first_name }} {{ student.other_names or '' }}</strong></div>
+    <div><span>Adm. no:</span> {{ student.admission_no }}</div>
+    <div><span>Class:</span> {{ klass.name if klass else '—' }}</div>
+    {% if student.gender %}<div><span>Gender:</span> {{ student.gender }}</div>{% endif %}
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th class="num">Total (%)</th>
+        <th class="num">Grade</th>
+        {% if s and s.show_grade_point %}<th class="num">Point</th>{% endif %}
+        <th>Remark</th>
+        {% if s and s.show_class_position %}<th class="num">Position</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.subject }}</td>
+        <td class="num">{{ r.total_score if r.total_score is not none else '—' }}</td>
+        <td class="num">{{ r.grade_label or '—' }}</td>
+        {% if s and s.show_grade_point %}<td class="num">{{ r.grade_point if r.grade_point is not none else '—' }}</td>{% endif %}
+        <td>{{ r.remark or '—' }}</td>
+        {% if s and s.show_class_position %}<td class="num">{{ r.class_position if r.class_position is not none else '—' }}</td>{% endif %}
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center;color:#7b8794">No results for this term.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="summary">
+    <div>Subjects: <b>{{ summary.subjects_count }}</b></div>
+    {% if summary.average is not none %}<div>Average: <b>{{ summary.average }}%</b></div>{% endif %}
+    <div>Passed: <b>{{ summary.passed }}/{{ summary.subjects_count }}</b></div>
+  </div>
+
+  <div class="section">
+    <h3>Attendance</h3>
+    <div class="summary">
+      <div>Present: <b>{{ attendance.present }}</b></div>
+      {% if attendance.total is not none %}<div>Total days: <b>{{ attendance.total }}</b></div>{% endif %}
+      {% if attendance.late is not none %}<div>Late: <b>{{ attendance.late }}</b></div>{% endif %}
+      {% if attendance.excused is not none %}<div>Excused: <b>{{ attendance.excused }}</b></div>{% endif %}
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Class teacher's comment</h3>
+    <div class="comment-box">{{ comments.teacher_comment if comments and comments.teacher_comment else '' }}</div>
+  </div>
+  <div class="section">
+    <h3>Head teacher's comment</h3>
+    <div class="comment-box">{{ comments.head_comment if comments and comments.head_comment else '' }}</div>
+  </div>
+
+  <div class="sign-row">
+    <div class="sign">Class Teacher</div>
+    <div class="sign">Head Teacher</div>
+  </div>
+
+  {% if s and s.next_term_begins_label %}
+  <div style="margin-top:18px;font-size:11px;color:#52606d">{{ s.next_term_begins_label }}</div>
+  {% endif %}
+</div>
+</body>
+</html>

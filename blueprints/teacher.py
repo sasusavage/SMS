@@ -20,7 +20,10 @@ from services import attendance
 from services.attendance import AttendanceError
 from services import results_engine
 from services.results_engine import ResultsError
+from services import report_card
+from services.report_card import ReportError
 from models.config_tables import Class, Subject, Term
+from models.operational import Student
 
 teacher_bp = Blueprint('teacher', __name__, url_prefix='/teacher')
 
@@ -174,6 +177,54 @@ def scores():
                            selected_subject_id=subject_id, terms=terms,
                            selected_term_id=term_id, components=components,
                            roster=roster, grid=grid, ready=ready)
+
+
+# ---------------------------------------------------------------------------
+# Report comments  (/teacher/comments)
+# ---------------------------------------------------------------------------
+@teacher_bp.route('/comments', methods=['GET', 'POST'])
+def comments():
+    sid = _sid()
+    classes = attendance.accessible_classes(sid, current_user)
+    class_id = _int(request.values.get('class_id'))
+    term_id = _int(request.values.get('term_id'))
+
+    if class_id is not None and not attendance.teacher_can_access_class(
+            sid, current_user, class_id):
+        abort(404)
+
+    terms = Term.query.filter_by(school_id=sid).order_by(Term.sequence).all()
+
+    if request.method == 'POST' and class_id is not None and term_id is not None:
+        student_id = _int(request.form.get('student_id'))
+        try:
+            report_card.save_comment(
+                sid, student_id, term_id,
+                teacher_comment=request.form.get('teacher_comment', ''),
+                head_comment=request.form.get('head_comment', ''))
+            log_action('save_comment', entity='student', entity_id=student_id,
+                       meta={'term_id': term_id})
+            db.session.commit()
+            flash('Comment saved.', 'success')
+        except ReportError as e:
+            db.session.rollback()
+            flash(e.message, 'danger')
+        return redirect(url_for('teacher.comments', class_id=class_id,
+                                term_id=term_id))
+
+    roster = []
+    existing = {}
+    if class_id is not None and term_id is not None:
+        roster = results_engine._roster(sid, class_id)
+        from models.operational import ReportComment
+        for rc in ReportComment.query.filter_by(
+                school_id=sid, term_id=term_id).all():
+            existing[rc.student_id] = rc
+
+    return render_template('teacher/comments.html', classes=classes,
+                           selected_class_id=class_id, terms=terms,
+                           selected_term_id=term_id, roster=roster,
+                           existing=existing)
 
 
 def _int(v):

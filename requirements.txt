@@ -10,3 +10,7 @@ alembic==1.15.2
 psycopg2-binary==2.9.11
 python-dotenv==1.0.0
 gunicorn==23.0.0
+# Optional: server-side PDF for report cards. Needs native libs (pango/cairo/
+# gdk-pixbuf) — see nixpacks.toml. If those libs are missing at runtime the app
+# still works; PDF degrades to browser Print → Save as PDF.
+weasyprint==62.3

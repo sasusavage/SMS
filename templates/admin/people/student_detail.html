@@ -8,6 +8,17 @@
   <p class="muted">Admission no. {{ student.admission_no }}</p>
 </div>
 
+{% if terms %}
+<div class="card">
+  <h3>Report cards</h3>
+  <div class="row-gap">
+    {% for t in terms %}
+    <a class="btn secondary sm" href="{{ url_for('reports.report_card_view', student_id=student.id, term_id=t.id) }}">{{ t.name }}</a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 <div class="card">
   <h3>Details</h3>
   <table class="table">

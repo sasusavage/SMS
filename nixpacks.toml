@@ -3,7 +3,11 @@
 # command so migrations + conditional seed run before gunicorn.
 
 [phases.setup]
-nixPkgs = ["python311", "gcc"]
+# python311 + gcc for building wheels. pango/cairo/gdk-pixbuf/fontconfig are the
+# native libraries WeasyPrint needs for server-side PDF export. If a build can't
+# resolve these, PDF gracefully degrades to "Print → Save as PDF" in the browser
+# (the HTML report card always works regardless).
+nixPkgs = ["python311", "gcc", "pango", "cairo", "gdk-pixbuf", "fontconfig", "harfbuzz"]
 
 [start]
 cmd = "bash start.sh"

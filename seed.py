@@ -25,7 +25,7 @@ from models.operational import User, Student
 from models.config_tables import Class, Level, AcademicYear, Subject, Term
 from auth.security import hash_password
 from services.template_loader import apply_template
-from services import people, attendance
+from services import people, attendance, results_engine, report_card
 
 
 # --- Credentials (demo only — change in production) ------------------------
@@ -242,6 +242,39 @@ def seed_people(school):
                                            marked_by=teachers[0].id)
             marked_days += 1
         print(f'  + attendance marked for {marked_days} recent weekdays')
+
+    # Scores + computed/published results + comments, so the full results and
+    # report-card flow is clickable. Enter scores for the assigned subjects.
+    if klass and term and students:
+        lg_id = results_engine._class_level_group_id(sid, klass)
+        components = results_engine.components_for(sid, lg_id)
+        # Score every subject offered at this class's level so no result row is
+        # left at 0 (which would look broken on the report card).
+        graded_subjects = results_engine.subjects_for_class(sid, klass)
+        # Spread scores so grades and class positions differ between students.
+        base_scores = [85, 72, 58, 44]
+        for subj in graded_subjects:
+            entries = []
+            for i, st in enumerate(students):
+                for comp in components:
+                    entries.append({'student_id': st.id,
+                                    'component_id': comp.id,
+                                    'score': base_scores[i % len(base_scores)]})
+            results_engine.save_scores(sid, klass.id, subj.id, term.id, entries,
+                                       entered_by=teachers[0].id)
+        out = results_engine.compute_term_results(sid, klass.id, term.id)
+        results_engine.publish_results(sid, klass.id, term.id)
+        print(f'  + scores entered, results computed ({out["computed"]}) '
+              'and published')
+
+        # A couple of report comments.
+        report_card.save_comment(sid, students[0].id, term.id,
+                                 teacher_comment='Excellent, consistent work.',
+                                 head_comment='A very good result. Keep it up.')
+        report_card.save_comment(sid, students[1].id, term.id,
+                                 teacher_comment='Good effort; revise weaker topics.',
+                                 head_comment='Promising progress.')
+        print('  + report comments added')
 
 
 def main():

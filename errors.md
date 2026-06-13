@@ -4,6 +4,36 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Step 6 — Report cards testing (2026-06-13)
+
+Built the report-settings-driven HTML report card + /teacher/comments +
+optional WeasyPrint PDF. Added 11 tests (data service + comments + routes).
+
+### No functional bugs found
+Verified: report card includes only PUBLISHED results by default (preview can
+opt into unpublished); report_settings drive which columns/sections appear;
+comments flow into the report; cross-school/unknown student -> 404; the .pdf
+route gracefully redirects (never 500s) when WeasyPrint is absent.
+
+### SEED-001 — seeded results looked broken (0-score subjects)
+- **Severity:** Low (demo data only, not app logic)
+- **Found by:** first seed scored only 2 subjects, but the GES class's level
+  offers 9 (via level_subjects). The engine correctly computed all 9, so 7 came
+  out total=0 / grade=9 / position=1 (everyone tied at 0). Technically correct,
+  but the report card looked empty/wrong.
+- **Fix:** seed now scores EVERY subject offered at the class's level
+  (results_engine.subjects_for_class), so every result row is meaningful.
+- **Status:** ✅ Fixed.
+
+### Deploy note — WeasyPrint is optional
+- weasyprint added to requirements.txt; pango/cairo/gdk-pixbuf/fontconfig/
+  harfbuzz added to nixpacks.toml setup. If the build can't resolve the native
+  libs, the app still runs and PDF degrades to browser Print → Save as PDF (the
+  HTML report card always works). The .pdf route imports WeasyPrint lazily
+  inside a try/except so a missing lib never breaks startup or the page.
+
+---
+
 ## Step 5 — Scores & Results testing (2026-06-13)
 
 Built the results engine (services/results_engine.py): score-entry upsert,

@@ -142,9 +142,10 @@ def student_detail(student_id):
                .order_by(User.name).all())
     links = (tenant_query(ParentStudent)
              .filter_by(student_id=student_id).all())
+    terms = tenant_query(Term).order_by(Term.sequence).all()
     return render_template('admin/people/student_detail.html',
                            student=student, classes=classes, parents=parents,
-                           links=links)
+                           links=links, terms=terms)
 
 
 @people_bp.route('/students/<int:student_id>/transfer', methods=['POST'])

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Report comments{% endblock %}
+{% block topbar_title %}Comments{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Report comments</h1>
+  <p class="muted">Write the class teacher and head teacher comments shown on
+     each student's report card.</p>
+</div>
+
+<div class="card">
+  <form method="get" class="form-inline">
+    <div class="form-group"><label>Class</label>
+      <select name="class_id" onchange="this.form.submit()">
+        <option value="">— class —</option>
+        {% for c in classes %}<option value="{{ c.id }}" {{ 'selected' if selected_class_id == c.id }}>{{ c.name }}</option>{% endfor %}
+      </select></div>
+    <div class="form-group"><label>Term</label>
+      <select name="term_id" onchange="this.form.submit()">
+        <option value="">— term —</option>
+        {% for t in terms %}<option value="{{ t.id }}" {{ 'selected' if selected_term_id == t.id }}>{{ t.name }}</option>{% endfor %}
+      </select></div>
+    <noscript><button class="btn">Load</button></noscript>
+  </form>
+</div>
+
+{% if selected_class_id is none or selected_term_id is none %}
+  <div class="card"><p class="muted mb-0">Choose a class and term.</p></div>
+{% elif not roster %}
+  <div class="card"><p class="muted mb-0">This class has no students.</p></div>
+{% else %}
+  {% for student in roster %}
+  {% set rc = existing.get(student.id) %}
+  <div class="card">
+    <div class="card-title">
+      <h3 class="mb-0">{{ student.last_name }}, {{ student.first_name }}
+        <span class="muted" style="font-weight:400">({{ student.admission_no }})</span></h3>
+      <a class="btn secondary sm" href="{{ url_for('reports.report_card_view', student_id=student.id, term_id=selected_term_id) }}">View report card</a>
+    </div>
+    <form method="post" action="{{ url_for('teacher.comments', class_id=selected_class_id, term_id=selected_term_id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="student_id" value="{{ student.id }}">
+      <div class="form-group">
+        <label>Class teacher's comment</label>
+        <textarea name="teacher_comment" rows="2">{{ rc.teacher_comment if rc and rc.teacher_comment else '' }}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Head teacher's comment</label>
+        <textarea name="head_comment" rows="2">{{ rc.head_comment if rc and rc.head_comment else '' }}</textarea>
+      </div>
+      <button type="submit" class="btn">Save</button>
+    </form>
+  </div>
+  {% endfor %}
+{% endif %}
+{% endblock %}

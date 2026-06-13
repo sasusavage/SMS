@@ -115,6 +115,6 @@ def wizard():
         'components': AssessmentComponent.query.filter_by(school_id=sid).count(),
         'terms': Term.query.filter_by(school_id=sid).count(),
     }
-    school = School.query.get(sid)
+    school = db.session.get(School, sid)
     return render_template('onboarding/wizard.html', summary=summary,
                            school=school)

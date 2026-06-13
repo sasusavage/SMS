@@ -1,30 +1,40 @@
 {% extends "base.html" %}
 {% block title %}Level–subjects{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
 {% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Level–subjects</div>
+  <h1>Level–subjects</h1>
+  <p class="muted">Which subjects are offered at which level.</p>
+</div>
+
 <div class="card">
-  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
-  <h2>Level–subjects</h2>
-  <p>Which subjects are offered at which level.</p>
+  <h3>Map subject to level</h3>
   {% if levels and subjects %}
-  <form method="post">
+  <form method="post" class="form-inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Level</label>
-    <select name="level_id" required>{% for l in levels %}<option value="{{ l.id }}">{{ l.name }}</option>{% endfor %}</select>
-    <label>Subject</label>
-    <select name="subject_id" required>{% for s in subjects %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select>
-    <button type="submit">Map subject to level</button>
+    <div class="form-group"><label>Level</label>
+      <select name="level_id" required>{% for l in levels %}<option value="{{ l.id }}">{{ l.name }}</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Subject</label>
+      <select name="subject_id" required>{% for s in subjects %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select></div>
+    <button type="submit" class="btn">Map</button>
   </form>
-  {% else %}<p><em>Add levels and subjects first.</em></p>{% endif %}
-  <table style="margin-top:20px">
-    <thead><tr><th>Level</th><th>Subject</th><th></th></tr></thead>
-    <tbody>
-      {% for m in mappings %}
-      <tr><td>{{ m.level.name if m.level else '—' }}</td><td>{{ m.subject.name if m.subject else '—' }}</td>
-        <td><form method="post" action="{{ url_for('admin_config.delete_level_subject', ls_id=m.id) }}" style="display:inline">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button style="margin:0;padding:4px 8px;background:#8a1c13">Remove</button></form></td></tr>
-      {% else %}<tr><td colspan="3">None yet.</td></tr>{% endfor %}
-    </tbody>
-  </table>
+  {% else %}<p class="muted mb-0">Add levels and subjects first.</p>{% endif %}
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Level</th><th>Subject</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for m in mappings %}
+        <tr><td>{{ m.level.name if m.level else '—' }}</td><td>{{ m.subject.name if m.subject else '—' }}</td>
+          <td class="actions"><form method="post" action="{{ url_for('admin_config.delete_level_subject', ls_id=m.id) }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger sm">Remove</button></form></td></tr>
+        {% else %}<tr><td colspan="3" class="empty">No mappings yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

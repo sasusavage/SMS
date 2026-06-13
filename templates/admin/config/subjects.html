@@ -1,26 +1,38 @@
 {% extends "base.html" %}
 {% block title %}Subjects{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
 {% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Subjects</div>
+  <h1>Subjects</h1>
+</div>
+
 <div class="card">
-  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
-  <h2>Subjects</h2>
-  <form method="post">
+  <h3>Add subject</h3>
+  <form method="post" class="form-inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Name</label><input name="name" required>
-    <label>Code</label><input name="code" placeholder="e.g. MATH">
-    <label><input type="checkbox" name="is_core" checked> Core subject</label>
-    <button type="submit">Add subject</button>
+    <div class="form-group"><label>Name</label><input name="name" required></div>
+    <div class="form-group"><label>Code</label><input name="code" placeholder="MATH"></div>
+    <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label>
+      <div class="checkbox-row"><input type="checkbox" id="is_core" name="is_core" checked><label for="is_core">Core subject</label></div></div>
+    <button type="submit" class="btn">Add</button>
   </form>
-  <table style="margin-top:20px">
-    <thead><tr><th>Name</th><th>Code</th><th>Core</th><th></th></tr></thead>
-    <tbody>
-      {% for s in subjects %}
-      <tr><td>{{ s.name }}</td><td>{{ s.code or '—' }}</td><td>{{ 'Yes' if s.is_core else 'No' }}</td>
-        <td><form method="post" action="{{ url_for('admin_config.delete_subject', subject_id=s.id) }}" style="display:inline" onsubmit="return confirm('Delete this subject?')">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button style="margin:0;padding:4px 8px;background:#8a1c13">Delete</button></form></td></tr>
-      {% else %}<tr><td colspan="4">None yet.</td></tr>{% endfor %}
-    </tbody>
-  </table>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Code</th><th>Core</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for s in subjects %}
+        <tr><td>{{ s.name }}</td><td>{{ s.code or '—' }}</td>
+          <td>{% if s.is_core %}<span class="badge primary">core</span>{% else %}<span class="badge">elective</span>{% endif %}</td>
+          <td class="actions"><form method="post" action="{{ url_for('admin_config.delete_subject', subject_id=s.id) }}" class="inline-form" onsubmit="return confirm('Delete this subject?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger sm">Delete</button></form></td></tr>
+        {% else %}<tr><td colspan="4" class="empty">No subjects yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

@@ -1,31 +1,39 @@
 {% extends "base.html" %}
 {% block title %}Set up {{ school.name }}{% endblock %}
+{% block topbar_title %}Setup checklist{% endblock %}
 {% block content %}
-<div class="card">
-  <h2>Welcome — let's finish setting up {{ school.name }}</h2>
-  <p>Your "{{ school.curriculum_template_used }}" template seeded the basics.
-     Review each area and customise as needed.</p>
-  <table>
-    <thead><tr><th>Step</th><th>Seeded</th><th>Action</th></tr></thead>
-    <tbody>
-      <tr><td>Academic year &amp; terms</td><td>{{ summary.terms }} terms</td>
-          <td><a href="{{ url_for('admin_config.terms') }}">Review →</a></td></tr>
-      <tr><td>Level groups &amp; levels</td><td>{{ summary.level_groups }} groups, {{ summary.levels }} levels</td>
-          <td><a href="{{ url_for('admin_config.levels') }}">Review →</a></td></tr>
-      <tr><td>Classes / streams</td><td>—</td>
-          <td><a href="{{ url_for('admin_config.classes') }}">Add streams →</a></td></tr>
-      <tr><td>Subjects</td><td>{{ summary.subjects }} subjects</td>
-          <td><a href="{{ url_for('admin_config.subjects') }}">Review →</a></td></tr>
-      <tr><td>Grading scheme</td><td>{{ summary.grading_schemes }} scheme(s)</td>
-          <td><a href="{{ url_for('admin_config.grading_schemes') }}">Review bands →</a></td></tr>
-      <tr><td>Assessment weights</td><td>{{ summary.components }} components</td>
-          <td><a href="{{ url_for('admin_config.components') }}">Check = 100 →</a></td></tr>
-      <tr><td>Report settings</td><td>configured</td>
-          <td><a href="{{ url_for('admin_config.report_settings') }}">Review →</a></td></tr>
-    </tbody>
-  </table>
-  <p style="margin-top:16px">
-    <a href="{{ url_for('dashboard.index') }}"><button>Go to dashboard</button></a>
-  </p>
+<div class="content-narrow">
+  <div class="page-header">
+    <h1>Welcome — let's finish setting up {{ school.name }}</h1>
+    <p class="muted">Your "<strong>{{ school.curriculum_template_used }}</strong>"
+       template seeded the basics. Review each area and customise as needed.</p>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Step</th><th>Seeded</th><th class="text-right">Action</th></tr></thead>
+        <tbody>
+          <tr><td>Academic year &amp; terms</td><td><span class="badge">{{ summary.terms }} terms</span></td>
+              <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_config.terms') }}">Review</a></td></tr>
+          <tr><td>Level groups &amp; levels</td><td><span class="badge">{{ summary.level_groups }} groups · {{ summary.levels }} levels</span></td>
+              <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_config.levels') }}">Review</a></td></tr>
+          <tr><td>Classes / streams</td><td><span class="badge">—</span></td>
+              <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_config.classes') }}">Add streams</a></td></tr>
+          <tr><td>Subjects</td><td><span class="badge">{{ summary.subjects }} subjects</span></td>
+              <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_config.subjects') }}">Review</a></td></tr>
+          <tr><td>Grading scheme</td><td><span class="badge">{{ summary.grading_schemes }} scheme(s)</span></td>
+              <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_config.grading_schemes') }}">Review bands</a></td></tr>
+          <tr><td>Assessment weights</td><td><span class="badge">{{ summary.components }} components</span></td>
+              <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_config.components') }}">Check = 100</a></td></tr>
+          <tr><td>Report settings</td><td><span class="badge success">configured</span></td>
+              <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_config.report_settings') }}">Review</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-5">
+      <a class="btn" href="{{ url_for('dashboard.index') }}">Go to dashboard</a>
+    </div>
+  </div>
 </div>
 {% endblock %}

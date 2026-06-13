@@ -1,44 +1,52 @@
 {% extends "base.html" %}
 {% block title %}Terms{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
 {% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Terms</div>
+  <h1>Terms</h1>
+</div>
+
 <div class="card">
-  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
-  <h2>Terms</h2>
+  <h3>Add term</h3>
   {% if years %}
-  <form method="post">
+  <form method="post" class="form-inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Academic year</label>
-    <select name="academic_year_id" required>
-      {% for y in years %}<option value="{{ y.id }}">{{ y.name }}</option>{% endfor %}
-    </select>
-    <label>Name (e.g. Term 1)</label><input name="name" required>
-    <label>Sequence</label><input type="number" name="sequence" value="1" min="1">
-    <label>Start date</label><input type="date" name="start_date">
-    <label>End date</label><input type="date" name="end_date">
-    <button type="submit">Add term</button>
+    <div class="form-group"><label>Academic year</label>
+      <select name="academic_year_id" required>
+        {% for y in years %}<option value="{{ y.id }}">{{ y.name }}</option>{% endfor %}
+      </select></div>
+    <div class="form-group"><label>Name</label><input name="name" placeholder="Term 1" required></div>
+    <div class="form-group" style="flex:0 0 90px"><label>Sequence</label><input type="number" name="sequence" value="1" min="1"></div>
+    <div class="form-group"><label>Start date</label><input type="date" name="start_date"></div>
+    <div class="form-group"><label>End date</label><input type="date" name="end_date"></div>
+    <button type="submit" class="btn">Add</button>
   </form>
-  {% else %}<p><em>Add an academic year first.</em></p>{% endif %}
-  <table style="margin-top:20px">
-    <thead><tr><th>Term</th><th>Seq</th><th>Start</th><th>End</th><th>Current</th><th></th></tr></thead>
-    <tbody>
-      {% for t in terms %}
-      <tr>
-        <td>{{ t.name }}</td><td>{{ t.sequence }}</td>
-        <td>{{ t.start_date or '—' }}</td><td>{{ t.end_date or '—' }}</td>
-        <td>{% if t.is_current %}<strong>✓</strong>{% else %}
-          <form method="post" action="{{ url_for('admin_config.set_current_term_route', term_id=t.id) }}" style="display:inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button style="margin:0;padding:4px 8px">Make current</button>
-          </form>{% endif %}</td>
-        <td>
-          <form method="post" action="{{ url_for('admin_config.delete_term', term_id=t.id) }}" style="display:inline" onsubmit="return confirm('Delete this term?')">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button style="margin:0;padding:4px 8px;background:#8a1c13">Delete</button>
-          </form>
-        </td>
-      </tr>
-      {% else %}<tr><td colspan="6">None yet.</td></tr>{% endfor %}
-    </tbody>
-  </table>
+  {% else %}<p class="muted mb-0">Add an academic year first.</p>{% endif %}
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Term</th><th>Seq</th><th>Start</th><th>End</th><th>Current</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for t in terms %}
+        <tr>
+          <td>{{ t.name }}</td><td>{{ t.sequence }}</td>
+          <td>{{ t.start_date or '—' }}</td><td>{{ t.end_date or '—' }}</td>
+          <td>{% if t.is_current %}<span class="badge success">current</span>{% else %}
+            <form method="post" action="{{ url_for('admin_config.set_current_term_route', term_id=t.id) }}" class="inline-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn ghost sm">Make current</button></form>{% endif %}</td>
+          <td class="actions">
+            <form method="post" action="{{ url_for('admin_config.delete_term', term_id=t.id) }}" class="inline-form" onsubmit="return confirm('Delete this term?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn danger sm">Delete</button></form>
+          </td>
+        </tr>
+        {% else %}<tr><td colspan="6" class="empty">No terms yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

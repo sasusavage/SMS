@@ -45,6 +45,15 @@ def create_app(config_name=None):
 
 
 def _register_request_hooks(app):
+    @app.context_processor
+    def inject_role():
+        """Expose the current user's role as a plain string to all templates."""
+        role = None
+        if current_user.is_authenticated:
+            r = getattr(current_user, 'role', None)
+            role = r.value if hasattr(r, 'value') else r
+        return {'current_role': role}
+
     @app.before_request
     def resolve_tenant():
         """

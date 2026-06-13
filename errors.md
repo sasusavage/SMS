@@ -4,6 +4,34 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## UI redesign (2026-06-13)
+
+Full restyle to a clean modern SaaS look (single static/css/app.css, app shell
+with sidebar/topbar). Added 17 page-render smoke tests; **full suite 73/73
+passing.**
+
+### BUG-003 — missing `db` import after switching to `db.session.get()`
+- **Severity:** HIGH (would crash auth on every request in production)
+- **Found by:** noticing `db.session.get()` was added to `auth/security.py`
+  (the Flask-Login user loader) without importing `db`. The test suite did NOT
+  catch it at first — the in-memory client reused the session identity, so the
+  loader's NameError path wasn't always exercised. A direct `load_user()` probe
+  reproduced it.
+- **Cause:** modernised `User.query.get()` → `db.session.get(User, ...)` to
+  clear a SQLAlchemy 2.0 deprecation, but `db` wasn't in the import list.
+- **Fix:** `from extensions import login_manager, bcrypt, db`. Verified
+  `load_user()` loads users, platform identities, and returns None for missing.
+- **Lesson:** a green suite isn't proof a hot path ran — probe security-critical
+  functions directly.
+- **Status:** ✅ Fixed.
+
+### Cleanup — replaced legacy Query.get() in app code
+- `onboarding.py`, `auth/security.py` now use `db.session.get(...)`. No behavior
+  change; removes SQLAlchemy 2.0 deprecation warnings from real code.
+- **Status:** ✅ Done.
+
+---
+
 ## Step 2 — Config module testing (2026-06-13)
 
 Added 27 tests (17 validation-service + 10 route/wizard). **Full suite now

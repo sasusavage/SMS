@@ -1,29 +1,38 @@
 {% extends "base.html" %}
 {% block title %}Grading schemes{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
 {% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Grading schemes</div>
+  <h1>Grading schemes</h1>
+</div>
+
 <div class="card">
-  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
-  <h2>Grading schemes</h2>
-  <form method="post">
+  <h3>Add scheme</h3>
+  <form method="post" class="form-inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Name (e.g. BECE Style, IGCSE A*–G)</label><input name="name" required>
-    <button type="submit">Add scheme</button>
+    <div class="form-group"><label>Name</label><input name="name" placeholder="BECE Style, IGCSE A*–G" required></div>
+    <button type="submit" class="btn">Add</button>
   </form>
-  <table style="margin-top:20px">
-    <thead><tr><th>Name</th><th>Default</th><th>Boundaries</th><th></th></tr></thead>
-    <tbody>
-      {% for s in schemes %}
-      <tr>
-        <td><a href="{{ url_for('admin_config.scheme_boundaries', scheme_id=s.id) }}">{{ s.name }}</a></td>
-        <td>{% if s.is_default %}<strong>✓ default</strong>{% else %}
-          <form method="post" action="{{ url_for('admin_config.set_default_scheme', scheme_id=s.id) }}" style="display:inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button style="margin:0;padding:4px 8px">Make default</button></form>{% endif %}</td>
-        <td><a href="{{ url_for('admin_config.scheme_boundaries', scheme_id=s.id) }}">Edit bands →</a></td>
-        <td></td>
-      </tr>
-      {% else %}<tr><td colspan="4">None yet.</td></tr>{% endfor %}
-    </tbody>
-  </table>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Default</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for s in schemes %}
+        <tr>
+          <td><a href="{{ url_for('admin_config.scheme_boundaries', scheme_id=s.id) }}">{{ s.name }}</a></td>
+          <td>{% if s.is_default %}<span class="badge success">default</span>{% else %}
+            <form method="post" action="{{ url_for('admin_config.set_default_scheme', scheme_id=s.id) }}" class="inline-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn ghost sm">Make default</button></form>{% endif %}</td>
+          <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_config.scheme_boundaries', scheme_id=s.id) }}">Edit bands</a></td>
+        </tr>
+        {% else %}<tr><td colspan="3" class="empty">No grading schemes yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

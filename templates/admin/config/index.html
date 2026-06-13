@@ -1,23 +1,39 @@
 {% extends "base.html" %}
 {% block title %}Configuration — SchoolBrain{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
 {% block content %}
+<div class="page-header">
+  <h1>School configuration</h1>
+  <p class="muted">Set up your school's academic structure, calendar, subjects,
+     grading and report options. Nothing here is hardcoded — every school is different.</p>
+</div>
+
 <div class="card">
-  <h2>School configuration</h2>
-  <p>Set up your school's academic structure, calendar, subjects, grading and
-     report options. Nothing here is hardcoded — every school is different.</p>
-  <table>
-    <tbody>
-      <tr><td><a href="{{ url_for('admin_config.academic_years') }}">Academic years</a></td><td>{{ counts.academic_years }}</td></tr>
-      <tr><td><a href="{{ url_for('admin_config.terms') }}">Terms</a></td><td>{{ counts.terms }}</td></tr>
-      <tr><td><a href="{{ url_for('admin_config.level_groups') }}">Level groups</a></td><td>{{ counts.level_groups }}</td></tr>
-      <tr><td><a href="{{ url_for('admin_config.levels') }}">Levels</a></td><td>{{ counts.levels }}</td></tr>
-      <tr><td><a href="{{ url_for('admin_config.classes') }}">Classes</a></td><td>{{ counts.classes }}</td></tr>
-      <tr><td><a href="{{ url_for('admin_config.subjects') }}">Subjects</a></td><td>{{ counts.subjects }}</td></tr>
-      <tr><td><a href="{{ url_for('admin_config.level_subjects') }}">Level–subjects</a></td><td>—</td></tr>
-      <tr><td><a href="{{ url_for('admin_config.grading_schemes') }}">Grading schemes</a></td><td>{{ counts.grading_schemes }}</td></tr>
-      <tr><td><a href="{{ url_for('admin_config.components') }}">Assessment components</a></td><td>{{ counts.components }}</td></tr>
-      <tr><td><a href="{{ url_for('admin_config.report_settings') }}">Report settings</a></td><td>—</td></tr>
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Area</th><th>Configured</th><th class="text-right">Open</th></tr></thead>
+      <tbody>
+        {% set rows = [
+          ('Academic years', counts.academic_years, 'admin_config.academic_years'),
+          ('Terms', counts.terms, 'admin_config.terms'),
+          ('Level groups', counts.level_groups, 'admin_config.level_groups'),
+          ('Levels', counts.levels, 'admin_config.levels'),
+          ('Classes', counts.classes, 'admin_config.classes'),
+          ('Subjects', counts.subjects, 'admin_config.subjects'),
+          ('Level–subjects', none, 'admin_config.level_subjects'),
+          ('Grading schemes', counts.grading_schemes, 'admin_config.grading_schemes'),
+          ('Assessment components', counts.components, 'admin_config.components'),
+          ('Report settings', none, 'admin_config.report_settings'),
+        ] %}
+        {% for label, count, endpoint in rows %}
+        <tr>
+          <td><a href="{{ url_for(endpoint) }}">{{ label }}</a></td>
+          <td>{% if count is not none %}<span class="badge">{{ count }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+          <td class="actions"><a class="btn secondary sm" href="{{ url_for(endpoint) }}">Open</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

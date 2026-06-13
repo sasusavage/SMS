@@ -1,30 +1,43 @@
-{% extends "base.html" %}
+{% extends "auth_base.html" %}
 {% block title %}Create your school — SchoolBrain{% endblock %}
+{% block card_class %}wide{% endblock %}
 {% block content %}
-<div class="card" style="max-width:560px;margin:32px auto">
-  <h2>Create your school</h2>
-  <p>Set up your school and pick a starting template. You can customise
-     everything afterwards — nothing is locked in.</p>
-  <form method="post" action="{{ url_for('onboarding.signup') }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<h2>Create your school</h2>
+<p class="muted">Set up your school and pick a starting template. You can
+   customise everything afterwards — nothing is locked in.</p>
+<form method="post" action="{{ url_for('onboarding.signup') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <h3>School</h3>
+  <h3 class="mt-4">School</h3>
+  <div class="form-group">
     <label>School name</label>
     <input name="school_name" value="{{ form.get('school_name','') }}" required>
-    <label>School code (login slug, optional — derived from name if blank)</label>
+  </div>
+  <div class="form-group">
+    <label>School code (login slug — derived from name if blank)</label>
     <input name="slug" value="{{ form.get('slug','') }}" placeholder="e.g. demo-ges">
+  </div>
+  <div class="form-group">
     <label>Country</label>
     <input name="country" value="{{ form.get('country','') }}">
+  </div>
 
-    <h3>First administrator</h3>
+  <h3 class="mt-4">First administrator</h3>
+  <div class="form-group">
     <label>Your name</label>
     <input name="admin_name" value="{{ form.get('admin_name','') }}" required>
+  </div>
+  <div class="form-group">
     <label>Email</label>
     <input type="email" name="admin_email" value="{{ form.get('admin_email','') }}" required>
+  </div>
+  <div class="form-group">
     <label>Password (min 8 chars)</label>
     <input type="password" name="password" required>
+  </div>
 
-    <h3>Starting template</h3>
+  <h3 class="mt-4">Starting template</h3>
+  <div class="form-group">
     <label>Curriculum template</label>
     <select name="template" required>
       {% for t in templates %}
@@ -33,9 +46,9 @@
     </select>
     <small>ghana_ges and cambridge come pre-filled with levels, subjects,
       grading and terms. blank starts empty.</small>
+  </div>
 
-    <button type="submit">Create school</button>
-  </form>
-  <p style="margin-top:16px"><a href="{{ url_for('auth.login') }}">Already have an account? Log in</a></p>
-</div>
+  <button type="submit" class="btn block">Create school</button>
+</form>
+<p class="mt-4"><a href="{{ url_for('auth.login') }}">Already have an account? Log in</a></p>
 {% endblock %}

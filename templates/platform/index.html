@@ -1,24 +1,42 @@
 {% extends "base.html" %}
 {% block title %}Platform — SchoolBrain{% endblock %}
+{% block topbar_title %}Platform administration{% endblock %}
 {% block content %}
+<div class="page-header">
+  <h1>Platform administration</h1>
+  <p class="muted">Signed in as super admin: {{ current_user.name }}</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat">
+    <div class="stat-label">Schools</div>
+    <div class="stat-value">{{ schools|length }}</div>
+  </div>
+</div>
+
 <div class="card">
-  <h2>Platform administration</h2>
-  <p>Logged in as super admin: {{ current_user.name }}</p>
-  <h3>Schools ({{ schools|length }})</h3>
-  <table>
-    <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Template</th><th>Status</th></tr></thead>
-    <tbody>
-      {% for s in schools %}
-      <tr>
-        <td>{{ s.id }}</td><td>{{ s.name }}</td><td>{{ s.slug }}</td>
-        <td>{{ s.curriculum_template_used or '—' }}</td>
-        <td>{{ s.status.value if s.status else '—' }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="5">No schools yet.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <p style="margin-top:16px"><em>Suspend / activate / subscriptions / metrics land in Step 8.</em></p>
+  <div class="card-title"><h3 class="mb-0">Schools</h3></div>
+  <div class="table-wrap mt-4">
+    <table class="table">
+      <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Template</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for s in schools %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td>{{ s.name }}</td>
+          <td><span class="badge">{{ s.slug }}</span></td>
+          <td>{{ s.curriculum_template_used or '—' }}</td>
+          <td>
+            {% set st = s.status.value if s.status else '—' %}
+            <span class="badge {{ 'success' if st == 'active' else 'warning' if st == 'trial' else 'danger' }}">{{ st }}</span>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="empty">No schools yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="muted mt-4 mb-0"><em>Suspend / activate / subscriptions / metrics land in Step 8.</em></p>
 </div>
 {% endblock %}

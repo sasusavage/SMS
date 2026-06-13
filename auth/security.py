@@ -18,7 +18,7 @@ from functools import wraps
 from flask import g, abort
 from flask_login import current_user
 
-from extensions import login_manager, bcrypt
+from extensions import login_manager, bcrypt, db
 from models.operational import User
 from models.platform import PlatformUser
 
@@ -53,10 +53,10 @@ def load_user(user_id):
         return None
 
     if kind == 'user':
-        user = User.query.get(obj_id)
+        user = db.session.get(User, obj_id)
         return user if (user and user.is_active) else None
     if kind == 'platform':
-        pu = PlatformUser.query.get(obj_id)
+        pu = db.session.get(PlatformUser, obj_id)
         if pu and pu.is_active:
             return PlatformIdentity(pu)
     return None

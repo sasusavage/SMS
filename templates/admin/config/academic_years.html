@@ -1,37 +1,44 @@
 {% extends "base.html" %}
 {% block title %}Academic years{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
 {% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Academic years</div>
+  <h1>Academic years</h1>
+</div>
+
 <div class="card">
-  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
-  <h2>Academic years</h2>
-  <form method="post">
+  <h3>Add academic year</h3>
+  <form method="post" class="form-inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Name (e.g. 2025/2026)</label>
-    <input name="name" required>
-    <label>Start date</label><input type="date" name="start_date">
-    <label>End date</label><input type="date" name="end_date">
-    <button type="submit">Add academic year</button>
+    <div class="form-group"><label>Name</label><input name="name" placeholder="2025/2026" required></div>
+    <div class="form-group"><label>Start date</label><input type="date" name="start_date"></div>
+    <div class="form-group"><label>End date</label><input type="date" name="end_date"></div>
+    <button type="submit" class="btn">Add</button>
   </form>
-  <table style="margin-top:20px">
-    <thead><tr><th>Name</th><th>Start</th><th>End</th><th>Current</th><th></th></tr></thead>
-    <tbody>
-      {% for y in years %}
-      <tr>
-        <td>{{ y.name }}</td><td>{{ y.start_date or '—' }}</td><td>{{ y.end_date or '—' }}</td>
-        <td>{% if y.is_current %}<strong>✓ current</strong>{% else %}
-          <form method="post" action="{{ url_for('admin_config.set_current_year', year_id=y.id) }}" style="display:inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button style="margin:0;padding:4px 8px">Make current</button>
-          </form>{% endif %}</td>
-        <td>
-          <form method="post" action="{{ url_for('admin_config.delete_year', year_id=y.id) }}" style="display:inline" onsubmit="return confirm('Delete this academic year and its terms?')">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button style="margin:0;padding:4px 8px;background:#8a1c13">Delete</button>
-          </form>
-        </td>
-      </tr>
-      {% else %}<tr><td colspan="5">None yet.</td></tr>{% endfor %}
-    </tbody>
-  </table>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Start</th><th>End</th><th>Current</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for y in years %}
+        <tr>
+          <td>{{ y.name }}</td><td>{{ y.start_date or '—' }}</td><td>{{ y.end_date or '—' }}</td>
+          <td>{% if y.is_current %}<span class="badge success">current</span>{% else %}
+            <form method="post" action="{{ url_for('admin_config.set_current_year', year_id=y.id) }}" class="inline-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn ghost sm">Make current</button></form>{% endif %}</td>
+          <td class="actions">
+            <form method="post" action="{{ url_for('admin_config.delete_year', year_id=y.id) }}" class="inline-form" onsubmit="return confirm('Delete this academic year and its terms?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn danger sm">Delete</button></form>
+          </td>
+        </tr>
+        {% else %}<tr><td colspan="5" class="empty">No academic years yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

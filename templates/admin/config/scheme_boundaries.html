@@ -1,35 +1,49 @@
 {% extends "base.html" %}
 {% block title %}{{ scheme.name }} — bands{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
 {% block content %}
+<div class="page-header">
+  <div class="breadcrumb">
+    <a href="{{ url_for('admin_config.index') }}">Configuration</a> /
+    <a href="{{ url_for('admin_config.grading_schemes') }}">Grading schemes</a> / {{ scheme.name }}
+  </div>
+  <h1>{{ scheme.name }} — grade bands</h1>
+  <p class="muted">Bands must not overlap and must lie within 0–100. The system
+     validates this when you add a band.</p>
+</div>
+
 <div class="card">
-  <p><a href="{{ url_for('admin_config.grading_schemes') }}">← Grading schemes</a></p>
-  <h2>{{ scheme.name }} — grade bands</h2>
-  <p>Bands must not overlap and must lie within 0–100. The system validates
-     this when you add a band.</p>
-  <form method="post">
+  <h3>Add band</h3>
+  <form method="post" class="form-inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Min score</label><input type="number" name="min_score" min="0" max="100" required>
-    <label>Max score</label><input type="number" name="max_score" min="0" max="100" required>
-    <label>Grade label (e.g. A1)</label><input name="grade_label" required>
-    <label>Remark (e.g. Excellent)</label><input name="remark">
-    <label>Grade point (optional)</label><input type="number" step="0.01" name="grade_point">
-    <label><input type="checkbox" name="is_pass" checked> Counts as a pass</label>
-    <button type="submit">Add band</button>
+    <div class="form-group" style="flex:0 0 100px"><label>Min</label><input type="number" name="min_score" min="0" max="100" required></div>
+    <div class="form-group" style="flex:0 0 100px"><label>Max</label><input type="number" name="max_score" min="0" max="100" required></div>
+    <div class="form-group" style="flex:0 0 110px"><label>Grade</label><input name="grade_label" placeholder="A1" required></div>
+    <div class="form-group"><label>Remark</label><input name="remark" placeholder="Excellent"></div>
+    <div class="form-group" style="flex:0 0 110px"><label>Grade point</label><input type="number" step="0.01" name="grade_point"></div>
+    <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label>
+      <div class="checkbox-row"><input type="checkbox" id="is_pass" name="is_pass" checked><label for="is_pass">Pass</label></div></div>
+    <button type="submit" class="btn">Add</button>
   </form>
-  <table style="margin-top:20px">
-    <thead><tr><th>Range</th><th>Grade</th><th>Remark</th><th>Point</th><th>Pass</th><th></th></tr></thead>
-    <tbody>
-      {% for b in boundaries %}
-      <tr>
-        <td>{{ b.min_score }}–{{ b.max_score }}</td><td>{{ b.grade_label }}</td>
-        <td>{{ b.remark or '—' }}</td><td>{{ b.grade_point if b.grade_point is not none else '—' }}</td>
-        <td>{{ 'Yes' if b.is_pass else 'No' }}</td>
-        <td><form method="post" action="{{ url_for('admin_config.delete_boundary', boundary_id=b.id) }}" style="display:inline">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button style="margin:0;padding:4px 8px;background:#8a1c13">Delete</button></form></td>
-      </tr>
-      {% else %}<tr><td colspan="6">No bands yet.</td></tr>{% endfor %}
-    </tbody>
-  </table>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Range</th><th>Grade</th><th>Remark</th><th>Point</th><th>Pass</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for b in boundaries %}
+        <tr>
+          <td>{{ b.min_score }}–{{ b.max_score }}</td><td><strong>{{ b.grade_label }}</strong></td>
+          <td>{{ b.remark or '—' }}</td><td>{{ b.grade_point if b.grade_point is not none else '—' }}</td>
+          <td>{% if b.is_pass %}<span class="badge success">pass</span>{% else %}<span class="badge danger">fail</span>{% endif %}</td>
+          <td class="actions"><form method="post" action="{{ url_for('admin_config.delete_boundary', boundary_id=b.id) }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger sm">Delete</button></form></td>
+        </tr>
+        {% else %}<tr><td colspan="6" class="empty">No bands yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

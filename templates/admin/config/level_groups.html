@@ -1,26 +1,36 @@
 {% extends "base.html" %}
 {% block title %}Level groups{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
 {% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Level groups</div>
+  <h1>Level groups</h1>
+  <p class="muted">Broad bands, e.g. "Primary", "JHS", "Lower Secondary".</p>
+</div>
+
 <div class="card">
-  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
-  <h2>Level groups</h2>
-  <p>Broad bands, e.g. "Primary", "JHS", "Lower Secondary".</p>
-  <form method="post">
+  <h3>Add level group</h3>
+  <form method="post" class="form-inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Name</label><input name="name" required>
-    <label>Sequence</label><input type="number" name="sequence" value="0">
-    <button type="submit">Add level group</button>
+    <div class="form-group"><label>Name</label><input name="name" required></div>
+    <div class="form-group" style="flex:0 0 90px"><label>Sequence</label><input type="number" name="sequence" value="0"></div>
+    <button type="submit" class="btn">Add</button>
   </form>
-  <table style="margin-top:20px">
-    <thead><tr><th>Seq</th><th>Name</th><th></th></tr></thead>
-    <tbody>
-      {% for g in groups %}
-      <tr><td>{{ g.sequence }}</td><td>{{ g.name }}</td>
-        <td><form method="post" action="{{ url_for('admin_config.delete_level_group', group_id=g.id) }}" style="display:inline" onsubmit="return confirm('Delete this level group and its levels?')">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button style="margin:0;padding:4px 8px;background:#8a1c13">Delete</button></form></td></tr>
-      {% else %}<tr><td colspan="3">None yet.</td></tr>{% endfor %}
-    </tbody>
-  </table>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Seq</th><th>Name</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for g in groups %}
+        <tr><td>{{ g.sequence }}</td><td>{{ g.name }}</td>
+          <td class="actions"><form method="post" action="{{ url_for('admin_config.delete_level_group', group_id=g.id) }}" class="inline-form" onsubmit="return confirm('Delete this level group and its levels?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger sm">Delete</button></form></td></tr>
+        {% else %}<tr><td colspan="3" class="empty">No level groups yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

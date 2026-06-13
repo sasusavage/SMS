@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Terms{% endblock %}
+{% block content %}
+<div class="card">
+  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
+  <h2>Terms</h2>
+  {% if years %}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Academic year</label>
+    <select name="academic_year_id" required>
+      {% for y in years %}<option value="{{ y.id }}">{{ y.name }}</option>{% endfor %}
+    </select>
+    <label>Name (e.g. Term 1)</label><input name="name" required>
+    <label>Sequence</label><input type="number" name="sequence" value="1" min="1">
+    <label>Start date</label><input type="date" name="start_date">
+    <label>End date</label><input type="date" name="end_date">
+    <button type="submit">Add term</button>
+  </form>
+  {% else %}<p><em>Add an academic year first.</em></p>{% endif %}
+  <table style="margin-top:20px">
+    <thead><tr><th>Term</th><th>Seq</th><th>Start</th><th>End</th><th>Current</th><th></th></tr></thead>
+    <tbody>
+      {% for t in terms %}
+      <tr>
+        <td>{{ t.name }}</td><td>{{ t.sequence }}</td>
+        <td>{{ t.start_date or '—' }}</td><td>{{ t.end_date or '—' }}</td>
+        <td>{% if t.is_current %}<strong>✓</strong>{% else %}
+          <form method="post" action="{{ url_for('admin_config.set_current_term_route', term_id=t.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button style="margin:0;padding:4px 8px">Make current</button>
+          </form>{% endif %}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin_config.delete_term', term_id=t.id) }}" style="display:inline" onsubmit="return confirm('Delete this term?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button style="margin:0;padding:4px 8px;background:#8a1c13">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}<tr><td colspan="6">None yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

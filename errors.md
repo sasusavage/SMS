@@ -4,6 +4,25 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Step 2 — Config module testing (2026-06-13)
+
+Added 27 tests (17 validation-service + 10 route/wizard). **Full suite now
+56/56 passing.** Covered: grade-boundary overlap, weights=100 per bucket, term
+dates within academic year, single-current/single-default invariants, config
+CRUD tenant-scoping (cross-tenant delete = 404 not 403), validation surfaced
+through routes, and the /signup → template-applied → wizard flow.
+
+### Note — no functional bugs found
+The validation-service-first approach paid off: building and testing the rules
+before the UI meant the routes wired up correctly on the first run. No defects.
+
+### TEST-001 — deprecated Query.get() in a test assertion
+- **Severity:** Cosmetic (test-only warning)
+- **Fix:** switched `Subject.query.get(id)` → `db.session.get(Subject, id)`.
+- **Status:** ✅ Fixed.
+
+---
+
 ## Step 1 — Testing (2026-06-13)
 
 Ran a 29-test suite (tenant isolation, auth/decorators, template loader, seed

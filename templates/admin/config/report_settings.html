@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Report settings{% endblock %}
+{% block content %}
+<div class="card">
+  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
+  <h2>Report card settings</h2>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label><input type="checkbox" name="show_class_position" {{ 'checked' if rs.show_class_position }}> Show class position</label>
+    <label><input type="checkbox" name="show_grade_point" {{ 'checked' if rs.show_grade_point }}> Show grade point</label>
+    <label><input type="checkbox" name="show_skills_ratings" {{ 'checked' if rs.show_skills_ratings }}> Show skills ratings</label>
+    <label><input type="checkbox" name="teacher_comment_required" {{ 'checked' if rs.teacher_comment_required }}> Teacher comment required</label>
+    <label><input type="checkbox" name="head_comment_required" {{ 'checked' if rs.head_comment_required }}> Head comment required</label>
+    <label>"Next term begins" label</label>
+    <input name="next_term_begins_label" value="{{ rs.next_term_begins_label or '' }}">
+    <button type="submit">Save settings</button>
+  </form>
+</div>
+{% endblock %}

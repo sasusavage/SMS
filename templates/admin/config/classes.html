@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Classes{% endblock %}
+{% block content %}
+<div class="card">
+  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
+  <h2>Classes</h2>
+  <p>Actual class/stream, e.g. "Basic 4 Gold", "Year 7B".</p>
+  {% if levels and years %}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Level</label>
+    <select name="level_id" required>{% for l in levels %}<option value="{{ l.id }}">{{ l.name }}</option>{% endfor %}</select>
+    <label>Academic year</label>
+    <select name="academic_year_id" required>{% for y in years %}<option value="{{ y.id }}">{{ y.name }}</option>{% endfor %}</select>
+    <label>Name</label><input name="name" required>
+    <button type="submit">Add class</button>
+  </form>
+  {% else %}<p><em>Add levels and an academic year first.</em></p>{% endif %}
+  <table style="margin-top:20px">
+    <thead><tr><th>Name</th><th>Level</th><th></th></tr></thead>
+    <tbody>
+      {% for c in classes %}
+      <tr><td>{{ c.name }}</td><td>{{ c.level.name if c.level else '—' }}</td>
+        <td><form method="post" action="{{ url_for('admin_config.delete_class', class_id=c.id) }}" style="display:inline" onsubmit="return confirm('Delete this class?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button style="margin:0;padding:4px 8px;background:#8a1c13">Delete</button></form></td></tr>
+      {% else %}<tr><td colspan="3">None yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

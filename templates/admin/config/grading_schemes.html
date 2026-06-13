@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Grading schemes{% endblock %}
+{% block content %}
+<div class="card">
+  <p><a href="{{ url_for('admin_config.index') }}">← Configuration</a></p>
+  <h2>Grading schemes</h2>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Name (e.g. BECE Style, IGCSE A*–G)</label><input name="name" required>
+    <button type="submit">Add scheme</button>
+  </form>
+  <table style="margin-top:20px">
+    <thead><tr><th>Name</th><th>Default</th><th>Boundaries</th><th></th></tr></thead>
+    <tbody>
+      {% for s in schemes %}
+      <tr>
+        <td><a href="{{ url_for('admin_config.scheme_boundaries', scheme_id=s.id) }}">{{ s.name }}</a></td>
+        <td>{% if s.is_default %}<strong>✓ default</strong>{% else %}
+          <form method="post" action="{{ url_for('admin_config.set_default_scheme', scheme_id=s.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button style="margin:0;padding:4px 8px">Make default</button></form>{% endif %}</td>
+        <td><a href="{{ url_for('admin_config.scheme_boundaries', scheme_id=s.id) }}">Edit bands →</a></td>
+        <td></td>
+      </tr>
+      {% else %}<tr><td colspan="4">None yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

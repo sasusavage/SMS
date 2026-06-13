@@ -64,10 +64,14 @@ def _register_blueprints(app):
     from auth.routes import auth_bp
     from blueprints.dashboard import dashboard_bp
     from blueprints.platform import platform_bp
+    from blueprints.admin_config import config_bp
+    from blueprints.onboarding import onboarding_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(platform_bp)
+    app.register_blueprint(config_bp)
+    app.register_blueprint(onboarding_bp)
 
 
 def _register_error_handlers(app):

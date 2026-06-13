@@ -4,7 +4,11 @@
 <div class="card">
   <h2>Welcome, {{ current_user.name }}</h2>
   <p>Role: <strong>{{ role }}</strong></p>
-  <p>This is the Step 1 foundation dashboard. Role-specific features
-     (config, students, attendance, scores, reports) arrive in later steps.</p>
+  {% if role == 'school_admin' %}
+  <p><a href="{{ url_for('admin_config.index') }}"><button>School configuration</button></a>
+     <a href="{{ url_for('onboarding.wizard') }}"><button style="background:#33506f">Setup checklist</button></a></p>
+  {% endif %}
+  <p>Role-specific features (students, attendance, scores, reports) arrive in
+     later steps.</p>
 </div>
 {% endblock %}

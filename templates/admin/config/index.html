@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Configuration — SchoolBrain{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>School configuration</h2>
+  <p>Set up your school's academic structure, calendar, subjects, grading and
+     report options. Nothing here is hardcoded — every school is different.</p>
+  <table>
+    <tbody>
+      <tr><td><a href="{{ url_for('admin_config.academic_years') }}">Academic years</a></td><td>{{ counts.academic_years }}</td></tr>
+      <tr><td><a href="{{ url_for('admin_config.terms') }}">Terms</a></td><td>{{ counts.terms }}</td></tr>
+      <tr><td><a href="{{ url_for('admin_config.level_groups') }}">Level groups</a></td><td>{{ counts.level_groups }}</td></tr>
+      <tr><td><a href="{{ url_for('admin_config.levels') }}">Levels</a></td><td>{{ counts.levels }}</td></tr>
+      <tr><td><a href="{{ url_for('admin_config.classes') }}">Classes</a></td><td>{{ counts.classes }}</td></tr>
+      <tr><td><a href="{{ url_for('admin_config.subjects') }}">Subjects</a></td><td>{{ counts.subjects }}</td></tr>
+      <tr><td><a href="{{ url_for('admin_config.level_subjects') }}">Level–subjects</a></td><td>—</td></tr>
+      <tr><td><a href="{{ url_for('admin_config.grading_schemes') }}">Grading schemes</a></td><td>{{ counts.grading_schemes }}</td></tr>
+      <tr><td><a href="{{ url_for('admin_config.components') }}">Assessment components</a></td><td>{{ counts.components }}</td></tr>
+      <tr><td><a href="{{ url_for('admin_config.report_settings') }}">Report settings</a></td><td>—</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

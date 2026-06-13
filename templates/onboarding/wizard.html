@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Set up {{ school.name }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Welcome — let's finish setting up {{ school.name }}</h2>
+  <p>Your "{{ school.curriculum_template_used }}" template seeded the basics.
+     Review each area and customise as needed.</p>
+  <table>
+    <thead><tr><th>Step</th><th>Seeded</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>Academic year &amp; terms</td><td>{{ summary.terms }} terms</td>
+          <td><a href="{{ url_for('admin_config.terms') }}">Review →</a></td></tr>
+      <tr><td>Level groups &amp; levels</td><td>{{ summary.level_groups }} groups, {{ summary.levels }} levels</td>
+          <td><a href="{{ url_for('admin_config.levels') }}">Review →</a></td></tr>
+      <tr><td>Classes / streams</td><td>—</td>
+          <td><a href="{{ url_for('admin_config.classes') }}">Add streams →</a></td></tr>
+      <tr><td>Subjects</td><td>{{ summary.subjects }} subjects</td>
+          <td><a href="{{ url_for('admin_config.subjects') }}">Review →</a></td></tr>
+      <tr><td>Grading scheme</td><td>{{ summary.grading_schemes }} scheme(s)</td>
+          <td><a href="{{ url_for('admin_config.grading_schemes') }}">Review bands →</a></td></tr>
+      <tr><td>Assessment weights</td><td>{{ summary.components }} components</td>
+          <td><a href="{{ url_for('admin_config.components') }}">Check = 100 →</a></td></tr>
+      <tr><td>Report settings</td><td>configured</td>
+          <td><a href="{{ url_for('admin_config.report_settings') }}">Review →</a></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:16px">
+    <a href="{{ url_for('dashboard.index') }}"><button>Go to dashboard</button></a>
+  </p>
+</div>
+{% endblock %}

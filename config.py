@@ -59,6 +59,9 @@ class TestingConfig(Config):
         'TEST_DATABASE_URL',
         'postgresql://postgres:changeme@localhost:5432/schoolbrain_test'
     )
+    # The base pool options (pool_pre_ping/pool_recycle) are Postgres-oriented
+    # and not appropriate for a SQLite test DB.
+    SQLALCHEMY_ENGINE_OPTIONS = {}
 
 
 config = {

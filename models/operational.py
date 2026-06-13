@@ -8,7 +8,7 @@ cross-tenant boundary clean: a row in `users` always belongs to exactly one
 school.
 """
 from sqlalchemy import (
-    Integer, String, Text, Boolean, Date, DateTime, Numeric,
+    Integer, String, Text, Boolean, Date, DateTime, Numeric, JSON,
     Enum as SAEnum, ForeignKey, UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -282,4 +282,5 @@ class AuditLog(db.Model, TimestampMixin):
     action = mapped_column(String(100), nullable=False)
     entity = mapped_column(String(100))
     entity_id = mapped_column(Integer)
-    meta = mapped_column(JSONB)
+    # JSONB on PostgreSQL (prod), plain JSON elsewhere (e.g. SQLite in tests).
+    meta = mapped_column(JSON().with_variant(JSONB, 'postgresql'))

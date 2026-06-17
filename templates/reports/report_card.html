@@ -56,9 +56,15 @@
   {% endif %}
 
   <div class="rc-head">
-    <div>
-      <h1>{{ school.name }}</h1>
-      <div style="font-size:11px;color:#52606d">{{ school.address or '' }}{% if school.phone %} · {{ school.phone }}{% endif %}</div>
+    <div style="display:flex;gap:12px;align-items:center">
+      {% if not pdf and school.logo_path %}
+      <img src="{{ url_for('media.serve', rel_path=school.logo_path) }}" alt=""
+           style="max-height:54px;border-radius:6px">
+      {% endif %}
+      <div>
+        <h1>{{ school.name }}</h1>
+        <div style="font-size:11px;color:#52606d">{{ school.address or '' }}{% if school.phone %} · {{ school.phone }}{% endif %}</div>
+      </div>
     </div>
     <div class="meta">
       <div><strong>TERMINAL REPORT</strong></div>

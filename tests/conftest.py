@@ -31,12 +31,17 @@ def app():
     # SQLite doesn't accept the pool options tuned for Postgres.
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
     app.config['WTF_CSRF_ENABLED'] = False
+    # Uploads go to a throwaway temp dir, not the repo's uploads/ folder.
+    upload_dir = tempfile.mkdtemp(prefix='sb-uploads-')
+    app.config['UPLOAD_FOLDER'] = upload_dir
     with app.app_context():
         _db.drop_all()
         _db.create_all()
         yield app
         _db.session.remove()
         _db.drop_all()
+    import shutil
+    shutil.rmtree(upload_dir, ignore_errors=True)
 
 
 @pytest.fixture()

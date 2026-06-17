@@ -27,12 +27,23 @@
       <tbody>
         {% for p in plans %}
         <tr>
-          <td>{{ p.name }}</td><td>{{ p.price_ghs }}</td>
-          <td>{{ p.max_students if p.max_students is not none else 'unlimited' }}</td>
-          <td>{{ p.billing_cycle }}</td>
-          <td class="actions"><form method="post" action="{{ url_for('platform.delete_plan', plan_id=p.id) }}" class="inline-form" onsubmit="return confirm('Delete this plan?')">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn danger sm">Delete</button></form></td>
+          <td>
+            <form id="edit-plan-{{ p.id }}" method="post" action="{{ url_for('platform.edit_plan', plan_id=p.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            </form>
+            <input form="edit-plan-{{ p.id }}" name="name" value="{{ p.name }}" style="min-width:120px">
+          </td>
+          <td><input form="edit-plan-{{ p.id }}" type="number" step="0.01" name="price_ghs" value="{{ p.price_ghs }}" style="width:100px"></td>
+          <td><input form="edit-plan-{{ p.id }}" type="number" name="max_students" value="{{ p.max_students if p.max_students is not none else '' }}" placeholder="unlimited" style="width:100px"></td>
+          <td><select form="edit-plan-{{ p.id }}" name="billing_cycle">
+            {% for bc in ['monthly','annual','trial'] %}<option value="{{ bc }}" {{ 'selected' if p.billing_cycle == bc }}>{{ bc }}</option>{% endfor %}
+          </select></td>
+          <td class="actions">
+            <button form="edit-plan-{{ p.id }}" class="btn secondary sm">Save</button>
+            <form method="post" action="{{ url_for('platform.delete_plan', plan_id=p.id) }}" class="inline-form" onsubmit="return confirm('Delete this plan?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn danger sm">Delete</button></form>
+          </td>
         </tr>
         {% else %}<tr><td colspan="5" class="empty">No plans yet.</td></tr>{% endfor %}
       </tbody>

@@ -55,6 +55,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
+    RATELIMIT_ENABLED = False  # don't throttle the many logins in the test suite
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'TEST_DATABASE_URL',
         'postgresql://postgres:changeme@localhost:5432/schoolbrain_test'

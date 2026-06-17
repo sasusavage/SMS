@@ -30,13 +30,20 @@
       <tbody>
         {% for u in users %}
         <tr>
-          <td>{{ u.name }}</td><td>{{ u.email }}</td>
+          <td>
+            <form id="edit-user-{{ u.id }}" method="post" action="{{ url_for('admin_people.edit_user', user_id=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            </form>
+            <input form="edit-user-{{ u.id }}" name="name" value="{{ u.name }}" style="min-width:120px">
+          </td>
+          <td><input form="edit-user-{{ u.id }}" name="email" value="{{ u.email }}" style="min-width:160px"></td>
           <td><span class="badge primary">{{ u.role.value.replace('_',' ') }}</span></td>
           <td>{% if u.is_active %}<span class="badge success">active</span>{% else %}<span class="badge danger">inactive</span>{% endif %}</td>
           <td class="actions">
+            <button form="edit-user-{{ u.id }}" class="btn secondary sm">Save</button>
             <form method="post" action="{{ url_for('admin_people.reset_password', user_id=u.id) }}" class="inline-form" onsubmit="return confirm('Reset this user\'s password?')">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="btn secondary sm">Reset password</button></form>
+              <button class="btn ghost sm">Reset pw</button></form>
             <form method="post" action="{{ url_for('admin_people.toggle_active', user_id=u.id) }}" class="inline-form">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn ghost sm">{{ 'Deactivate' if u.is_active else 'Activate' }}</button></form>

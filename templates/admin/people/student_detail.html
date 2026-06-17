@@ -20,6 +20,20 @@
 {% endif %}
 
 <div class="card">
+  <h3>Photo</h3>
+  {% if student.photo_path %}
+  <p><img src="{{ url_for('media.serve', rel_path=student.photo_path) }}" alt="Student photo"
+          style="max-height:120px;border-radius:8px"></p>
+  {% endif %}
+  <form method="post" action="{{ url_for('admin_people.upload_student_photo', student_id=student.id) }}" enctype="multipart/form-data" class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group"><label>Upload photo (PNG/JPG/WebP)</label>
+      <input type="file" name="photo" accept="image/*" required></div>
+    <button type="submit" class="btn secondary">Upload</button>
+  </form>
+</div>
+
+<div class="card">
   <h3>Edit details</h3>
   <form method="post" action="{{ url_for('admin_people.edit_student', student_id=student.id) }}" class="form-inline">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -10,7 +10,7 @@ from flask import (
 )
 from flask_login import login_user, logout_user, login_required, current_user
 
-from extensions import db
+from extensions import db, limiter
 from models.platform import School, PlatformUser
 from models.operational import User
 from models.enums import SchoolStatus
@@ -23,6 +23,8 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit('10 per minute; 50 per hour', methods=['POST'],
+               error_message='Too many login attempts. Please wait and try again.')
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
@@ -99,3 +101,48 @@ def password_reset():
               'administrator.', 'info')
         return redirect(url_for('auth.login'))
     return render_template('auth/password_reset.html')
+
+
+@auth_bp.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    """Self-service password change for any logged-in user (incl. super admin)."""
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    if request.method == 'POST':
+        from auth.security import hash_password
+        current = request.form.get('current_password') or ''
+        new = request.form.get('new_password') or ''
+        confirm = request.form.get('confirm_password') or ''
+
+        if not verify_password(_current_user_hash(), current):
+            flash('Your current password is incorrect.', 'danger')
+        elif len(new) < 8:
+            flash('New password must be at least 8 characters.', 'danger')
+        elif new != confirm:
+            flash('New passwords do not match.', 'danger')
+        else:
+            _set_current_user_password(hash_password(new))
+            db.session.commit()
+            log_action('change_password',
+                       entity='self', entity_id=getattr(current_user, 'id', None),
+                       commit=True)
+            flash('Password changed.', 'success')
+            return redirect(url_for('auth.change_password'))
+    return render_template('auth/change_password.html')
+
+
+def _current_user_hash():
+    """Password hash for the logged-in user (User or PlatformIdentity)."""
+    if is_platform_user():
+        pu = db.session.get(PlatformUser, current_user.id)
+        return pu.password_hash if pu else None
+    return current_user.password_hash
+
+
+def _set_current_user_password(new_hash):
+    if is_platform_user():
+        pu = db.session.get(PlatformUser, current_user.id)
+        if pu:
+            pu.password_hash = new_hash
+    else:
+        current_user.password_hash = new_hash

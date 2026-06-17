@@ -25,11 +25,24 @@
       <thead><tr><th>Name</th><th>Code</th><th>Core</th><th class="text-right">Actions</th></tr></thead>
       <tbody>
         {% for s in subjects %}
-        <tr><td>{{ s.name }}</td><td>{{ s.code or '—' }}</td>
-          <td>{% if s.is_core %}<span class="badge primary">core</span>{% else %}<span class="badge">elective</span>{% endif %}</td>
-          <td class="actions"><form method="post" action="{{ url_for('admin_config.delete_subject', subject_id=s.id) }}" class="inline-form" onsubmit="return confirm('Delete this subject?')">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn danger sm">Delete</button></form></td></tr>
+        {# Inputs are associated with the edit form by the HTML5 form= attribute,
+           which keeps the table markup valid (no <form> spanning <td>s). #}
+        <tr>
+          <td>
+            <form id="edit-subj-{{ s.id }}" method="post" action="{{ url_for('admin_config.edit_subject', subject_id=s.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            </form>
+            <input form="edit-subj-{{ s.id }}" name="name" value="{{ s.name }}" style="min-width:140px">
+          </td>
+          <td><input form="edit-subj-{{ s.id }}" name="code" value="{{ s.code or '' }}" style="width:90px"></td>
+          <td><div class="checkbox-row"><input form="edit-subj-{{ s.id }}" type="checkbox" name="is_core" {{ 'checked' if s.is_core }}></div></td>
+          <td class="actions">
+            <button form="edit-subj-{{ s.id }}" class="btn secondary sm">Save</button>
+            <form method="post" action="{{ url_for('admin_config.delete_subject', subject_id=s.id) }}" class="inline-form" onsubmit="return confirm('Delete this subject?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn danger sm">Delete</button></form>
+          </td>
+        </tr>
         {% else %}<tr><td colspan="4" class="empty">No subjects yet.</td></tr>{% endfor %}
       </tbody>
     </table>

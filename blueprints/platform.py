@@ -126,6 +126,23 @@ def plans():
     return render_template('platform/plans.html', plans=all_plans)
 
 
+@platform_bp.route('/plans/<int:plan_id>/edit', methods=['POST'])
+def edit_plan(plan_id):
+    try:
+        plat.update_plan(
+            plan_id, name=request.form.get('name'),
+            price_ghs=_dec(request.form.get('price_ghs')),
+            max_students=_int(request.form.get('max_students')),
+            billing_cycle=request.form.get('billing_cycle'))
+        _audit('update_plan', entity='plan', entity_id=plan_id)
+        db.session.commit()
+        flash('Plan updated.', 'success')
+    except PlatformError as e:
+        db.session.rollback()
+        flash(e.message, 'danger')
+    return redirect(url_for('platform.plans'))
+
+
 @platform_bp.route('/plans/<int:plan_id>/delete', methods=['POST'])
 def delete_plan(plan_id):
     try:

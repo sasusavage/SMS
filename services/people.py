@@ -91,6 +91,26 @@ def set_user_active(school_id, user_id, active):
     return user
 
 
+def update_user(school_id, user_id, *, name=None, email=None, phone=None):
+    """Edit a user's name/email/phone (tenant-scoped). Email unique per school."""
+    user = _get_user(school_id, user_id)
+    if email is not None:
+        email = email.strip().lower()
+        if not email:
+            raise PeopleError('Email is required.')
+        if email_taken(school_id, email, exclude_user_id=user_id):
+            raise PeopleError(f'A user with email {email} already exists in this school.')
+        user.email = email
+    if name is not None:
+        if not name.strip():
+            raise PeopleError('Name is required.')
+        user.name = name.strip()
+    if phone is not None:
+        user.phone = phone.strip() or None
+    db.session.flush()
+    return user
+
+
 # ---------------------------------------------------------------------------
 # Students
 # ---------------------------------------------------------------------------

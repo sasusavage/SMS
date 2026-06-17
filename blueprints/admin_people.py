@@ -76,6 +76,20 @@ def users():
                            roles=['teacher', 'parent', 'school_admin'])
 
 
+@people_bp.route('/users/<int:user_id>/edit', methods=['POST'])
+def edit_user(user_id):
+    try:
+        people.update_user(_sid(), user_id, name=request.form.get('name'),
+                           email=request.form.get('email'),
+                           phone=request.form.get('phone'))
+        _commit_audit('edit', 'user', user_id)
+        flash('User updated.', 'success')
+    except PeopleError as e:
+        db.session.rollback()
+        flash(e.message, 'danger')
+    return redirect(url_for('admin_people.users'))
+
+
 @people_bp.route('/users/<int:user_id>/reset-password', methods=['POST'])
 def reset_password(user_id):
     try:
@@ -164,6 +178,26 @@ def edit_student(student_id):
         _commit_audit('edit', 'student', student_id)
         flash('Student details updated.', 'success')
     except PeopleError as e:
+        db.session.rollback()
+        flash(e.message, 'danger')
+    return redirect(url_for('admin_people.student_detail', student_id=student_id))
+
+
+@people_bp.route('/students/<int:student_id>/photo', methods=['POST'])
+def upload_student_photo(student_id):
+    from services import uploads
+    from services.uploads import UploadError
+    student = get_tenant_or_404(Student, student_id)
+    try:
+        old = student.photo_path
+        rel = uploads.save_upload(request.files.get('photo'), _sid(), 'photo',
+                                  images_only=True)
+        student.photo_path = rel
+        _commit_audit('upload_photo', 'student', student_id)
+        if old:
+            uploads.delete_upload(old)
+        flash('Photo updated.', 'success')
+    except UploadError as e:
         db.session.rollback()
         flash(e.message, 'danger')
     return redirect(url_for('admin_people.student_detail', student_id=student_id))

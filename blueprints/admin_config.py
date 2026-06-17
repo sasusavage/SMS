@@ -55,6 +55,40 @@ def index():
 
 
 # ---------------------------------------------------------------------------
+# School profile (name, contact, logo)
+# ---------------------------------------------------------------------------
+@config_bp.route('/profile', methods=['GET', 'POST'])
+def profile():
+    from models.platform import School
+    from services import uploads
+    from services.uploads import UploadError
+    school = db.session.get(School, g.current_school_id)
+    if request.method == 'POST':
+        school.name = (request.form.get('name') or school.name).strip()
+        school.address = (request.form.get('address') or '').strip() or None
+        school.phone = (request.form.get('phone') or '').strip() or None
+        school.email = (request.form.get('email') or '').strip() or None
+        # Optional logo upload.
+        logo = request.files.get('logo')
+        try:
+            if logo and logo.filename:
+                old = school.logo_path
+                school.logo_path = uploads.save_upload(
+                    logo, g.current_school_id, 'logo', images_only=True)
+                if old:
+                    uploads.delete_upload(old)
+            log_action('update', entity='school_profile',
+                       entity_id=school.id)
+            db.session.commit()
+            flash('School profile saved.', 'success')
+        except UploadError as e:
+            db.session.rollback()
+            flash(e.message, 'danger')
+        return redirect(url_for('admin_config.profile'))
+    return render_template('admin/config/profile.html', school=school)
+
+
+# ---------------------------------------------------------------------------
 # Academic years
 # ---------------------------------------------------------------------------
 @config_bp.route('/academic-years', methods=['GET', 'POST'])
@@ -272,6 +306,21 @@ def subjects():
         return redirect(url_for('admin_config.subjects'))
     all_subjects = tenant_query(Subject).order_by(Subject.name).all()
     return render_template('admin/config/subjects.html', subjects=all_subjects)
+
+
+@config_bp.route('/subjects/<int:subject_id>/edit', methods=['POST'])
+def edit_subject(subject_id):
+    subj = get_tenant_or_404(Subject, subject_id)
+    name = (request.form.get('name') or '').strip()
+    if not name:
+        flash('Subject name is required.', 'danger')
+    else:
+        subj.name = name
+        subj.code = (request.form.get('code') or '').strip() or None
+        subj.is_core = bool(request.form.get('is_core'))
+        _commit_with_audit('edit', 'subject', subj)
+        flash('Subject updated.', 'success')
+    return redirect(url_for('admin_config.subjects'))
 
 
 @config_bp.route('/subjects/<int:subject_id>/delete', methods=['POST'])

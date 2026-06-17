@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}School profile{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / School profile</div>
+    <h1>School profile</h1>
+  </div>
+
+  <div class="card">
+    {% if school.logo_path %}
+    <p><img src="{{ url_for('media.serve', rel_path=school.logo_path) }}" alt="School logo"
+            style="max-height:80px;border-radius:8px"></p>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label>School name</label>
+        <input name="name" value="{{ school.name }}" required></div>
+      <div class="form-group"><label>Address</label>
+        <input name="address" value="{{ school.address or '' }}"></div>
+      <div class="form-group"><label>Phone</label>
+        <input name="phone" value="{{ school.phone or '' }}"></div>
+      <div class="form-group"><label>Email</label>
+        <input type="email" name="email" value="{{ school.email or '' }}"></div>
+      <div class="form-group"><label>Logo (PNG/JPG/WebP)</label>
+        <input type="file" name="logo" accept="image/*"></div>
+      <button type="submit" class="btn">Save profile</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

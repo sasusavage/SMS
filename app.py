@@ -11,7 +11,7 @@ from flask_login import current_user
 from dotenv import load_dotenv
 
 from config import config
-from extensions import db, migrate, login_manager, bcrypt, csrf
+from extensions import db, migrate, login_manager, bcrypt, csrf, limiter
 
 load_dotenv()
 
@@ -28,6 +28,7 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     bcrypt.init_app(app)
     csrf.init_app(app)
+    limiter.init_app(app)
 
     # Import models so they register on db.metadata (needed for migrations and
     # the user loader), then install the tenant query descriptor.
@@ -109,6 +110,7 @@ def _register_blueprints(app):
     from blueprints.admin_results import results_bp
     from blueprints.reports import reports_bp
     from blueprints.portal import portal_bp
+    from blueprints.media import media_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -120,6 +122,7 @@ def _register_blueprints(app):
     app.register_blueprint(results_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(portal_bp)
+    app.register_blueprint(media_bp)
 
 
 def _register_error_handlers(app):
@@ -137,6 +140,12 @@ def _register_error_handlers(app):
     def not_found(e):
         return render_template('errors/error.html', code=404,
                                message='Not found.'), 404
+
+    @app.errorhandler(429)
+    def too_many_requests(e):
+        return render_template('errors/error.html', code=429,
+                               message='Too many requests. Please slow down and '
+                                       'try again shortly.'), 429
 
     @app.errorhandler(500)
     def server_error(e):

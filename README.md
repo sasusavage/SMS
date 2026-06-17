@@ -81,6 +81,12 @@ This repo is Coolify-ready via Nixpacks — no Dockerfile needed.
 | `FLASK_CONFIG` | `production` |
 | `PORT` | usually set by Coolify automatically; `start.sh` defaults to 8000 |
 | `WEB_CONCURRENCY` | optional, gunicorn workers (default 3) |
+| `UPLOAD_FOLDER` | path to a **persistent volume** for uploaded logos/photos (e.g. `/data/uploads`). Without a persistent volume these files are lost on every redeploy. |
+| `RATELIMIT_STORAGE_URI` | optional, e.g. `redis://...`. Login rate limiting uses in-memory storage by default, which is **per-worker** — set Redis here if you want strict limits shared across all gunicorn workers. |
+
+**Persistent volume for uploads:** in Coolify, add a persistent storage mount
+(e.g. host/volume → container path `/data/uploads`) and set `UPLOAD_FOLDER` to
+that path. School logos and student photos are stored there.
 
 **4. Deploy.** On each deploy `start.sh`:
 1. runs `flask db upgrade` (creates/updates tables — idempotent),

@@ -70,6 +70,7 @@
     <div class="topbar-user">
       <span class="user-name">{{ current_user.name }}</span>
       {% if role %}<span class="badge primary">{{ role.replace('_', ' ') }}</span>{% endif %}
+      <a class="btn ghost sm" href="{{ url_for('auth.change_password') }}">Password</a>
       <form action="{{ url_for('auth.logout') }}" method="post" class="inline-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn ghost sm">Log out</button>

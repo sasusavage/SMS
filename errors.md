@@ -4,6 +4,44 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 1 hardening — round 2 (2026-06-17)
+
+Cleared the remaining hardening backlog. Added 13 tests.
+
+### HARDEN-005 — file uploads (logos + student photos)
+- services/uploads.py: secure save (random token filename, extension allowlist,
+  images-only for logo/photo, empty-file + path-containment checks), stored
+  under uploads/<school_id>/<kind>/. /media/<path> serves files but is
+  TENANT-SCOPED (school A can't fetch school B's files; super admin any).
+- School logo: /admin/config/profile (also edits name/address/phone/email);
+  logo shown on the report card (HTML view; skipped in PDF since /media needs a
+  session WeasyPrint won't have). Student photo: /admin/students/<id>/photo.
+- Path-traversal and cross-tenant fetch are tested (return None / 404).
+
+### HARDEN-006 — edit coverage for remaining CRUD
+- Added edit routes + inline editable tables (HTML5 form= attribute keeps table
+  markup valid) for subjects, users (name/email/phone, dup-email guard) and
+  plans. Students already had edit (round 1). Classes left as add+delete
+  (low-value rename).
+
+### HARDEN-007 — login rate limiting + 429 page
+- Flask-Limiter on POST /auth/login: 10/min, 50/hr per IP (blunt brute force).
+  429 -> friendly error page. DISABLED in tests (RATELIMIT_ENABLED=False) so the
+  suite's many logins don't trip it.
+- NOTE: default storage is in-memory = PER WORKER. For strict cross-worker
+  limits set RATELIMIT_STORAGE_URI=redis://... (documented in README). The
+  in-memory UserWarning at boot is expected and harmless.
+
+### HARDEN-008 — self-service password change
+- /auth/change-password for any logged-in user incl. super admin (verifies
+  current password, min 8 chars, confirm match). Topbar "Password" link.
+
+### Deploy notes added to README
+- UPLOAD_FOLDER must point at a Coolify PERSISTENT VOLUME or uploads vanish on
+  redeploy. RATELIMIT_STORAGE_URI for Redis-backed limits. Health path /health.
+
+---
+
 ## Phase 1 hardening — round 1 (2026-06-17)
 
 After Phase 1 feature-complete, an audit surfaced production-readiness gaps.

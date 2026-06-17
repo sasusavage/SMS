@@ -4,6 +4,44 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 1 hardening — round 1 (2026-06-17)
+
+After Phase 1 feature-complete, an audit surfaced production-readiness gaps.
+Fixed the highest-impact ones; added 9 tests.
+
+### HARDEN-001 — no 500 handler (raw errors + stuck session)
+- An unhandled exception had no friendly page and, worse, left the DB session
+  in a failed-transaction state for the rest of the worker's life.
+- Fix: @errorhandler(500) rolls back the session, logs the exception, renders
+  the friendly error page.
+
+### HARDEN-002 — no health check endpoint
+- Coolify/load balancers had nothing cheap to probe.
+- Fix: GET /health pings the DB (SELECT 1) -> {"status":"ok"} 200, or
+  "degraded" 503. No auth, not tenant-scoped. (Set this as the health-check
+  path in the Coolify UI.)
+
+### HARDEN-003 — no security headers
+- Fix: after_request sets X-Content-Type-Options=nosniff,
+  X-Frame-Options=SAMEORIGIN, Referrer-Policy=same-origin (setdefault, so
+  per-route overrides still win).
+
+### HARDEN-004 — CRUD was add+delete only, no edit
+- You couldn't fix a typo (student name, admission no, guardian) without
+  delete+re-add. Added people.update_student (admission_no uniqueness excludes
+  self; tenant-scoped) + /admin/students/<id>/edit route + inline edit form on
+  the student detail page. Other entities (subjects/users/classes) still
+  add+delete only — candidates for the next hardening round if needed.
+
+### Known remaining gaps (not yet done)
+- File uploads: logo_path/photo_path columns + UPLOAD_FOLDER exist but nothing
+  uploads logos or student photos yet.
+- Edit coverage for subjects/users/classes/plans.
+- Real WeasyPrint PDF on deploy still depends on the Nixpacks native libs
+  resolving (graceful fallback is in place).
+
+---
+
 ## Step 8 — Platform panel testing (2026-06-13) — PHASE 1 COMPLETE
 
 Built the super-admin platform area (services/platform.py + expanded /platform

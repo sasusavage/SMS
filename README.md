@@ -87,7 +87,10 @@ This repo is Coolify-ready via Nixpacks — no Dockerfile needed.
 2. runs `seed_if_empty.py` (seeds demo data only on an empty DB),
 3. starts gunicorn on `0.0.0.0:$PORT`.
 
-**5. First login:** use the seeded super admin (blank school code,
+**5. Health check:** set the Coolify health-check path to **`/health`**
+(returns `{"status":"ok"}` 200, or 503 if the DB is unreachable). No auth needed.
+
+**6. First login:** use the seeded super admin (blank school code,
 `sasuisaac332@gmail.com`) or a demo school admin. **Change all seeded
 passwords immediately.**
 

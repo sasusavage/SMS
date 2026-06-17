@@ -134,6 +134,43 @@ def create_student(school_id, *, admission_no, first_name, last_name,
     return student
 
 
+def update_student(school_id, student_id, *, admission_no=None,
+                   first_name=None, last_name=None, other_names=None,
+                   gender=None, dob=None, guardian_name=None,
+                   guardian_phone=None):
+    """Edit a student's core fields (tenant-scoped). Only provided fields change."""
+    student = _get_student(school_id, student_id)
+    if admission_no is not None:
+        admission_no = admission_no.strip()
+        if not admission_no:
+            raise PeopleError('Admission number is required.')
+        if admission_no_taken(school_id, admission_no,
+                              exclude_student_id=student_id):
+            raise PeopleError(
+                f'Admission number "{admission_no}" already exists in this school.')
+        student.admission_no = admission_no
+    if first_name is not None:
+        if not first_name.strip():
+            raise PeopleError('First name is required.')
+        student.first_name = first_name.strip()
+    if last_name is not None:
+        if not last_name.strip():
+            raise PeopleError('Last name is required.')
+        student.last_name = last_name.strip()
+    if other_names is not None:
+        student.other_names = other_names.strip() or None
+    if gender is not None:
+        student.gender = gender.strip() or None
+    if dob is not None:
+        student.dob = dob
+    if guardian_name is not None:
+        student.guardian_name = guardian_name.strip() or None
+    if guardian_phone is not None:
+        student.guardian_phone = guardian_phone.strip() or None
+    db.session.flush()
+    return student
+
+
 def transfer_student(school_id, student_id, new_class_id):
     """Move a student to another class (must belong to same school)."""
     student = _get_student(school_id, student_id)

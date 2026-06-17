@@ -148,6 +148,27 @@ def student_detail(student_id):
                            links=links, terms=terms)
 
 
+@people_bp.route('/students/<int:student_id>/edit', methods=['POST'])
+def edit_student(student_id):
+    try:
+        people.update_student(
+            _sid(), student_id,
+            admission_no=request.form.get('admission_no'),
+            first_name=request.form.get('first_name'),
+            last_name=request.form.get('last_name'),
+            other_names=request.form.get('other_names'),
+            gender=request.form.get('gender'),
+            dob=people._parse_date(request.form.get('dob')),
+            guardian_name=request.form.get('guardian_name'),
+            guardian_phone=request.form.get('guardian_phone'))
+        _commit_audit('edit', 'student', student_id)
+        flash('Student details updated.', 'success')
+    except PeopleError as e:
+        db.session.rollback()
+        flash(e.message, 'danger')
+    return redirect(url_for('admin_people.student_detail', student_id=student_id))
+
+
 @people_bp.route('/students/<int:student_id>/transfer', methods=['POST'])
 def transfer_student(student_id):
     try:

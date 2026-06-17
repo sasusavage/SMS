@@ -40,6 +40,7 @@ def create_app(config_name=None):
     _register_request_hooks(app)
     _register_blueprints(app)
     _register_error_handlers(app)
+    _register_misc(app)
 
     return app
 
@@ -136,6 +137,33 @@ def _register_error_handlers(app):
     def not_found(e):
         return render_template('errors/error.html', code=404,
                                message='Not found.'), 404
+
+    @app.errorhandler(500)
+    def server_error(e):
+        # Roll back any half-finished transaction so the session is usable
+        # again, and never leak a stack trace to the user.
+        db.session.rollback()
+        app.logger.exception('Unhandled server error')
+        return render_template('errors/error.html', code=500,
+                               message='Something went wrong on our end.'), 500
+
+
+def _register_misc(app):
+    @app.after_request
+    def security_headers(resp):
+        resp.headers.setdefault('X-Content-Type-Options', 'nosniff')
+        resp.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
+        resp.headers.setdefault('Referrer-Policy', 'same-origin')
+        return resp
+
+    @app.route('/health')
+    def health():
+        """Lightweight health check for Coolify. Pings the DB cheaply."""
+        try:
+            db.session.execute(db.text('SELECT 1'))
+            return {'status': 'ok'}, 200
+        except Exception:
+            return {'status': 'degraded'}, 503
 
 
 # Module-level app for `flask` CLI (flask db ...) and gunicorn.

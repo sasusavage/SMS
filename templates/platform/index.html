@@ -8,17 +8,22 @@
 </div>
 
 <div class="stat-grid">
-  <div class="stat">
-    <div class="stat-label">Schools</div>
-    <div class="stat-value">{{ schools|length }}</div>
-  </div>
+  <div class="stat"><div class="stat-label">Schools</div><div class="stat-value">{{ metrics.schools_total }}</div></div>
+  <div class="stat"><div class="stat-label">Active</div><div class="stat-value">{{ metrics.schools_by_status.active }}</div></div>
+  <div class="stat"><div class="stat-label">Trial</div><div class="stat-value">{{ metrics.schools_by_status.trial }}</div></div>
+  <div class="stat"><div class="stat-label">Suspended</div><div class="stat-value">{{ metrics.schools_by_status.suspended }}</div></div>
+  <div class="stat"><div class="stat-label">Students</div><div class="stat-value">{{ metrics.students_total }}</div></div>
+  <div class="stat"><div class="stat-label">Users</div><div class="stat-value">{{ metrics.users_total }}</div></div>
 </div>
 
 <div class="card">
-  <div class="card-title"><h3 class="mb-0">Schools</h3></div>
+  <div class="card-title">
+    <h3 class="mb-0">Schools</h3>
+    <a class="btn secondary" href="{{ url_for('platform.plans') }}">Manage plans</a>
+  </div>
   <div class="table-wrap mt-4">
     <table class="table">
-      <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Template</th><th>Status</th></tr></thead>
+      <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Template</th><th>Status</th><th class="text-right">Manage</th></tr></thead>
       <tbody>
         {% for s in schools %}
         <tr>
@@ -26,17 +31,13 @@
           <td>{{ s.name }}</td>
           <td><span class="badge">{{ s.slug }}</span></td>
           <td>{{ s.curriculum_template_used or '—' }}</td>
-          <td>
-            {% set st = s.status.value if s.status else '—' %}
-            <span class="badge {{ 'success' if st == 'active' else 'warning' if st == 'trial' else 'danger' }}">{{ st }}</span>
-          </td>
+          <td>{% set st = s.status.value if s.status else '—' %}
+            <span class="badge {{ 'success' if st == 'active' else 'warning' if st == 'trial' else 'danger' }}">{{ st }}</span></td>
+          <td class="actions"><a class="btn secondary sm" href="{{ url_for('platform.school_detail', school_id=s.id) }}">Open</a></td>
         </tr>
-        {% else %}
-        <tr><td colspan="5" class="empty">No schools yet.</td></tr>
-        {% endfor %}
+        {% else %}<tr><td colspan="6" class="empty">No schools yet.</td></tr>{% endfor %}
       </tbody>
     </table>
   </div>
-  <p class="muted mt-4 mb-0"><em>Suspend / activate / subscriptions / metrics land in Step 8.</em></p>
 </div>
 {% endblock %}

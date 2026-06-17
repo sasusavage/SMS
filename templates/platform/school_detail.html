@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ school.name }} — Platform{% endblock %}
+{% block topbar_title %}Platform administration{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('platform.index') }}">Platform</a> / {{ school.name }}</div>
+  <div class="card-title">
+    <h1 class="mb-0">{{ school.name }}</h1>
+    {% set st = school.status.value if school.status else '—' %}
+    <span class="badge {{ 'success' if st == 'active' else 'warning' if st == 'trial' else 'danger' }}">{{ st }}</span>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat"><div class="stat-label">Students</div><div class="stat-value">{{ students }}</div></div>
+  <div class="stat"><div class="stat-label">Users</div><div class="stat-value">{{ users }}</div></div>
+  <div class="stat"><div class="stat-label">Template</div><div class="stat-value" style="font-size:1rem">{{ school.curriculum_template_used or '—' }}</div></div>
+</div>
+
+<div class="card">
+  <h3>Status</h3>
+  <p class="muted">Suspending a school blocks all its users from signing in.</p>
+  <div class="row-gap">
+    {% if st != 'suspended' %}
+    <form method="post" action="{{ url_for('platform.suspend', school_id=school.id) }}" class="inline-form" onsubmit="return confirm('Suspend this school? Its users will be locked out.')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn danger">Suspend</button></form>
+    {% endif %}
+    {% if st != 'active' %}
+    <form method="post" action="{{ url_for('platform.activate', school_id=school.id) }}" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn">Activate</button></form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <h3>Subscription</h3>
+  {% if subscription %}
+  <p>Current: <strong>{{ subscription.plan.name if subscription.plan else subscription.plan_id }}</strong>
+     · {{ subscription.status }}
+     · {{ subscription.starts_on or '—' }} → {{ subscription.ends_on or '—' }}</p>
+  {% else %}<p class="muted">No subscription set.</p>{% endif %}
+
+  <form method="post" action="{{ url_for('platform.set_subscription', school_id=school.id) }}" class="form-inline mt-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group"><label>Plan</label>
+      <select name="plan_id" required>{% for p in plans %}<option value="{{ p.id }}">{{ p.name }} (GHS {{ p.price_ghs }})</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Status</label>
+      <select name="status">
+        <option value="active">active</option>
+        <option value="expired">expired</option>
+        <option value="cancelled">cancelled</option>
+      </select></div>
+    <div class="form-group"><label>Starts</label><input type="date" name="starts_on"></div>
+    <div class="form-group"><label>Ends</label><input type="date" name="ends_on"></div>
+    <button class="btn">Mark subscription</button>
+  </form>
+  <p class="muted mt-4 mb-0"><em>Manual marking — automated Paystack billing arrives in Phase 2.</em></p>
+</div>
+{% endblock %}

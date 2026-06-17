@@ -67,6 +67,34 @@ def _register_request_hooks(app):
             g.current_user_id = getattr(current_user, 'id', None)
             # PlatformIdentity.school_id is None by design.
             g.current_school_id = getattr(current_user, 'school_id', None)
+            # If an in-school user's tenant gets suspended mid-session, log them
+            # out on their next request. Super admins (no school_id) are exempt.
+            redirect_resp = _enforce_school_active()
+            if redirect_resp is not None:
+                return redirect_resp
+
+    def _enforce_school_active():
+        from flask import request, redirect, url_for, flash
+        from flask_login import logout_user
+        from models.enums import SchoolStatus
+        from models.platform import School
+
+        sid = g.current_school_id
+        if sid is None:
+            return None
+        # Allow auth endpoints so the logout/login redirect itself works.
+        if (request.endpoint or '').startswith('auth.') or \
+                (request.endpoint or '') == 'static':
+            return None
+        school = db.session.get(School, sid)
+        if school is not None and school.status == SchoolStatus.suspended:
+            logout_user()
+            flash('Your school has been suspended. Please contact your '
+                  'administrator.', 'danger')
+            g.current_school_id = None
+            g.current_user_id = None
+            return redirect(url_for('auth.login'))
+        return None
 
 
 def _register_blueprints(app):

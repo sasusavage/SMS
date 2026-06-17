@@ -4,6 +4,35 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Step 8 — Platform panel testing (2026-06-13) — PHASE 1 COMPLETE
+
+Built the super-admin platform area (services/platform.py + expanded /platform
+blueprint): metrics dashboard, schools list, per-school detail with suspend/
+activate, manual subscriptions, and plans CRUD. Added 21 tests (12 service +
+9 route).
+
+### No functional bugs found
+Verified: only super admins reach /platform (school admin -> 403); suspend/
+activate toggles status; plan create rejects duplicates (case-insensitive) and
+delete is blocked while subscriptions reference it; metrics aggregate across all
+schools; subscriptions are marked manually (no Paystack — that's Phase 2).
+
+### Suspended-school lockout — two layers (both tested)
+1. Login: a suspended school's users are blocked at sign-in (403, clear message).
+2. Mid-session: app-factory before_request checks the logged-in user's school
+   status every request; if suspended, it logs them out and redirects to login.
+   IMPORTANT detail — the redirect must be RETURNED by the before_request
+   handler itself, so the nested _enforce_school_active() returns the response
+   and resolve_tenant returns it up to Flask (a redirect returned only from the
+   nested helper would NOT short-circuit the request). Super admins (no
+   school_id) and auth.* endpoints are exempt so logout/login still work.
+
+### Note — services/platform.py vs blueprints/platform.py
+Same filename in different packages; no collision (distinct import paths). The
+blueprint imports the service as `from services import platform as plat`.
+
+---
+
 ## Step 7 — Portals testing (2026-06-13)
 
 Built student + parent portals (services/portal.py + /portal blueprint),

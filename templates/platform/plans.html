@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Plans — Platform{% endblock %}
+{% block topbar_title %}Platform administration{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('platform.index') }}">Platform</a> / Plans</div>
+  <h1>Pricing plans</h1>
+</div>
+
+<div class="card">
+  <h3>Add plan</h3>
+  <form method="post" class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group"><label>Name</label><input name="name" required></div>
+    <div class="form-group" style="flex:0 0 130px"><label>Price (GHS)</label><input type="number" step="0.01" name="price_ghs" value="0"></div>
+    <div class="form-group" style="flex:0 0 150px"><label>Max students</label><input type="number" name="max_students" placeholder="unlimited"></div>
+    <div class="form-group"><label>Billing cycle</label>
+      <select name="billing_cycle"><option value="monthly">monthly</option><option value="annual">annual</option><option value="trial">trial</option></select></div>
+    <button class="btn">Add</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Price (GHS)</th><th>Max students</th><th>Cycle</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for p in plans %}
+        <tr>
+          <td>{{ p.name }}</td><td>{{ p.price_ghs }}</td>
+          <td>{{ p.max_students if p.max_students is not none else 'unlimited' }}</td>
+          <td>{{ p.billing_cycle }}</td>
+          <td class="actions"><form method="post" action="{{ url_for('platform.delete_plan', plan_id=p.id) }}" class="inline-form" onsubmit="return confirm('Delete this plan?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger sm">Delete</button></form></td>
+        </tr>
+        {% else %}<tr><td colspan="5" class="empty">No plans yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

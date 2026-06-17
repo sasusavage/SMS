@@ -93,8 +93,16 @@ passwords immediately.**
 
 > Note: never commit `.env` — set real secrets in Coolify's env var UI.
 
-## Not built yet (later steps)
-Config CRUD/wizard (Step 2), people (Step 3), attendance (Step 4),
-scores & results engine (Step 5), report cards (Step 6), portals (Step 7),
-platform panel (Step 8). Out of scope for Phase 1: fees/Paystack, SMS/email,
-timetabling, React, mobile, AI.
+## Phase 1 — COMPLETE ✅
+All 8 steps shipped and tested:
+1. Foundation (models, migrations, auth, tenant isolation)
+2. Config module (onboarding wizard + `/admin/config` CRUD with validation)
+3. People (users, students + CSV import, parent links, teacher assignments)
+4. Attendance (daily grid + monthly summary)
+5. Scores & Results (score entry, results engine, publish flow, class ranking)
+6. Report cards (HTML driven by report_settings + optional WeasyPrint PDF)
+7. Portals (student + parent, published data only)
+8. Platform panel (super admin: schools, suspend/activate, plans, subscriptions, metrics)
+
+**Out of scope for Phase 1 (Phase 2+):** fees/Paystack billing, SMS/email
+notifications, timetabling, React frontend, mobile app, AI features.

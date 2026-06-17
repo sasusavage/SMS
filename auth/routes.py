@@ -13,6 +13,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from extensions import db
 from models.platform import School, PlatformUser
 from models.operational import User
+from models.enums import SchoolStatus
 from auth.security import (
     verify_password, PlatformIdentity, is_platform_user,
 )
@@ -54,6 +55,11 @@ def login():
                 db.func.lower(User.email) == email,
             ).first()
             if user and user.is_active and verify_password(user.password_hash, password):
+                # Suspended tenants are locked out entirely.
+                if school.status == SchoolStatus.suspended:
+                    flash('This school is suspended. Please contact your '
+                          'administrator.', 'danger')
+                    return render_template('auth/login.html'), 403
                 login_user(user)
                 log_action('login', entity='user', entity_id=user.id,
                            school_id=school.id, user_id=user.id, commit=True)

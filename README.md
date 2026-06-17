@@ -82,7 +82,7 @@ This repo is Coolify-ready via Nixpacks — no Dockerfile needed.
 | `PORT` | usually set by Coolify automatically; `start.sh` defaults to 8000 |
 | `WEB_CONCURRENCY` | optional, gunicorn workers (default 3) |
 | `UPLOAD_FOLDER` | path to a **persistent volume** for uploaded logos/photos (e.g. `/data/uploads`). Without a persistent volume these files are lost on every redeploy. |
-| `RATELIMIT_STORAGE_URI` | optional, e.g. `redis://...`. Login rate limiting uses in-memory storage by default, which is **per-worker** — set Redis here if you want strict limits shared across all gunicorn workers. |
+| `REDIS_URL` *(or `RATELIMIT_STORAGE_URI`)* | optional, e.g. `redis://host:6379/0`. Login rate limiting uses in-memory storage by default, which is **per-worker** — point this at Redis for strict limits shared across all gunicorn workers. Either var works (`RATELIMIT_STORAGE_URI` wins if both set). If Redis is briefly unreachable the limiter fails open (logins keep working). |
 
 **Persistent volume for uploads:** in Coolify, add a persistent storage mount
 (e.g. host/volume → container path `/data/uploads`) and set `UPLOAD_FOLDER` to

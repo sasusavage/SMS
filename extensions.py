@@ -18,10 +18,12 @@ login_manager = LoginManager()
 bcrypt = Bcrypt()
 csrf = CSRFProtect()
 
-# Rate limiter — used to blunt login brute-force. Default in-memory storage is
-# per-worker; for strict limits across multiple gunicorn workers, point
-# RATELIMIT_STORAGE_URI at Redis. No global default limits (opt-in per route).
-limiter = Limiter(key_func=get_remote_address, default_limits=[])
+# Rate limiter — used to blunt login brute-force. Storage URI comes from config
+# (RATELIMIT_STORAGE_URI / REDIS_URL, else memory://). No global default limits
+# (opt-in per route). in_memory_fallback_enabled keeps logins working if Redis
+# is briefly unreachable (fail-open) instead of locking everyone out.
+limiter = Limiter(key_func=get_remote_address, default_limits=[],
+                  in_memory_fallback_enabled=True)
 
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'warning'

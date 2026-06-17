@@ -33,6 +33,14 @@ class Config:
     # CSRF (Flask-WTF) — on by default for all forms
     WTF_CSRF_ENABLED = True
 
+    # Rate limiting (Flask-Limiter). Accept either RATELIMIT_STORAGE_URI or the
+    # more conventional REDIS_URL; without one, falls back to per-worker memory.
+    RATELIMIT_STORAGE_URI = (
+        os.environ.get('RATELIMIT_STORAGE_URI')
+        or os.environ.get('REDIS_URL')
+        or 'memory://'
+    )
+
     # Uploads — tenant files stored under uploads/<school_id>/...
     UPLOAD_FOLDER = os.environ.get(
         'UPLOAD_FOLDER',

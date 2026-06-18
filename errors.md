@@ -4,6 +4,26 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 2 — Student fee invoicing (2026-06-18)
+
+Parents/students paying SCHOOLS (distinct from subscription billing = schools
+paying the platform). Added 15 tests (9 service + 6 route).
+
+- models/fees.py: FeeStructure (per level+term), Invoice (per student+term),
+  InvoiceItem, FeePayment. migration 5dee8e2f750d (hand-written, guarded).
+- services/fees.py: create/delete fee structure, generate_invoices (one per
+  student in a class, idempotent), record_payment (partial supported; status
+  unpaid/partial/paid derived from payments; reference-dedupe), balance.
+- Paystack parent payment: billing.start_fee_checkout / complete_fee_payment
+  with FEE-<school>-<invoice>-<rand> reference; webhook + callback route by the
+  FEE- prefix (vs SB- subscription). Idempotent via record_payment ref dedupe.
+- /admin/fees (school_admin): fee structures, generate invoices, invoice
+  list/detail, record manual payment. /portal/fees/<student> (parent/student):
+  view + pay online. Cross-child access -> 404.
+- ACTION on live DB: flask db upgrade (adds 4 fee tables).
+
+---
+
 ## BUG-009 — SMS phone normalization mangled 11-digit local numbers (2026-06-18)
 
 - **Severity:** High (SMS to affected numbers failed outright)

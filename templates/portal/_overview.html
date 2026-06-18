@@ -29,6 +29,11 @@
 </div>
 
 <div class="card">
+  <h3>Fees</h3>
+  <a class="btn secondary sm" href="{{ url_for('portal.fees', student_id=student.id) }}">View &amp; pay fees</a>
+</div>
+
+<div class="card">
   <h3>Report cards</h3>
   {% if term_links %}
   <div class="row-gap">

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Fees{% endblock %}
+{% block topbar_title %}Fees{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  <div class="page-header">
+    <h1>Fees — {{ student.first_name }} {{ student.last_name }}</h1>
+    <p class="muted">View invoices and pay online.</p>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Term</th><th>Total</th><th>Balance</th><th>Status</th><th class="text-right">Pay</th></tr></thead>
+        <tbody>
+          {% for inv in invoices %}
+          <tr>
+            <td>{{ terms.get(inv.term_id, inv.term_id) }}</td>
+            <td>GHS {{ inv.total_amount }}</td>
+            <td>GHS {{ balances.get(inv.id, 0) }}</td>
+            <td><span class="badge {{ 'success' if inv.status == 'paid' else 'warning' if inv.status == 'partial' else 'danger' }}">{{ inv.status }}</span></td>
+            <td class="actions">
+              {% if balances.get(inv.id, 0) > 0 %}
+              <form method="post" action="{{ url_for('portal.pay_invoice', student_id=student.id, invoice_id=inv.id) }}" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn sm">Pay GHS {{ balances.get(inv.id, 0) }}</button>
+              </form>
+              {% else %}<span class="muted">Settled</span>{% endif %}
+            </td>
+          </tr>
+          {% else %}<tr><td colspan="5" class="empty">No invoices yet.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

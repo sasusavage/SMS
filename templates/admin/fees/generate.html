@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Generate invoices{% endblock %}
+{% block topbar_title %}Fees{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="{{ url_for('admin_fees.index') }}">Fees</a> / Generate invoices</div>
+    <h1>Generate invoices</h1>
+    <p class="muted">Creates one invoice per student in the class for the term,
+       using the fees defined for that level. Re-running skips students who
+       already have an invoice.</p>
+  </div>
+  <div class="card">
+    {% if classes and terms %}
+    <form method="post" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label>Class</label>
+        <select name="class_id" required>{% for c in classes %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label>Term</label>
+        <select name="term_id" required>{% for t in terms %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</select></div>
+      <button class="btn">Generate</button>
+    </form>
+    {% else %}<p class="muted mb-0">Add a class and term first.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

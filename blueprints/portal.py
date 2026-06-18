@@ -81,6 +81,42 @@ def parent_report(student_id, term_id):
 
 
 # ---------------------------------------------------------------------------
+# Fees — parent/student view + pay invoices online
+# ---------------------------------------------------------------------------
+@portal_bp.route('/fees/<int:student_id>')
+def fees(student_id):
+    from services import fees as feesvc
+    from models.config_tables import Term
+    try:
+        student = portal.assert_can_view(_sid(), current_user, student_id)
+    except PortalError:
+        abort(404)
+    invoices = feesvc.student_invoices(_sid(), student_id)
+    terms = {t.id: t.name for t in Term.query.filter_by(school_id=_sid()).all()}
+    balances = {inv.id: feesvc.balance(_sid(), inv) for inv in invoices}
+    return render_template('portal/fees.html', student=student,
+                           invoices=invoices, terms=terms, balances=balances)
+
+
+@portal_bp.route('/fees/<int:student_id>/pay/<int:invoice_id>', methods=['POST'])
+def pay_invoice(student_id, invoice_id):
+    from services import billing
+    from services.billing import BillingError
+    try:
+        portal.assert_can_view(_sid(), current_user, student_id)
+    except PortalError:
+        abort(404)
+    email = (getattr(current_user, 'email', '') or '').strip()
+    callback = url_for('billing.callback', _external=True)
+    try:
+        out = billing.start_fee_checkout(_sid(), invoice_id, email, callback)
+        return redirect(out['url'])
+    except BillingError as e:
+        flash(e.message, 'danger')
+        return redirect(url_for('portal.fees', student_id=student_id))
+
+
+# ---------------------------------------------------------------------------
 # Shared report card render (published only)
 # ---------------------------------------------------------------------------
 def _render_report(student_id, term_id):

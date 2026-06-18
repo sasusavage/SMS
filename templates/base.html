@@ -64,6 +64,8 @@
          href="{{ url_for('onboarding.wizard') }}">Setup checklist</a>
       <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('admin_config.') }}"
          href="{{ url_for('admin_config.index') }}">Configuration</a>
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('admin_fees.') }}"
+         href="{{ url_for('admin_fees.index') }}">Fees</a>
       <a class="nav-link {{ 'active' if request.endpoint == 'billing.index' }}"
          href="{{ url_for('billing.index') }}">Billing</a>
     {% endif %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Fees{% endblock %}
+{% block topbar_title %}Fees{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="card-title">
+    <h1 class="mb-0">Fees</h1>
+    <div class="row-gap">
+      <a class="btn secondary" href="{{ url_for('admin_fees.generate') }}">Generate invoices</a>
+      <a class="btn secondary" href="{{ url_for('admin_fees.invoices') }}">View invoices</a>
+    </div>
+  </div>
+  <p class="muted">Define fees per level + term, then generate invoices for a class.</p>
+</div>
+
+<div class="card">
+  <h3>Add fee</h3>
+  <form method="post" action="{{ url_for('admin_fees.create_structure') }}" class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group"><label>Name</label><input name="name" placeholder="Tuition" required></div>
+    <div class="form-group"><label>Term</label>
+      <select name="term_id" required>{% for t in all_terms %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</select></div>
+    <div class="form-group"><label>Level</label>
+      <select name="level_id"><option value="">All levels</option>{% for l in all_levels %}<option value="{{ l.id }}">{{ l.name }}</option>{% endfor %}</select></div>
+    <div class="form-group" style="flex:0 0 130px"><label>Amount (GHS)</label><input type="number" step="0.01" name="amount" required></div>
+    <button class="btn">Add</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Term</th><th>Level</th><th>Amount</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for f in structures %}
+        <tr>
+          <td>{{ f.name }}</td>
+          <td>{{ terms.get(f.term_id, f.term_id) }}</td>
+          <td>{{ levels.get(f.level_id, 'All levels') if f.level_id else 'All levels' }}</td>
+          <td>{{ f.amount }}</td>
+          <td class="actions"><form method="post" action="{{ url_for('admin_fees.delete_structure', fee_id=f.id) }}" class="inline-form" onsubmit="return confirm('Delete this fee?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger sm">Delete</button></form></td>
+        </tr>
+        {% else %}<tr><td colspan="5" class="empty">No fees defined yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

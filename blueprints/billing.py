@@ -78,6 +78,26 @@ def callback():
     if not reference:
         flash('No payment reference returned.', 'warning')
         return redirect(url_for('billing.index'))
+
+    # Fee payment (parent paying a student invoice) — route by prefix.
+    if reference.startswith('FEE-'):
+        try:
+            pay = billing.complete_fee_payment(reference)
+            if pay is not None:
+                flash('Payment received — thank you.', 'success')
+            else:
+                flash('Payment not completed. If you were charged, it will be '
+                      'confirmed shortly.', 'warning')
+        except Exception:  # noqa: BLE001
+            flash('Could not confirm the payment yet — it will update shortly.',
+                  'warning')
+        # Send the user back to the fee page if we can derive the student.
+        try:
+            student_id = int(reference.split('-')[2 + 1])  # FEE-school-INVOICE-...
+        except (ValueError, IndexError):
+            student_id = None
+        return redirect(url_for('dashboard.index'))
+
     try:
         payment = billing.complete_payment(reference)
         if payment.status == 'success':
@@ -106,9 +126,13 @@ def webhook():
         reference = (event.get('data') or {}).get('reference')
         if reference:
             try:
-                billing.complete_payment(reference)
-            except BillingError:
-                log.exception('webhook complete_payment failed')
+                # Route by reference prefix: FEE-... = student fee, else subscription.
+                if reference.startswith('FEE-'):
+                    billing.complete_fee_payment(reference)
+                else:
+                    billing.complete_payment(reference)
+            except Exception:  # noqa: BLE001
+                log.exception('webhook payment completion failed')
     return ('', 200)
 
 

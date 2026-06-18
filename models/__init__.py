@@ -36,6 +36,11 @@ from models.notifications import (  # noqa: F401
     SchoolNotificationSettings, PlatformSetting, NotificationLog,
 )
 
+# Fee invoicing tables (Phase 2)
+from models.fees import (  # noqa: F401
+    FeeStructure, Invoice, InvoiceItem, FeePayment,
+)
+
 __all__ = [
     'db',
     'SchoolStatus', 'UserRole', 'StudentStatus', 'AttendanceStatus',
@@ -48,4 +53,5 @@ __all__ = [
     'AttendanceRecord', 'AssessmentScore', 'TermResult', 'ReportComment',
     'AuditLog',
     'SchoolNotificationSettings', 'PlatformSetting', 'NotificationLog',
+    'FeeStructure', 'Invoice', 'InvoiceItem', 'FeePayment',
 ]

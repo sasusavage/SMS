@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Invoices{% endblock %}
+{% block topbar_title %}Fees{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb"><a href="{{ url_for('admin_fees.index') }}">Fees</a> / Invoices</div>
+  <h1>Invoices</h1>
+</div>
+
+<div class="card">
+  <form method="get" class="form-inline">
+    <div class="form-group"><label>Term</label>
+      <select name="term_id" onchange="this.form.submit()">
+        <option value="">All terms</option>
+        {% for t in all_terms %}<option value="{{ t.id }}" {{ 'selected' if selected_term == t.id }}>{{ t.name }}</option>{% endfor %}
+      </select></div>
+    <noscript><button class="btn secondary">Filter</button></noscript>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Student</th><th>Term</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th class="text-right"></th></tr></thead>
+      <tbody>
+        {% for inv in invoices %}
+        {% set st = students.get(inv.student_id) %}
+        <tr>
+          <td>{{ (st.last_name ~ ', ' ~ st.first_name) if st else inv.student_id }}</td>
+          <td>{{ terms.get(inv.term_id, inv.term_id) }}</td>
+          <td>{{ inv.total_amount }}</td>
+          <td>{{ paid.get(inv.id, 0) }}</td>
+          <td>{{ inv.total_amount - paid.get(inv.id, 0) }}</td>
+          <td><span class="badge {{ 'success' if inv.status == 'paid' else 'warning' if inv.status == 'partial' else 'danger' }}">{{ inv.status }}</span></td>
+          <td class="actions"><a class="btn secondary sm" href="{{ url_for('admin_fees.invoice_detail', invoice_id=inv.id) }}">Open</a></td>
+        </tr>
+        {% else %}<tr><td colspan="7" class="empty">No invoices. Use "Generate invoices".</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

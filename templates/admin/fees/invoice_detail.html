@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Invoice{% endblock %}
+{% block topbar_title %}Fees{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="{{ url_for('admin_fees.invoices') }}">Invoices</a> / #{{ invoice.id }}</div>
+    <h1>Invoice #{{ invoice.id }}</h1>
+    <p class="muted">{{ (student.last_name ~ ', ' ~ student.first_name) if student }}
+      ({{ student.admission_no if student }})</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">{{ invoice.total_amount }}</div></div>
+    <div class="stat"><div class="stat-label">Paid</div><div class="stat-value">{{ paid }}</div></div>
+    <div class="stat"><div class="stat-label">Balance</div><div class="stat-value">{{ balance }}</div></div>
+  </div>
+
+  <div class="card">
+    <h3>Items</h3>
+    <table class="table">
+      <thead><tr><th>Description</th><th class="text-right">Amount</th></tr></thead>
+      <tbody>
+        {% for it in invoice.items %}
+        <tr><td>{{ it.description }}</td><td class="text-right">{{ it.amount }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Payments</h3>
+    <table class="table">
+      <thead><tr><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for p in invoice.payments %}
+        <tr><td>{{ p.amount }}</td><td>{{ p.method }}</td><td>{{ p.reference or '—' }}</td>
+            <td>{{ p.created_at.strftime('%Y-%m-%d') if p.created_at else '—' }}</td></tr>
+        {% else %}<tr><td colspan="4" class="empty">No payments yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    {% if balance > 0 %}
+    <hr class="divider">
+    <h3>Record a payment</h3>
+    <form method="post" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group" style="flex:0 0 150px"><label>Amount (GHS)</label><input type="number" step="0.01" name="amount" required></div>
+      <div class="form-group"><label>Method</label>
+        <select name="method"><option value="cash">cash</option><option value="momo">momo</option><option value="other">other</option></select></div>
+      <button class="btn">Record payment</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -68,6 +68,9 @@ def attendance_grid():
             log_action('mark_attendance', entity='class', entity_id=class_id,
                        meta={'date': on_date.isoformat(), 'count': saved})
             db.session.commit()
+            # Notify guardians of absentees (best-effort).
+            from services import notify
+            notify.notify_absentees(sid, class_id, on_date, marks)
             flash(f'Attendance saved for {saved} student(s).', 'success')
         except AttendanceError as e:
             db.session.rollback()

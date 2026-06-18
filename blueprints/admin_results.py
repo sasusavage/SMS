@@ -112,7 +112,13 @@ def publish():
         log_action('publish_results', entity='class', entity_id=class_id,
                    meta={'term_id': term_id, 'published': n})
         db.session.commit()
-        flash(f'Published {n} result(s). Students and parents can now see them.',
+        # Notify guardians (best-effort; won't fail the publish).
+        notified = 0
+        if n:
+            from services import notify
+            notified = notify.notify_results_published(sid, class_id, term_id)
+        flash(f'Published {n} result(s). Students and parents can now see them.'
+              + (f' {notified} notification(s) sent.' if notified else ''),
               'success')
     except ResultsError as e:
         db.session.rollback()

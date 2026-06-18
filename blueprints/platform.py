@@ -126,6 +126,52 @@ def plans():
     return render_template('platform/plans.html', plans=all_plans)
 
 
+@platform_bp.route('/settings', methods=['GET', 'POST'])
+def settings():
+    """Platform SMTP (fallback) + Vynfy bridge config."""
+    from services import platform_settings as ps
+    from services import notify
+    if request.method == 'POST':
+        section = request.form.get('section')
+        if section == 'smtp':
+            ps.set('smtp_host', (request.form.get('smtp_host') or '').strip())
+            ps.set('smtp_port', (request.form.get('smtp_port') or '587').strip())
+            ps.set('smtp_use_tls', '1' if request.form.get('smtp_use_tls') else '0')
+            ps.set('smtp_username', (request.form.get('smtp_username') or '').strip())
+            ps.set('smtp_from_email', (request.form.get('smtp_from_email') or '').strip())
+            ps.set('smtp_from_name', (request.form.get('smtp_from_name') or '').strip())
+            if request.form.get('smtp_password'):  # blank = keep existing
+                ps.set('smtp_password', request.form.get('smtp_password'))
+            _audit('update', entity='platform_smtp')
+            db.session.commit()
+            flash('Platform SMTP saved.', 'success')
+        elif section == 'vynfy':
+            ps.set('vynfy_base_url', (request.form.get('vynfy_base_url') or '').strip())
+            ps.set('vynfy_sender_id', (request.form.get('vynfy_sender_id') or '').strip())
+            if request.form.get('vynfy_api_key'):
+                ps.set('vynfy_api_key', request.form.get('vynfy_api_key'))
+            _audit('update', entity='platform_vynfy')
+            db.session.commit()
+            flash('Vynfy SMS settings saved.', 'success')
+        elif section == 'test-email':
+            to = (request.form.get('to') or '').strip()
+            entry = notify.test_email(None, to) if to else None
+            if entry and entry.status == 'sent':
+                flash(f'Test email sent to {to}.', 'success')
+            elif entry and entry.status == 'logged':
+                flash('No platform SMTP configured — logged only.', 'warning')
+            elif entry:
+                flash(f'Test email failed: {entry.error}', 'danger')
+            else:
+                flash('Enter a recipient.', 'warning')
+        return redirect(url_for('platform.settings'))
+
+    return render_template('platform/settings.html',
+                           plain=ps.get_all_plain(),
+                           has_smtp_pw=ps.has_secret('smtp_password'),
+                           has_vynfy_key=ps.has_secret('vynfy_api_key'))
+
+
 @platform_bp.route('/plans/<int:plan_id>/edit', methods=['POST'])
 def edit_plan(plan_id):
     try:

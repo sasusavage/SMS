@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Platform settings{% endblock %}
+{% block topbar_title %}Platform administration{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="{{ url_for('platform.index') }}">Platform</a> / Settings</div>
+    <h1>Platform settings</h1>
+    <p class="muted">Platform-wide email (used as the fallback for schools and
+       for signup/billing) and the shared Vynfy SMS connection.</p>
+  </div>
+
+  <div class="card">
+    <h3>Platform SMTP (email fallback)</h3>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="section" value="smtp">
+      <div class="form-group"><label>SMTP host</label><input name="smtp_host" value="{{ plain.get('smtp_host','') }}"></div>
+      <div class="form-inline">
+        <div class="form-group" style="flex:0 0 110px"><label>Port</label><input type="number" name="smtp_port" value="{{ plain.get('smtp_port','587') }}"></div>
+        <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><div class="checkbox-row"><input type="checkbox" id="ptls" name="smtp_use_tls" {{ 'checked' if plain.get('smtp_use_tls','1') not in ('0','false','') }}><label for="ptls">Use TLS</label></div></div>
+      </div>
+      <div class="form-group"><label>Username</label><input name="smtp_username" value="{{ plain.get('smtp_username','') }}" autocomplete="off"></div>
+      <div class="form-group"><label>Password {% if has_smtp_pw %}<span class="muted">(set — blank to keep)</span>{% endif %}</label>
+        <input type="password" name="smtp_password" autocomplete="new-password" placeholder="{{ '••••••••' if has_smtp_pw else '' }}"></div>
+      <div class="form-group"><label>From email</label><input name="smtp_from_email" value="{{ plain.get('smtp_from_email','') }}"></div>
+      <div class="form-group"><label>From name</label><input name="smtp_from_name" value="{{ plain.get('smtp_from_name','') }}"></div>
+      <button class="btn">Save platform SMTP</button>
+    </form>
+    <hr class="divider">
+    <form method="post" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="section" value="test-email">
+      <div class="form-group"><label>Send a test email to</label><input name="to" type="email"></div>
+      <button class="btn secondary">Send test</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Vynfy SMS</h3>
+    <p class="muted">Bridge URL + API key shared by all schools. Each school sets
+       its own sender ID.</p>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="section" value="vynfy">
+      <div class="form-group"><label>Bridge / API base URL</label>
+        <input name="vynfy_base_url" value="{{ plain.get('vynfy_base_url','') }}" placeholder="https://your-bridge-url.com or https://sms.vynfy.com"></div>
+      <div class="form-group"><label>API key {% if has_vynfy_key %}<span class="muted">(set — blank to keep)</span>{% endif %}</label>
+        <input type="password" name="vynfy_api_key" autocomplete="new-password" placeholder="{{ '••••••••' if has_vynfy_key else '' }}"></div>
+      <div class="form-group"><label>Default sender ID</label>
+        <input name="vynfy_sender_id" maxlength="11" value="{{ plain.get('vynfy_sender_id','') }}" placeholder="SchoolBrn"></div>
+      <button class="btn">Save Vynfy settings</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

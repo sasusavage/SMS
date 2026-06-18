@@ -18,6 +18,8 @@
          href="{{ url_for('platform.index') }}">Schools</a>
       <a class="nav-link {{ 'active' if request.endpoint == 'platform.plans' }}"
          href="{{ url_for('platform.plans') }}">Plans</a>
+      <a class="nav-link {{ 'active' if request.endpoint == 'platform.settings' }}"
+         href="{{ url_for('platform.settings') }}">Settings</a>
     {% elif role not in ('student', 'parent') %}
     <a class="nav-link {{ 'active' if request.endpoint == 'dashboard.index' }}"
        href="{{ url_for('dashboard.index') }}">Dashboard</a>

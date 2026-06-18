@@ -89,6 +89,77 @@ def profile():
 
 
 # ---------------------------------------------------------------------------
+# Notification settings (per-school SMTP + SMS)
+# ---------------------------------------------------------------------------
+@config_bp.route('/notifications', methods=['GET', 'POST'])
+def notifications():
+    from services import school_settings
+    s = school_settings.get_or_create(g.current_school_id)
+    if request.method == 'POST':
+        section = request.form.get('section')
+        if section == 'smtp':
+            school_settings.update_smtp(
+                g.current_school_id,
+                enabled=request.form.get('smtp_enabled'),
+                host=request.form.get('smtp_host'),
+                port=request.form.get('smtp_port'),
+                use_tls=request.form.get('smtp_use_tls'),
+                username=request.form.get('smtp_username'),
+                password=request.form.get('smtp_password'),
+                from_email=request.form.get('smtp_from_email'),
+                from_name=request.form.get('smtp_from_name'))
+            log_action('update', entity='school_smtp', entity_id=g.current_school_id)
+            db.session.commit()
+            flash('Email (SMTP) settings saved.', 'success')
+        elif section == 'sms':
+            school_settings.update_sms(
+                g.current_school_id,
+                enabled=request.form.get('sms_enabled'),
+                sender_id=request.form.get('sms_sender_id'))
+            log_action('update', entity='school_sms', entity_id=g.current_school_id)
+            db.session.commit()
+            flash('SMS settings saved.', 'success')
+        return redirect(url_for('admin_config.notifications'))
+    return render_template('admin/config/notifications.html', s=s)
+
+
+@config_bp.route('/notifications/test-email', methods=['POST'])
+def test_email():
+    from services import notify
+    to = (request.form.get('to') or '').strip()
+    if not to:
+        flash('Enter a recipient email to test.', 'warning')
+    else:
+        entry = notify.test_email(g.current_school_id, to)
+        if entry.status == 'sent':
+            flash(f'Test email sent to {to}.', 'success')
+        elif entry.status == 'logged':
+            flash('No email provider configured — the message was logged only.',
+                  'warning')
+        else:
+            flash(f'Test email failed: {entry.error}', 'danger')
+    return redirect(url_for('admin_config.notifications'))
+
+
+@config_bp.route('/notifications/test-sms', methods=['POST'])
+def test_sms():
+    from services import notify
+    to = (request.form.get('to') or '').strip()
+    if not to:
+        flash('Enter a phone number to test.', 'warning')
+    else:
+        entry = notify.test_sms(g.current_school_id, to)
+        if entry.status == 'sent':
+            flash(f'Test SMS sent to {to}.', 'success')
+        elif entry.status == 'logged':
+            flash('No SMS provider configured — the message was logged only.',
+                  'warning')
+        else:
+            flash(f'Test SMS failed: {entry.error}', 'danger')
+    return redirect(url_for('admin_config.notifications'))
+
+
+# ---------------------------------------------------------------------------
 # Academic years
 # ---------------------------------------------------------------------------
 @config_bp.route('/academic-years', methods=['GET', 'POST'])

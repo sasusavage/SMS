@@ -58,6 +58,10 @@ def users():
                 password=request.form.get('password') or None,
                 phone=request.form.get('phone'))
             _commit_audit('create', 'user', user.id)
+            # Welcome email with login info (best-effort).
+            from services import notify
+            notify.notify_account_created(_sid(), user,
+                                          plaintext_password=generated)
             if generated:
                 flash(f'User created. Temporary password: {generated}', 'success')
             else:

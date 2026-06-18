@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block topbar_title %}Configuration{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Notifications</div>
+    <h1>Notification settings</h1>
+    <p class="muted">Send results, attendance and account emails/SMS from your
+       own accounts. If you leave email off, the platform's email is used as a fallback.</p>
+  </div>
+
+  <div class="card">
+    <h3>Email (SMTP)</h3>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="section" value="smtp">
+      <div class="checkbox-row"><input type="checkbox" id="se" name="smtp_enabled" {{ 'checked' if s.smtp_enabled }}><label for="se">Use my own SMTP</label></div>
+      <div class="form-group"><label>SMTP host</label><input name="smtp_host" value="{{ s.smtp_host or '' }}" placeholder="smtp.gmail.com"></div>
+      <div class="form-inline">
+        <div class="form-group" style="flex:0 0 110px"><label>Port</label><input type="number" name="smtp_port" value="{{ s.smtp_port or 587 }}"></div>
+        <div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><div class="checkbox-row"><input type="checkbox" id="tls" name="smtp_use_tls" {{ 'checked' if s.smtp_use_tls }}><label for="tls">Use TLS</label></div></div>
+      </div>
+      <div class="form-group"><label>Username</label><input name="smtp_username" value="{{ s.smtp_username or '' }}" autocomplete="off"></div>
+      <div class="form-group"><label>Password {% if s.smtp_password_enc %}<span class="muted">(set — leave blank to keep)</span>{% endif %}</label>
+        <input type="password" name="smtp_password" autocomplete="new-password" placeholder="{{ '••••••••' if s.smtp_password_enc else '' }}"></div>
+      <div class="form-group"><label>From email</label><input name="smtp_from_email" value="{{ s.smtp_from_email or '' }}"></div>
+      <div class="form-group"><label>From name</label><input name="smtp_from_name" value="{{ s.smtp_from_name or '' }}"></div>
+      <button class="btn">Save email settings</button>
+    </form>
+    <hr class="divider">
+    <form method="post" action="{{ url_for('admin_config.test_email') }}" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label>Send a test email to</label><input name="to" type="email" placeholder="you@example.com"></div>
+      <button class="btn secondary">Send test</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>SMS</h3>
+    <p class="muted">SMS is delivered through the platform's Vynfy connection.
+       Set your own sender ID (max 11 characters).</p>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="section" value="sms">
+      <div class="checkbox-row"><input type="checkbox" id="sms_e" name="sms_enabled" {{ 'checked' if s.sms_enabled }}><label for="sms_e">Enable SMS for my school</label></div>
+      <div class="form-group"><label>Sender ID</label><input name="sms_sender_id" maxlength="11" value="{{ s.sms_sender_id or '' }}" placeholder="MySchool"></div>
+      <button class="btn">Save SMS settings</button>
+    </form>
+    <hr class="divider">
+    <form method="post" action="{{ url_for('admin_config.test_sms') }}" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label>Send a test SMS to</label><input name="to" placeholder="0244..."></div>
+      <button class="btn secondary">Send test</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

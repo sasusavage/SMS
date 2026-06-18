@@ -31,6 +31,11 @@ from models.operational import (  # noqa: F401
     AssessmentScore, TermResult, ReportComment, AuditLog,
 )
 
+# Notification / settings tables (Phase 2)
+from models.notifications import (  # noqa: F401
+    SchoolNotificationSettings, PlatformSetting, NotificationLog,
+)
+
 __all__ = [
     'db',
     'SchoolStatus', 'UserRole', 'StudentStatus', 'AttendanceStatus',
@@ -42,4 +47,5 @@ __all__ = [
     'User', 'Student', 'ParentStudent', 'TeacherAssignment',
     'AttendanceRecord', 'AssessmentScore', 'TermResult', 'ReportComment',
     'AuditLog',
+    'SchoolNotificationSettings', 'PlatformSetting', 'NotificationLog',
 ]

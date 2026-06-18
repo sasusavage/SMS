@@ -4,6 +4,29 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## BUG-009 — SMS phone normalization mangled 11-digit local numbers (2026-06-18)
+
+- **Severity:** High (SMS to affected numbers failed outright)
+- **Found by:** user testing on the live app. Input `02011424183` produced
+  `23302011424183`; Vynfy rejected it: "Invalid international format". The
+  Vynfy connection itself WAS working — only the number was malformed.
+- **Cause:** `_normalize_phone` only stripped the leading `0` when the number
+  was exactly 10 digits (`0XXXXXXXXX`). An 11-digit local kept the 0, so we
+  prepended 233 onto a 0 -> `233 0...`.
+- **Fix:** always strip leading zero(s) before prepending 233 (Ghana mobile =
+  233 + national digits). Now `0...`/`+233...`/`233...`/bare-9-digit all
+  normalize correctly. Regression test added.
+- **Status:** ✅ Fixed.
+
+## FEATURE — super-admin can test any school's notifications (2026-06-18)
+
+- Per user request: Platform → Settings now has a "Test a school's
+  notifications" card — pick school + channel (SMS/email) + recipient -> sends
+  using THAT school's settings (with platform fallback), exactly as the school
+  would. Complements the existing per-school test buttons.
+
+---
+
 ## Phase 2 — Paystack subscription billing (2026-06-18)
 
 Mirrored slidein's robust Paystack module (app/paystack.py): initialize with

@@ -164,12 +164,35 @@ def settings():
                 flash(f'Test email failed: {entry.error}', 'danger')
             else:
                 flash('Enter a recipient.', 'warning')
+        elif section == 'test-tenant':
+            # Super admin tests a school's email/SMS using THAT school's settings
+            # (with platform fallback), exactly as the school would send.
+            school_id = _int(request.form.get('school_id'))
+            channel = request.form.get('channel')
+            to = (request.form.get('to') or '').strip()
+            school = db.session.get(School, school_id) if school_id else None
+            if not school or not to:
+                flash('Pick a school and enter a recipient.', 'warning')
+            else:
+                if channel == 'sms':
+                    entry = notify.test_sms(school.id, to)
+                else:
+                    entry = notify.test_email(school.id, to)
+                label = f'{channel.upper()} for {school.name}'
+                if entry.status == 'sent':
+                    flash(f'Test {label} sent to {to}.', 'success')
+                elif entry.status == 'logged':
+                    flash(f'{label}: no provider configured for that school — '
+                          'logged only.', 'warning')
+                else:
+                    flash(f'Test {label} failed: {entry.error}', 'danger')
         return redirect(url_for('platform.settings'))
 
     return render_template('platform/settings.html',
                            plain=ps.get_all_plain(),
                            has_smtp_pw=ps.has_secret('smtp_password'),
-                           has_vynfy_key=ps.has_secret('vynfy_api_key'))
+                           has_vynfy_key=ps.has_secret('vynfy_api_key'),
+                           schools=School.query.order_by(School.name).all())
 
 
 @platform_bp.route('/plans/<int:plan_id>/edit', methods=['POST'])

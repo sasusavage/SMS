@@ -52,5 +52,27 @@
       <button class="btn">Save Vynfy settings</button>
     </form>
   </div>
+
+  <div class="card">
+    <h3>Test a school's notifications</h3>
+    <p class="muted">Send a test email or SMS using a specific school's settings
+       (with platform fallback) — exactly how that school would send.</p>
+    <form method="post" class="form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="section" value="test-tenant">
+      <div class="form-group"><label>School</label>
+        <select name="school_id" required>
+          {% for s in schools %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+        </select></div>
+      <div class="form-group"><label>Channel</label>
+        <select name="channel">
+          <option value="sms">SMS</option>
+          <option value="email">Email</option>
+        </select></div>
+      <div class="form-group"><label>Recipient (phone or email)</label>
+        <input name="to" placeholder="0244... or you@example.com" required></div>
+      <button class="btn">Send test</button>
+    </form>
+  </div>
 </div>
 {% endblock %}

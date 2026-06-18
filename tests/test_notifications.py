@@ -122,6 +122,17 @@ def test_sms_stub_when_no_vynfy_key(app, db):
     assert entry.recipient == '233244123456'   # normalized
 
 
+def test_phone_normalization_variants(app):
+    n = notify._normalize_phone
+    assert n('0244123456') == '233244123456'      # standard local
+    assert n('+233244123456') == '233244123456'   # intl with +
+    assert n('233244123456') == '233244123456'    # intl no +
+    assert n('244123456') == '233244123456'       # bare 9-digit
+    # Regression: 11-digit local with extra leading 0 must NOT become 233 + 0...
+    assert not n('02011424183').startswith('2330')
+    assert n('02011424183') == '2332011424183'
+
+
 def test_sms_uses_vynfy_when_configured(app, db):
     s = make_school(db, slug='s')
     platform_settings.set('vynfy_api_key', 'KEY')
@@ -211,6 +222,25 @@ def test_school_notifications_page(app, db, client):
     client.post('/auth/login', data={'school_slug': 's', 'email': 'a@s.test',
                                      'password': 'pw'})
     assert client.get('/admin/config/notifications').status_code == 200
+
+
+def test_super_admin_can_test_tenant_sms(app, db, client):
+    from tests.factories import make_platform_user
+    s = make_school(db, slug='cossa', name='COSSA')
+    make_platform_user(db, email='super@x.test')
+    school_settings.update_sms(s.id, enabled=True, sender_id='COSSA')
+    platform_settings.set('vynfy_api_key', 'KEY')
+    db.session.commit()
+    client.post('/auth/login', data={'school_slug': '', 'email': 'super@x.test',
+                                     'password': 'pw'})
+    with patch('services.notify._vynfy_send', return_value={'data': {'job_id': 'J'}}) as m:
+        client.post('/platform/settings', data={
+            'section': 'test-tenant', 'school_id': s.id, 'channel': 'sms',
+            'to': '0244123456'}, follow_redirects=True)
+    m.assert_called_once()
+    # sent with the SCHOOL's sender id and normalized phone
+    sent = NotificationLog.query.filter_by(school_id=s.id, channel='sms').first()
+    assert sent is not None and sent.recipient == '233244123456'
 
 
 def test_platform_settings_page_super_admin_only(app, db, client):

@@ -184,16 +184,20 @@ def _vynfy_send(cfg, phone, message):
 # helpers
 # ---------------------------------------------------------------------------
 def _normalize_phone(phone):
-    """Ghana E.164-ish for Vynfy: 233XXXXXXXXX (no leading +)."""
+    """
+    Ghana E.164-ish for Vynfy: 233XXXXXXXXX (12 digits, no leading +).
+    A Ghana mobile is 233 + 9 national digits. Accepts the common inputs:
+      0XXXXXXXXX (local)        -> drop the 0, prepend 233
+      +233XXXXXXXXX / 233...    -> strip + (already international)
+      XXXXXXXXX (bare 9 digits) -> prepend 233
+    """
     if not phone:
         return phone
-    p = ''.join(ch for ch in str(phone) if ch.isdigit() or ch == '+')
-    p = p.lstrip('+')
-    if p.startswith('0') and len(p) == 10:
-        return '233' + p[1:]
-    if not p.startswith('233'):
-        return '233' + p
-    return p
+    p = ''.join(ch for ch in str(phone) if ch.isdigit())  # digits only (drops +)
+    if p.startswith('233'):
+        return p
+    p = p.lstrip('0')          # drop ANY leading zero(s), not just for len==10
+    return '233' + p
 
 
 def _commit():

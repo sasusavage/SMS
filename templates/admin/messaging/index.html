@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Messaging{% endblock %}
+{% block topbar_title %}Messaging{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="card-title">
+    <h1 class="mb-0">Messaging</h1>
+    <div class="row-gap">
+      <a class="btn secondary" href="{{ url_for('admin_messaging.bulk') }}">Bulk SMS</a>
+      <a class="btn secondary" href="{{ url_for('admin_messaging.fee_reminders') }}">Fee reminders</a>
+    </div>
+  </div>
+  <p class="muted">Every email/SMS the system sent, with status.</p>
+</div>
+
+<div class="card">
+  <form method="get" class="form-inline">
+    <div class="form-group"><label>Channel</label>
+      <select name="channel" onchange="this.form.submit()">
+        <option value="">All</option>
+        <option value="sms" {{ 'selected' if channel=='sms' }}>SMS</option>
+        <option value="email" {{ 'selected' if channel=='email' }}>Email</option>
+      </select></div>
+    <div class="form-group"><label>Status</label>
+      <select name="status" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for s in ['sent','failed','logged','queued'] %}<option value="{{ s }}" {{ 'selected' if status==s }}>{{ s }}</option>{% endfor %}
+      </select></div>
+    <noscript><button class="btn secondary">Filter</button></noscript>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>When</th><th>Ch</th><th>Recipient</th><th>Subject/Message</th><th>Status</th><th class="text-right"></th></tr></thead>
+      <tbody>
+        {% for l in logs %}
+        <tr>
+          <td>{{ l.created_at.strftime('%m-%d %H:%M') if l.created_at else '—' }}</td>
+          <td>{{ l.channel }}</td>
+          <td>{{ l.recipient }}</td>
+          <td>{{ (l.subject ~ ' — ' if l.subject else '') ~ (l.message or '')[:60] }}</td>
+          <td><span class="badge {{ 'success' if l.status=='sent' else 'danger' if l.status=='failed' else '' }}">{{ l.status }}</span>
+              {% if l.error %}<br><small class="muted">{{ l.error[:80] }}</small>{% endif %}</td>
+          <td class="actions">
+            {% if l.status in ('failed','logged') %}
+            <form method="post" action="{{ url_for('admin_messaging.retry', log_id=l.id) }}" class="inline-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn secondary sm">Retry</button></form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}<tr><td colspan="6" class="empty">No messages yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

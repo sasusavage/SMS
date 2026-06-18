@@ -274,13 +274,29 @@ def parse_student_csv(school_id, file_text, class_id=None):
         if data['dob'] and _parse_date(data['dob']) is None:
             errors.append('dob must be YYYY-MM-DD')
 
-        preview['rows'].append({'row': i, 'data': data, 'errors': errors})
+        # Non-blocking warning: a guardian phone that won't work for SMS.
+        warnings = []
+        if data['guardian_phone'] and not _phone_ok(data['guardian_phone']):
+            warnings.append(f'guardian_phone "{data["guardian_phone"]}" may not '
+                            'be a valid Ghana number (SMS may fail)')
+
+        preview['rows'].append({'row': i, 'data': data, 'errors': errors,
+                                'warnings': warnings})
         if errors:
             preview['invalid'] += 1
         else:
             preview['valid'] += 1
 
     return preview
+
+
+def _phone_ok(raw):
+    """Thin wrapper so people.py doesn't hard-depend on notify at import time."""
+    try:
+        from services.notify import looks_like_valid_phone
+        return looks_like_valid_phone(raw)
+    except Exception:
+        return True  # never block import on a validation hiccup
 
 
 def commit_student_csv(school_id, file_text, class_id=None):

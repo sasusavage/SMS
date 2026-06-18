@@ -24,4 +24,12 @@ def index():
         return redirect(url_for('portal.student_home'))
     if role == 'parent':
         return redirect(url_for('portal.parent_home'))
-    return render_template('dashboard/index.html', role=role)
+
+    analytics_data = None
+    if role == 'school_admin':
+        from flask import g
+        from services import analytics
+        if g.get('current_school_id'):
+            analytics_data = analytics.school_dashboard(g.current_school_id)
+    return render_template('dashboard/index.html', role=role,
+                           analytics=analytics_data)

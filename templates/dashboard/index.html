@@ -7,15 +7,38 @@
   <p class="muted">You're signed in as <strong>{{ role.replace('_',' ') if role }}</strong>.</p>
 </div>
 
+{% if role == 'school_admin' and analytics %}
+{% set ov = analytics.overview %}{% set at = analytics.attendance %}
+{% set rs = analytics.results %}{% set fz = analytics.fees %}
+<div class="stat-grid">
+  <div class="stat"><div class="stat-label">Active students</div><div class="stat-value">{{ ov.students }}</div></div>
+  <div class="stat"><div class="stat-label">Classes</div><div class="stat-value">{{ ov.classes }}</div></div>
+  <div class="stat"><div class="stat-label">Teachers</div><div class="stat-value">{{ ov.teachers }}</div></div>
+  <div class="stat"><div class="stat-label">Attendance rate</div><div class="stat-value">{{ (at.present_rate ~ '%') if at.present_rate is not none else '—' }}</div></div>
+  <div class="stat"><div class="stat-label">Pass rate</div><div class="stat-value">{{ (rs.pass_rate ~ '%') if rs.pass_rate is not none else '—' }}</div></div>
+  <div class="stat"><div class="stat-label">Fees outstanding</div><div class="stat-value" style="font-size:1.3rem">GHS {{ fz.outstanding }}</div></div>
+</div>
+
+<div class="card">
+  <h3>Fees</h3>
+  <div class="row-gap">
+    <span class="badge">Billed: GHS {{ fz.billed }}</span>
+    <span class="badge success">Collected: GHS {{ fz.collected }}</span>
+    <span class="badge danger">Outstanding: GHS {{ fz.outstanding }}</span>
+    <span class="muted">{{ fz.invoices }} invoice(s)</span>
+  </div>
+</div>
+{% endif %}
+
 {% if role == 'school_admin' %}
 <div class="card">
   <h3>Quick actions</h3>
   <div class="row-gap mt-4">
     <a class="btn" href="{{ url_for('admin_people.students') }}">Students</a>
-    <a class="btn secondary" href="{{ url_for('admin_people.users') }}">Users</a>
-    <a class="btn secondary" href="{{ url_for('admin_people.assignments') }}">Teacher assignments</a>
-    <a class="btn secondary" href="{{ url_for('teacher.attendance_grid') }}">Attendance</a>
     <a class="btn secondary" href="{{ url_for('admin_results.index') }}">Results</a>
+    <a class="btn secondary" href="{{ url_for('admin_fees.index') }}">Fees</a>
+    <a class="btn secondary" href="{{ url_for('admin_messaging.index') }}">Messaging</a>
+    <a class="btn secondary" href="{{ url_for('billing.index') }}">Billing</a>
     <a class="btn secondary" href="{{ url_for('admin_config.index') }}">Configuration</a>
   </div>
 </div>
@@ -26,12 +49,8 @@
     <a class="btn" href="{{ url_for('teacher.attendance_grid') }}">Mark attendance</a>
     <a class="btn secondary" href="{{ url_for('teacher.attendance_summary') }}">Attendance summary</a>
     <a class="btn secondary" href="{{ url_for('teacher.scores') }}">Score entry</a>
+    <a class="btn secondary" href="{{ url_for('teacher.comments') }}">Report comments</a>
   </div>
 </div>
 {% endif %}
-
-<div class="card">
-  <p class="muted mb-0">More features (scores, results, report cards, portals)
-     arrive in later steps.</p>
-</div>
 {% endblock %}

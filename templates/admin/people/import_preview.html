@@ -43,6 +43,10 @@
               <span class="badge danger">error</span>
               <span class="muted">{{ r.errors | join('; ') }}</span>
             {% else %}<span class="badge success">ok</span>{% endif %}
+            {% if r.warnings %}
+              <br><span class="badge warning">warning</span>
+              <span class="muted">{{ r.warnings | join('; ') }}</span>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

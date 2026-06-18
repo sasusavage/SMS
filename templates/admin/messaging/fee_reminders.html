@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Fee reminders{% endblock %}
+{% block topbar_title %}Messaging{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="{{ url_for('admin_messaging.index') }}">Messaging</a> / Fee reminders</div>
+    <h1>Fee reminders</h1>
+    <p class="muted">SMS guardians of every student with an outstanding
+       (unpaid or partial) invoice balance.</p>
+  </div>
+  <div class="card">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label>Term (optional)</label>
+        <select name="term_id">
+          <option value="">All terms</option>
+          {% for t in terms %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+        </select></div>
+      <button class="btn" onclick="return confirm('Send reminders to all guardians with outstanding balances?')">Send reminders</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

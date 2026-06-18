@@ -217,6 +217,17 @@ def _valid_gh_msisdn(phone):
     return phone.startswith('233') and len(phone) == 12
 
 
+def looks_like_valid_phone(raw):
+    """
+    Public helper for data-entry validation: True if `raw` normalises to a
+    well-formed Ghana number. Empty/blank is treated as 'no opinion' -> True
+    (phone is optional). Used to warn on student add / CSV import.
+    """
+    if raw in (None, ''):
+        return True
+    return _valid_gh_msisdn(_normalize_phone(raw))
+
+
 def _commit():
     try:
         db.session.commit()
@@ -310,6 +321,81 @@ def notify_absentees(school_id, class_id, on_date, marks):
                      f'is unexpected.')
             count += 1
     return count
+
+
+def recent_logs(school_id, limit=200, channel=None, status=None):
+    """Recent notification logs for a school (newest first), optional filters."""
+    q = NotificationLog.query.filter_by(school_id=school_id)
+    if channel:
+        q = q.filter_by(channel=channel)
+    if status:
+        q = q.filter_by(status=status)
+    return q.order_by(NotificationLog.id.desc()).limit(limit).all()
+
+
+def retry_log(school_id, log_id):
+    """Re-send a single failed/logged notification. Returns the NEW log entry."""
+    entry = NotificationLog.query.filter_by(
+        school_id=school_id, id=log_id).first()
+    if entry is None:
+        return None
+    if entry.channel == 'sms':
+        return send_sms(school_id, entry.recipient, entry.message or '')
+    return send_email(school_id, entry.recipient, entry.subject or '(no subject)',
+                      entry.message or '')
+
+
+def bulk_sms_to_class(school_id, class_id, message):
+    """SMS the guardian of every student in a class. Returns count attempted."""
+    from models.operational import Student
+    students = Student.query.filter_by(
+        school_id=school_id, current_class_id=class_id).all()
+    n = 0
+    for st in students:
+        if st.guardian_phone:
+            send_sms(school_id, st.guardian_phone, message)
+            n += 1
+    return n
+
+
+def bulk_sms_all_guardians(school_id, message):
+    """SMS every student's guardian in the school. Returns count attempted."""
+    from models.operational import Student
+    n = 0
+    for st in Student.query.filter_by(school_id=school_id).all():
+        if st.guardian_phone:
+            send_sms(school_id, st.guardian_phone, message)
+            n += 1
+    return n
+
+
+def send_fee_reminders(school_id, term_id=None):
+    """
+    SMS guardians of students with an outstanding (unpaid/partial) invoice.
+    Optionally scoped to a term. Returns count of reminders sent.
+    """
+    from services import fees as feesvc
+    from models.fees import Invoice
+    from models.operational import Student
+    q = Invoice.query.filter(
+        Invoice.school_id == school_id,
+        Invoice.status.in_(['unpaid', 'partial']))
+    if term_id:
+        q = q.filter(Invoice.term_id == term_id)
+    n = 0
+    for inv in q.all():
+        student = db.session.get(Student, inv.student_id)
+        if not student or not student.guardian_phone:
+            continue
+        bal = feesvc.balance(school_id, inv)
+        if bal <= 0:
+            continue
+        send_sms(school_id, student.guardian_phone,
+                 f'Reminder: an outstanding balance of GHS {bal} remains for '
+                 f'{student.first_name} {student.last_name}. Please settle it '
+                 f'when convenient. Thank you.')
+        n += 1
+    return n
 
 
 def notify_payment_received(school_id, amount_ghs, plan_name=None):

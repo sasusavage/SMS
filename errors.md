@@ -4,6 +4,30 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 2 — Notifications log, analytics, polish (2026-06-18)
+
+Three features in one batch (user said "do all"). No new tables. +25 tests
+(6 messaging + 5 analytics + 3 polish + the earlier 15 fees).
+
+### Messaging (/admin/messaging)
+- notify.recent_logs / retry_log / bulk_sms_to_class / bulk_sms_all_guardians /
+  send_fee_reminders. Log viewer (filter by channel/status), retry failed,
+  bulk SMS to a class or all guardians, fee reminders to outstanding balances.
+
+### Analytics (services/analytics.py)
+- school_dashboard: active students, classes, teachers, attendance present-rate,
+  results pass-rate, fees billed/collected/outstanding. Shown as stat tiles on
+  the school_admin dashboard. platform_metrics extended with subscription
+  revenue (sum of successful Payments) + paid_count, shown on /platform.
+
+### Polish — guardian phone validation
+- notify.looks_like_valid_phone (reuses the GH 233+9 check). CSV import preview
+  now WARNS (non-blocking) on a guardian phone that won't work for SMS, so bad
+  numbers (like the 02011424183 typo) are caught at import, not at send time.
+  Student creation stays permissive (phone optional / may be foreign).
+
+---
+
 ## Phase 2 — Student fee invoicing (2026-06-18)
 
 Parents/students paying SCHOOLS (distinct from subscription billing = schools

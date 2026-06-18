@@ -127,6 +127,12 @@ def platform_metrics():
     for s in schools:
         key = s.status.value if s.status else 'trial'
         by_status[key] = by_status.get(key, 0) + 1
+    # Subscription revenue (successful Payment rows), in GHS.
+    from decimal import Decimal
+    from models.platform import Payment
+    paid = Payment.query.filter_by(status='success').all()
+    revenue = sum((Decimal(str(p.amount_pesewas)) for p in paid),
+                  Decimal('0')) / 100
     return {
         'schools_total': len(schools),
         'schools_by_status': by_status,
@@ -134,6 +140,8 @@ def platform_metrics():
         'users_total': User.query.count(),
         'plans_total': Plan.query.count(),
         'platform_admins': PlatformUser.query.count(),
+        'revenue_ghs': revenue,
+        'paid_count': len(paid),
     }
 
 

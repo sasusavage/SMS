@@ -5,11 +5,13 @@ These describe the SaaS platform itself: the schools (tenants), the pricing
 plans, their subscriptions, and the platform super admins.
 """
 from sqlalchemy import (
-    Integer, String, Text, Date, Numeric, Enum as SAEnum, ForeignKey,
+    Integer, String, Text, Date, DateTime, Numeric, Boolean,
+    Enum as SAEnum, ForeignKey,
 )
 from sqlalchemy.orm import mapped_column, relationship
 
 from extensions import db
+from models.mixins import utcnow
 from models.enums import SchoolStatus
 from models.mixins import TimestampMixin
 
@@ -93,3 +95,38 @@ class PlatformUser(db.Model, TimestampMixin):
 
     def __repr__(self):
         return f'<PlatformUser {self.email}>'
+
+
+class Payment(db.Model):
+    """
+    A Paystack transaction for a school's subscription. One row per checkout
+    attempt; `reference` is our unique idempotency key (also sent to Paystack).
+    status: pending -> success | failed. activated guards against double-applying
+    a successful payment (callback AND webhook can both fire).
+    """
+    __tablename__ = 'payments'
+
+    id = mapped_column(Integer, primary_key=True)
+    school_id = mapped_column(
+        Integer, ForeignKey('schools.id', ondelete='CASCADE'),
+        nullable=False, index=True,
+    )
+    plan_id = mapped_column(Integer, ForeignKey('plans.id', ondelete='SET NULL'),
+                            nullable=True)
+    reference = mapped_column(String(100), nullable=False, unique=True,
+                              index=True)
+    amount_pesewas = mapped_column(Integer, nullable=False)  # GHS * 100
+    currency = mapped_column(String(10), default='GHS')
+    status = mapped_column(String(20), default='pending', nullable=False,
+                           index=True)
+    activated = mapped_column(Boolean, default=False, nullable=False)
+    paystack_status = mapped_column(String(40))
+    created_at = mapped_column(DateTime(timezone=True), default=utcnow,
+                               nullable=False)
+    paid_at = mapped_column(DateTime(timezone=True))
+
+    school = relationship('School')
+    plan = relationship('Plan')
+
+    def __repr__(self):
+        return f'<Payment {self.reference} {self.status}>'

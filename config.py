@@ -41,6 +41,12 @@ class Config:
         or 'memory://'
     )
 
+    # Paystack (subscription billing). Keys set via env in Coolify.
+    PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
+    PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY', '')
+    # Public base URL for building the Paystack callback (e.g. https://app.example.com)
+    APP_BASE_URL = os.environ.get('APP_BASE_URL', '')
+
     # Uploads — tenant files stored under uploads/<school_id>/...
     UPLOAD_FOLDER = os.environ.get(
         'UPLOAD_FOLDER',

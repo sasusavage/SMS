@@ -16,7 +16,7 @@ from models.mixins import TenantMixin, TimestampMixin  # noqa: F401
 
 # Platform tables (no school_id)
 from models.platform import (  # noqa: F401
-    School, Plan, Subscription, PlatformUser,
+    School, Plan, Subscription, PlatformUser, Payment,
 )
 
 # Tenant configuration tables
@@ -40,7 +40,7 @@ __all__ = [
     'db',
     'SchoolStatus', 'UserRole', 'StudentStatus', 'AttendanceStatus',
     'TenantMixin', 'TimestampMixin',
-    'School', 'Plan', 'Subscription', 'PlatformUser',
+    'School', 'Plan', 'Subscription', 'PlatformUser', 'Payment',
     'AcademicYear', 'Term', 'LevelGroup', 'Level', 'Class', 'Subject',
     'LevelSubject', 'GradingScheme', 'GradeBoundary', 'AssessmentComponent',
     'ReportSettings',

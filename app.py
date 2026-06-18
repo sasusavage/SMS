@@ -111,6 +111,7 @@ def _register_blueprints(app):
     from blueprints.reports import reports_bp
     from blueprints.portal import portal_bp
     from blueprints.media import media_bp
+    from blueprints.billing import billing_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -123,6 +124,7 @@ def _register_blueprints(app):
     app.register_blueprint(reports_bp)
     app.register_blueprint(portal_bp)
     app.register_blueprint(media_bp)
+    app.register_blueprint(billing_bp)
 
 
 def _register_error_handlers(app):

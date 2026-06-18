@@ -4,6 +4,44 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 2 — Paystack subscription billing (2026-06-18)
+
+Mirrored slidein's robust Paystack module (app/paystack.py): initialize with
+retries/backoff, verify, correct pesewas rounding, exact error logging, plus
+the HMAC-SHA512 webhook signature pattern. Added 13 tests.
+
+### What shipped
+- models/platform.py: Payment (school, plan, reference, amount_pesewas, status,
+  activated, paystack_status, paid_at). Subscription already had paystack_ref.
+- migration 0caea30ccb02 (payments table; hand-written + inspector-guarded like
+  the notifications one — initial migration uses create_all).
+- services/paystack.py: initialize / verify / verify_webhook_signature
+  (HMAC-SHA512 of raw body) / to_pesewas. Keys from config (env).
+- services/billing.py: start_checkout (pending Payment + Paystack init) and
+  complete_payment (verify -> activate subscription ONCE). Idempotent via
+  Payment.activated, so callback AND webhook are both safe. Amount-mismatch
+  (underpayment) is rejected. A successful payment also flips the school to
+  active (lifts trial/suspension).
+- blueprints/billing.py: /admin/billing (school_admin), /admin/billing/checkout,
+  /billing/callback (verify on return), /billing/webhook (CSRF-EXEMPT, signed).
+- Trigger: notify_payment_received emails school admins on success (the
+  previously-stubbed fee/invoice notification).
+- config: PAYSTACK_SECRET_KEY/PUBLIC_KEY/APP_BASE_URL via env; .env.example updated.
+
+### Security notes
+- Webhook is CSRF-exempt (server-to-server) but signature-verified; bad/missing
+  signature -> 400.
+- complete_payment re-verifies with Paystack server-side (never trusts the
+  client callback params) and checks the amount actually paid.
+
+### ACTION on live DB
+Run `flask db upgrade` in Coolify (creates payments table; now 2 pending
+migrations: ed1b8bd275c0 notifications + 0caea30ccb02 payments). Set
+PAYSTACK_SECRET_KEY, PAYSTACK_PUBLIC_KEY, APP_BASE_URL in env. Point the
+Paystack dashboard webhook at <APP_BASE_URL>/billing/webhook.
+
+---
+
 ## Phase 2 — Email/SMS notifications (2026-06-18)
 
 First Phase 2 feature: multi-tenant notifications. Studied the user's Vynfy

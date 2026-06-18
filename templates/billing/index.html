@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Billing{% endblock %}
+{% block topbar_title %}Billing{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  <div class="page-header">
+    <h1>Subscription &amp; billing</h1>
+    <p class="muted">Choose a plan and pay securely via Paystack.</p>
+  </div>
+
+  {% if not configured %}
+  <div class="card"><div class="flash warning mb-0">Online payment isn't enabled
+    yet. Please contact the platform administrator.</div></div>
+  {% endif %}
+
+  <div class="card">
+    <h3>Current subscription</h3>
+    {% if current %}
+    <p>
+      <strong>{{ current.plan.name if current.plan else '—' }}</strong>
+      · <span class="badge {{ 'success' if current.status == 'active' else 'warning' }}">{{ current.status }}</span><br>
+      <span class="muted">{{ current.starts_on or '—' }} → {{ current.ends_on or '—' }}</span>
+    </p>
+    {% else %}
+    <p class="muted mb-0">No active subscription yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Plans</h3>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Plan</th><th>Price (GHS)</th><th>Max students</th><th>Cycle</th><th class="text-right">Subscribe</th></tr></thead>
+        <tbody>
+          {% for p in plans %}
+          <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ p.price_ghs }}</td>
+            <td>{{ p.max_students if p.max_students is not none else 'unlimited' }}</td>
+            <td>{{ p.billing_cycle }}</td>
+            <td class="actions">
+              <form method="post" action="{{ url_for('billing.checkout') }}" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="plan_id" value="{{ p.id }}">
+                <button class="btn sm" {{ 'disabled' if not configured }}>
+                  {{ 'Pay GHS ' ~ p.price_ghs if (p.price_ghs or 0) > 0 else 'Select' }}</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}<tr><td colspan="5" class="empty">No plans available.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Recent payments</h3>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Reference</th><th>Amount (GHS)</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for pay in payments %}
+          <tr>
+            <td>{{ pay.reference }}</td>
+            <td>{{ '%.2f'|format(pay.amount_pesewas / 100) }}</td>
+            <td><span class="badge {{ 'success' if pay.status == 'success' else 'danger' if pay.status == 'failed' else '' }}">{{ pay.status }}</span></td>
+            <td>{{ pay.paid_at.strftime('%Y-%m-%d') if pay.paid_at else (pay.created_at.strftime('%Y-%m-%d') if pay.created_at else '—') }}</td>
+          </tr>
+          {% else %}<tr><td colspan="4" class="empty">No payments yet.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -83,6 +83,13 @@ This repo is Coolify-ready via Nixpacks — no Dockerfile needed.
 | `WEB_CONCURRENCY` | optional, gunicorn workers (default 3) |
 | `UPLOAD_FOLDER` | path to a **persistent volume** for uploaded logos/photos (e.g. `/data/uploads`). Without a persistent volume these files are lost on every redeploy. |
 | `REDIS_URL` *(or `RATELIMIT_STORAGE_URI`)* | optional, e.g. `redis://host:6379/0`. Login rate limiting uses in-memory storage by default, which is **per-worker** — point this at Redis for strict limits shared across all gunicorn workers. Either var works (`RATELIMIT_STORAGE_URI` wins if both set). If Redis is briefly unreachable the limiter fails open (logins keep working). |
+| `PAYSTACK_SECRET_KEY` / `PAYSTACK_PUBLIC_KEY` | Paystack keys for subscription billing. Without them, billing shows "not enabled". |
+| `APP_BASE_URL` | public URL (e.g. `https://app.example.com`) used to build the Paystack callback. |
+| `ENCRYPTION_KEY` | optional; encrypts stored secrets (SMTP/API passwords). Defaults to `SECRET_KEY`. |
+
+**Paystack webhook:** in the Paystack dashboard, set the webhook URL to
+`<APP_BASE_URL>/billing/webhook` so subscriptions still activate if the user
+closes the tab before the callback.
 
 **Persistent volume for uploads:** in Coolify, add a persistent storage mount
 (e.g. host/volume → container path `/data/uploads`) and set `UPLOAD_FOLDER` to

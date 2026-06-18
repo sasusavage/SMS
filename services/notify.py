@@ -291,6 +291,27 @@ def notify_absentees(school_id, class_id, on_date, marks):
     return count
 
 
+def notify_payment_received(school_id, amount_ghs, plan_name=None):
+    """
+    Email the school's admins confirming a subscription payment. Best-effort.
+    """
+    from models.operational import User
+    from models.enums import UserRole
+    try:
+        admins = User.query.filter_by(
+            school_id=school_id, role=UserRole.school_admin,
+            is_active=True).all()
+        plan_line = f' for the {plan_name} plan' if plan_name else ''
+        body = (f'We received your payment of GHS {amount_ghs:.2f}{plan_line}. '
+                f'Your subscription is now active. Thank you.')
+        for a in admins:
+            if a.email:
+                send_email(school_id, a.email,
+                           'Payment received — SchoolBrain', body)
+    except Exception:  # noqa: BLE001
+        log.exception('payment-received notification failed')
+
+
 def notify_account_created(school_id, user, plaintext_password=None):
     """Send a welcome email/SMS with login info when a user is created."""
     try:

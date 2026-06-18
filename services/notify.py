@@ -63,6 +63,13 @@ def send_sms(school_id, phone, message):
                             message=message, status='queued')
     db.session.add(entry)
     try:
+        if not _valid_gh_msisdn(phone):
+            entry.provider = 'validation'
+            entry.status = 'failed'
+            entry.error = (f'Invalid phone number "{phone}". A Ghana number '
+                           'should be 10 digits (e.g. 0244123456).')
+            _commit()
+            return entry
         cfg = _sms_config(school_id)
         if cfg is None:
             entry.provider = 'stub'
@@ -198,6 +205,16 @@ def _normalize_phone(phone):
         return p
     p = p.lstrip('0')          # drop ANY leading zero(s), not just for len==10
     return '233' + p
+
+
+def _valid_gh_msisdn(phone):
+    """
+    True if `phone` is a well-formed Ghana international number: 233 + 9 digits
+    (12 digits total). Catches data-entry typos before they hit Vynfy.
+    """
+    if not phone or not str(phone).isdigit():
+        return False
+    return phone.startswith('233') and len(phone) == 12
 
 
 def _commit():

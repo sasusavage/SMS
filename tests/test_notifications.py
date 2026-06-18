@@ -122,6 +122,18 @@ def test_sms_stub_when_no_vynfy_key(app, db):
     assert entry.recipient == '233244123456'   # normalized
 
 
+def test_invalid_phone_fails_fast_without_calling_vynfy(app, db):
+    s = make_school(db, slug='s')
+    platform_settings.set('vynfy_api_key', 'KEY')
+    school_settings.update_sms(s.id, enabled=True, sender_id='X')
+    db.session.commit()
+    with patch('services.notify._vynfy_send') as m:
+        entry = notify.send_sms(s.id, '02011424183', 'hi')  # 11-digit -> 13 intl
+    assert entry.status == 'failed'
+    assert 'Invalid phone number' in entry.error
+    m.assert_not_called()   # never hit Vynfy with a bad number
+
+
 def test_phone_normalization_variants(app):
     n = notify._normalize_phone
     assert n('0244123456') == '233244123456'      # standard local

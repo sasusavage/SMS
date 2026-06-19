@@ -1,12 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Configuration — SchoolBrain{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>School configuration</h1>
-  <p class="muted">Set up your school's academic structure, calendar, subjects,
-     grading and report options. Nothing here is hardcoded — every school is different.</p>
-</div>
+{{ page_header('School configuration',
+   subtitle="Set up your school's academic structure, calendar, subjects, grading and report options. Nothing here is hardcoded — every school is different.") }}
 
 <div class="card">
   <div class="table-wrap">

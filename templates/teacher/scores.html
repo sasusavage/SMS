@@ -1,12 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Score entry{% endblock %}
 {% block topbar_title %}Scores{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>Score entry</h1>
-  <p class="muted">Enter raw component scores (0–100) for a class, subject and term.
-     The admin computes weighted results from these.</p>
-</div>
+{{ page_header('Score entry',
+   subtitle='Enter raw component scores (0–100) for a class, subject and term. The admin computes weighted results from these.') }}
 
 <div class="card">
   <form method="get" class="form-inline">

@@ -1,15 +1,14 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}{{ school.name }} — Platform{% endblock %}
 {% block topbar_title %}Platform administration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('platform.index') }}">Platform</a> / {{ school.name }}</div>
-  <div class="card-title">
-    <h1 class="mb-0">{{ school.name }}</h1>
-    {% set st = school.status.value if school.status else '—' %}
-    <span class="badge {{ 'success' if st == 'active' else 'warning' if st == 'trial' else 'danger' }}">{{ st }}</span>
-  </div>
-</div>
+{% set st = school.status.value if school.status else '—' %}
+{% call page_header(school.name,
+     back=url_for('platform.index'), back_label='Platform',
+     crumbs=[('Platform', url_for('platform.index')), (school.name, none)]) %}
+  <span class="badge {{ 'success' if st == 'active' else 'warning' if st == 'trial' else 'danger' }}">{{ st }}</span>
+{% endcall %}
 
 <div class="stat-grid">
   <div class="stat"><div class="stat-label">Students</div><div class="stat-value">{{ students }}</div></div>

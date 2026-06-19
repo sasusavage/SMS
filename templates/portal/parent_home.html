@@ -1,11 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Parent portal — SchoolBrain{% endblock %}
 {% block topbar_title %}Parent portal{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>Parent portal</h1>
-  <p class="muted">View your children's attendance and published results.</p>
-</div>
+{{ page_header('Parent portal',
+   subtitle="View your children's attendance and published results.") }}
 
 {% if not children %}
 <div class="card"><p class="muted mb-0">No children are linked to your account yet.

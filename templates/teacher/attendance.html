@@ -1,13 +1,11 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Attendance{% endblock %}
 {% block topbar_title %}Attendance{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="card-title">
-    <h1 class="mb-0">Daily attendance</h1>
-    <a class="btn secondary" href="{{ url_for('teacher.attendance_summary', class_id=selected_class_id) }}">Monthly summary</a>
-  </div>
-</div>
+{% call page_header('Daily attendance') %}
+  <a class="btn secondary" href="{{ url_for('teacher.attendance_summary', class_id=selected_class_id) }}">Monthly summary</a>
+{% endcall %}
 
 <div class="card">
   <form method="get" class="form-inline">

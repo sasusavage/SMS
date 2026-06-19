@@ -1,11 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Platform — SchoolBrain{% endblock %}
 {% block topbar_title %}Platform administration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>Platform administration</h1>
-  <p class="muted">Signed in as super admin: {{ current_user.name }}</p>
-</div>
+{{ page_header('Platform administration',
+   subtitle='Signed in as super admin: ' ~ current_user.name) }}
 
 <div class="stat-grid">
   <div class="stat"><div class="stat-label">Schools</div><div class="stat-value">{{ metrics.schools_total }}</div></div>

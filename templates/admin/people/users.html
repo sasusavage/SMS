@@ -1,13 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Users{% endblock %}
 {% block topbar_title %}People{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb">People / Users</div>
-  <h1>Users</h1>
-  <p class="muted">Teachers, parents and administrators. Students are managed
-     under <a href="{{ url_for('admin_people.students') }}">Students</a>.</p>
-</div>
+{{ page_header('Users',
+   subtitle='Teachers, parents and administrators. Students are managed under the Students page.') }}
 
 <div class="card">
   <h3>Add user</h3>

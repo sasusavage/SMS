@@ -1,12 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Results{% endblock %}
 {% block topbar_title %}Results{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>Results</h1>
-  <p class="muted">Compute weighted results from entered scores, review, then
-     publish. Students and parents only see published results.</p>
-</div>
+{{ page_header('Results',
+   subtitle='Compute weighted results from entered scores, review, then publish. Students and parents only see published results.') }}
 
 <div class="card">
   <form method="get" class="form-inline">

@@ -1,12 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Report comments{% endblock %}
 {% block topbar_title %}Comments{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>Report comments</h1>
-  <p class="muted">Write the class teacher and head teacher comments shown on
-     each student's report card.</p>
-</div>
+{{ page_header('Report comments',
+   subtitle="Write the class teacher and head teacher comments shown on each student's report card.") }}
 
 <div class="card">
   <form method="get" class="form-inline">

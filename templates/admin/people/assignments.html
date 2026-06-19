@@ -1,12 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Teacher assignments{% endblock %}
 {% block topbar_title %}People{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb">People / Teacher assignments</div>
-  <h1>Teacher assignments</h1>
-  <p class="muted">Assign a teacher to a class + subject for a given term.</p>
-</div>
+{{ page_header('Teacher assignments',
+   subtitle='Assign a teacher to a class + subject for a given term.') }}
 
 <div class="card">
   <h3>Add assignment</h3>

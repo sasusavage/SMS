@@ -1,13 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Set up {{ school.name }}{% endblock %}
 {% block topbar_title %}Setup checklist{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <h1>Welcome — let's finish setting up {{ school.name }}</h1>
-    <p class="muted">Your "<strong>{{ school.curriculum_template_used }}</strong>"
-       template seeded the basics. Review each area and customise as needed.</p>
-  </div>
+  {{ page_header("Welcome — let's finish setting up " ~ school.name) }}
+  <p class="muted" style="margin-top:-12px">Your "<strong>{{ school.curriculum_template_used }}</strong>"
+     template seeded the basics. Review each area and customise as needed.</p>
 
   <div class="card">
     <div class="table-wrap">

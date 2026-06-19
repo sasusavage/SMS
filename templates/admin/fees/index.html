@@ -1,17 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Fees{% endblock %}
 {% block topbar_title %}Fees{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="card-title">
-    <h1 class="mb-0">Fees</h1>
-    <div class="row-gap">
-      <a class="btn secondary" href="{{ url_for('admin_fees.generate') }}">Generate invoices</a>
-      <a class="btn secondary" href="{{ url_for('admin_fees.invoices') }}">View invoices</a>
-    </div>
-  </div>
-  <p class="muted">Define fees per level + term, then generate invoices for a class.</p>
-</div>
+{% call page_header('Fees', subtitle='Define fees per level + term, then generate invoices for a class.') %}
+  <a class="btn secondary" href="{{ url_for('admin_fees.generate') }}">Generate invoices</a>
+  <a class="btn secondary" href="{{ url_for('admin_fees.invoices') }}">View invoices</a>
+{% endcall %}
 
 <div class="card">
   <h3>Add fee</h3>

@@ -1,11 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Dashboard — SchoolBrain{% endblock %}
 {% block topbar_title %}Dashboard{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>Welcome, {{ current_user.name }}</h1>
-  <p class="muted">You're signed in as <strong>{{ role.replace('_',' ') if role }}</strong>.</p>
-</div>
+{{ page_header('Welcome, ' ~ current_user.name,
+   subtitle=('Signed in as ' ~ role.replace('_',' ')) if role else none) }}
 
 {% if role == 'school_admin' and analytics %}
 {% set ov = analytics.overview %}{% set at = analytics.attendance %}

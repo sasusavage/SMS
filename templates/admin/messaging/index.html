@@ -1,17 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Messaging{% endblock %}
 {% block topbar_title %}Messaging{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="card-title">
-    <h1 class="mb-0">Messaging</h1>
-    <div class="row-gap">
-      <a class="btn secondary" href="{{ url_for('admin_messaging.bulk') }}">Bulk SMS</a>
-      <a class="btn secondary" href="{{ url_for('admin_messaging.fee_reminders') }}">Fee reminders</a>
-    </div>
-  </div>
-  <p class="muted">Every email/SMS the system sent, with status.</p>
-</div>
+{% call page_header('Messaging', subtitle='Every email/SMS the system sent, with status.') %}
+  <a class="btn secondary" href="{{ url_for('admin_messaging.bulk') }}">Bulk SMS</a>
+  <a class="btn secondary" href="{{ url_for('admin_messaging.fee_reminders') }}">Fee reminders</a>
+{% endcall %}
 
 <div class="card">
   <form method="get" class="form-inline">

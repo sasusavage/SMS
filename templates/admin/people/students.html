@@ -1,14 +1,11 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Students{% endblock %}
 {% block topbar_title %}People{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb">People / Students</div>
-  <div class="card-title">
-    <h1 class="mb-0">Students</h1>
-    <a class="btn secondary" href="{{ url_for('admin_people.import_students') }}">Import CSV</a>
-  </div>
-</div>
+{% call page_header('Students') %}
+  <a class="btn secondary" href="{{ url_for('admin_people.import_students') }}">Import CSV</a>
+{% endcall %}
 
 <div class="card">
   <h3>Add student</h3>

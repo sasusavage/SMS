@@ -1,12 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Fees{% endblock %}
 {% block topbar_title %}Fees{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <h1>Fees — {{ student.first_name }} {{ student.last_name }}</h1>
-    <p class="muted">View invoices and pay online.</p>
-  </div>
+  {{ page_header('Fees — ' ~ student.first_name ~ ' ' ~ student.last_name,
+     back=url_for('dashboard.index'), back_label='Portal',
+     subtitle='View invoices and pay online.') }}
 
   <div class="card">
     <div class="table-wrap">

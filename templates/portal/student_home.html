@@ -1,11 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}My portal — SchoolBrain{% endblock %}
 {% block topbar_title %}My portal{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>Hi {{ student.first_name }}</h1>
-  <p class="muted">Your profile, attendance and published results.</p>
-</div>
+{{ page_header('Hi ' ~ student.first_name,
+   subtitle='Your profile, attendance and published results.') }}
 
 {% set overview = {'student': student, 'klass': klass, 'attendance': attendance, 'terms': terms} %}
 {% set term_links = [] %}

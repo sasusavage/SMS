@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+{% block title %}Timetable{% endblock %}
+{% block topbar_title %}Timetable{% endblock %}
+{% block content %}
+{% call page_header('Class timetable', subtitle='Build the weekly schedule for each class.') %}
+  <a class="btn secondary" href="{{ url_for('timetable.periods') }}">Manage periods</a>
+{% endcall %}
+
+<div class="card">
+  <form method="get" class="form-inline">
+    <div class="form-group"><label>Class</label>
+      <select name="class_id" onchange="this.form.submit()">
+        <option value="">— choose a class —</option>
+        {% for c in classes %}<option value="{{ c.id }}" {{ 'selected' if selected_class_id == c.id }}>{{ c.name }}</option>{% endfor %}
+      </select></div>
+    <noscript><button class="btn secondary">Load</button></noscript>
+  </form>
+</div>
+
+{% if selected_class_id is none %}
+  <div class="card"><p class="muted mb-0">Choose a class to edit its timetable.</p></div>
+{% elif not periods %}
+  <div class="card"><p class="muted mb-0">No periods defined yet —
+    <a href="{{ url_for('timetable.periods') }}">add periods</a> first.</p></div>
+{% else %}
+<div class="card">
+  <h3>{{ klass.name }}</h3>
+  <p class="muted">Pick a subject (and optional teacher) per cell, then Save. Leave subject blank and Save to clear.</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Period</th>{% for d, dname in days %}<th>{{ dname }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for p in periods %}
+        <tr>
+          <td><strong>{{ p.name }}</strong><br><small class="muted">{{ p.start_time.strftime('%H:%M') if p.start_time else '' }}</small></td>
+          {% for d, dname in days %}
+          {% set slot = grid.get((d, p.id)) %}
+          {% set fid = 'tt-' ~ d ~ '-' ~ p.id %}
+          <td style="min-width:160px">
+            <form id="{{ fid }}" method="post" action="{{ url_for('timetable.set_slot') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="class_id" value="{{ selected_class_id }}">
+              <input type="hidden" name="day_of_week" value="{{ d }}">
+              <input type="hidden" name="period_id" value="{{ p.id }}">
+            </form>
+            <select form="{{ fid }}" name="subject_id" style="width:100%;margin-bottom:4px">
+              <option value="">—</option>
+              {% for s in subjects %}<option value="{{ s.id }}" {{ 'selected' if slot and slot.subject_id == s.id }}>{{ s.name }}</option>{% endfor %}
+            </select>
+            <select form="{{ fid }}" name="teacher_user_id" style="width:100%;margin-bottom:4px">
+              <option value="">(no teacher)</option>
+              {% for t in teachers %}<option value="{{ t.id }}" {{ 'selected' if slot and slot.teacher_user_id == t.id }}>{{ t.name }}</option>{% endfor %}
+            </select>
+            <button form="{{ fid }}" class="btn secondary sm" style="width:100%">Save</button>
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

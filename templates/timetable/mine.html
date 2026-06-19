@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+{% block title %}My timetable{% endblock %}
+{% block topbar_title %}Timetable{% endblock %}
+{% block content %}
+{{ page_header('My timetable', subtitle='Your weekly teaching schedule.') }}
+
+{% if not periods %}
+  <div class="card"><p class="muted mb-0">No timetable has been set up yet.</p></div>
+{% else %}
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Period</th>{% for d, dname in days %}<th>{{ dname }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for p in periods %}
+        <tr>
+          <td><strong>{{ p.name }}</strong><br><small class="muted">{{ p.start_time.strftime('%H:%M') if p.start_time else '' }}</small></td>
+          {% for d, dname in days %}
+          {% set slot = grid.get((d, p.id)) %}
+          <td>
+            {% if slot %}
+              <strong>{{ subjects.get(slot.subject_id, '') }}</strong><br>
+              <small class="muted">{{ classes.get(slot.class_id, '') }}</small>
+            {% else %}<span class="muted">—</span>{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

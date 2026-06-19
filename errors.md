@@ -4,6 +4,30 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 3 — Timetabling (2026-06-19)
+
+Weekly class timetables with conflict detection. +15 tests (9 service + 6 route).
+migration a6f6d9ce44f5 (periods, timetable_slots; hand-written, guarded).
+
+- models/timetable.py: Period (named time slots per school) + TimetableSlot
+  (class+day+period -> subject+teacher; unique cell).
+- services/timetable.py: period CRUD, set/clear slot, TEACHER DOUBLE-BOOKING
+  conflict detection (same day+period in another class is rejected), tenant +
+  role validation (teacher must have teacher role).
+- /timetable (admin: per-class grid editor via HTML5 form= cells),
+  /timetable/periods (period setup), /timetable/mine (teacher read-only).
+  Nav: 'Timetable' (admin), 'My timetable' (teacher).
+
+### Test-infra fix
+- tests/factories.make_class now REUSES the school's academic year instead of
+  creating a new '2025/2026' each call — previously a second make_class() for
+  the same school hit the academic_years unique(name) constraint. (Surfaced
+  when timetable tests needed two classes in one school.)
+
+### ACTION on live DB: flask db upgrade (adds periods + timetable_slots).
+
+---
+
 ## Phase 2 — Notifications log, analytics, polish (2026-06-18)
 
 Three features in one batch (user said "do all"). No new tables. +25 tests

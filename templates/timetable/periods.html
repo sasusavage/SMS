@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+{% block title %}Periods{% endblock %}
+{% block topbar_title %}Timetable{% endblock %}
+{% block content %}
+{{ page_header('Periods',
+   back=url_for('timetable.index'), back_label='Timetable',
+   crumbs=[('Timetable', url_for('timetable.index')), ('Periods', none)],
+   subtitle='Define the daily time slots used across all class timetables.') }}
+
+<div class="card">
+  <h3>Add period</h3>
+  <form method="post" class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group"><label>Name</label><input name="name" placeholder="Period 1" required></div>
+    <div class="form-group" style="flex:0 0 90px"><label>Order</label><input type="number" name="sequence" value="0"></div>
+    <div class="form-group" style="flex:0 0 130px"><label>Start</label><input type="time" name="start_time"></div>
+    <div class="form-group" style="flex:0 0 130px"><label>End</label><input type="time" name="end_time"></div>
+    <button class="btn">Add</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Order</th><th>Name</th><th>Time</th><th class="text-right">Actions</th></tr></thead>
+      <tbody>
+        {% for p in periods %}
+        <tr>
+          <td>{{ p.sequence }}</td><td>{{ p.name }}</td>
+          <td>{{ (p.start_time.strftime('%H:%M') if p.start_time else '—') ~ ' – ' ~ (p.end_time.strftime('%H:%M') if p.end_time else '—') }}</td>
+          <td class="actions"><form method="post" action="{{ url_for('timetable.delete_period', period_id=p.id) }}" class="inline-form" onsubmit="return confirm('Delete this period? It removes its timetable slots.')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn danger sm">Delete</button></form></td>
+        </tr>
+        {% else %}<tr><td colspan="4" class="empty">No periods yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

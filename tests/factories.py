@@ -38,8 +38,13 @@ def make_class(db, school, name='Class A', class_teacher_id=None):
     db.session.flush()
     lvl = Level(school_id=school.id, level_group_id=lg.id, name=f'L-{name}',
                 sequence=1)
-    ay = AcademicYear(school_id=school.id, name='2025/2026', is_current=True)
-    db.session.add_all([lvl, ay])
+    db.session.add(lvl)
+    # Reuse the school's academic year if one exists (so make_class can be
+    # called multiple times per school without violating the unique name).
+    ay = AcademicYear.query.filter_by(school_id=school.id).first()
+    if ay is None:
+        ay = AcademicYear(school_id=school.id, name='2025/2026', is_current=True)
+        db.session.add(ay)
     db.session.flush()
     c = Class(school_id=school.id, level_id=lvl.id, academic_year_id=ay.id,
               name=name, class_teacher_id=class_teacher_id)

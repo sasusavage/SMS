@@ -46,6 +46,14 @@
          href="{{ url_for('teacher.scores') }}">Score entry</a>
       <a class="nav-link {{ 'active' if request.endpoint == 'teacher.comments' }}"
          href="{{ url_for('teacher.comments') }}">Report comments</a>
+      {% if role == 'teacher' %}
+      <a class="nav-link {{ 'active' if request.endpoint == 'timetable.mine' }}"
+         href="{{ url_for('timetable.mine') }}">My timetable</a>
+      {% endif %}
+      {% if role == 'school_admin' %}
+      <a class="nav-link {{ 'active' if request.endpoint and request.endpoint.startswith('timetable.') }}"
+         href="{{ url_for('timetable.index') }}">Timetable</a>
+      {% endif %}
     {% endif %}
 
     {% if role == 'school_admin' %}

@@ -41,6 +41,11 @@ from models.fees import (  # noqa: F401
     FeeStructure, Invoice, InvoiceItem, FeePayment,
 )
 
+# Timetabling tables (Phase 3)
+from models.timetable import (  # noqa: F401
+    Period, TimetableSlot,
+)
+
 __all__ = [
     'db',
     'SchoolStatus', 'UserRole', 'StudentStatus', 'AttendanceStatus',
@@ -54,4 +59,5 @@ __all__ = [
     'AuditLog',
     'SchoolNotificationSettings', 'PlatformSetting', 'NotificationLog',
     'FeeStructure', 'Invoice', 'InvoiceItem', 'FeePayment',
+    'Period', 'TimetableSlot',
 ]

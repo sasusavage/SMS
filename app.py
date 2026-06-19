@@ -114,6 +114,7 @@ def _register_blueprints(app):
     from blueprints.billing import billing_bp
     from blueprints.admin_fees import fees_bp
     from blueprints.admin_messaging import messaging_bp
+    from blueprints.timetable import timetable_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -129,6 +130,7 @@ def _register_blueprints(app):
     app.register_blueprint(billing_bp)
     app.register_blueprint(fees_bp)
     app.register_blueprint(messaging_bp)
+    app.register_blueprint(timetable_bp)
 
 
 def _register_error_handlers(app):

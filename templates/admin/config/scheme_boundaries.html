@@ -1,16 +1,14 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}{{ scheme.name }} — bands{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb">
-    <a href="{{ url_for('admin_config.index') }}">Configuration</a> /
-    <a href="{{ url_for('admin_config.grading_schemes') }}">Grading schemes</a> / {{ scheme.name }}
-  </div>
-  <h1>{{ scheme.name }} — grade bands</h1>
-  <p class="muted">Bands must not overlap and must lie within 0–100. The system
-     validates this when you add a band.</p>
-</div>
+{{ page_header(scheme.name ~ ' — grade bands',
+   back=url_for('admin_config.grading_schemes'), back_label='Grading schemes',
+   crumbs=[('Configuration', url_for('admin_config.index')),
+           ('Grading schemes', url_for('admin_config.grading_schemes')),
+           (scheme.name, none)],
+   subtitle='Bands must not overlap and must lie within 0–100. The system validates this when you add a band.') }}
 
 <div class="card">
   <h3>Add band</h3>

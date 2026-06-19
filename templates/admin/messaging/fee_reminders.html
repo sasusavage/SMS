@@ -1,14 +1,14 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Fee reminders{% endblock %}
 {% block topbar_title %}Messaging{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <div class="breadcrumb"><a href="{{ url_for('admin_messaging.index') }}">Messaging</a> / Fee reminders</div>
-    <h1>Fee reminders</h1>
-    <p class="muted">SMS guardians of every student with an outstanding
+  {{ page_header("Fee reminders",
+     back=url_for('admin_messaging.index'), back_label="Messaging",
+     crumbs=[("Messaging", url_for('admin_messaging.index')), ("Fee reminders", none)]) }}
+  <p class="muted">SMS guardians of every student with an outstanding
        (unpaid or partial) invoice balance.</p>
-  </div>
   <div class="card">
     <form method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

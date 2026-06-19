@@ -1,0 +1,40 @@
+{#
+  Reusable page header: Back link + breadcrumb + title (+ optional actions).
+
+  Usage:
+    {% from "_macros.html" import page_header %}
+    {{ page_header(
+         'Invoice #12',
+         back=url_for('admin_fees.invoices'), back_label='Invoices',
+         crumbs=[('Fees', url_for('admin_fees.index')),
+                 ('Invoices', url_for('admin_fees.invoices')),
+                 ('#12', none)],
+         subtitle='Ama Owusu (GES001)') }}
+
+  - back / back_label: the Back link target (omit on top-level pages).
+  - crumbs: list of (label, url|none) — last item is the current page (url=none).
+  - subtitle: optional muted line under the title.
+  - actions: pass a caller() block for right-aligned buttons (use page_header_actions).
+#}
+{% macro page_header(title, back=none, back_label='Back', crumbs=none, subtitle=none) %}
+<div class="page-header">
+  {% if back %}
+  <a class="back-link" href="{{ back }}"><span class="arrow">←</span> {{ back_label }}</a>
+  {% endif %}
+  {% if crumbs %}
+  <div class="breadcrumb">
+    {% for label, url in crumbs %}
+      {% if url %}<a href="{{ url }}">{{ label }}</a>{% else %}{{ label }}{% endif %}
+      {% if not loop.last %}<span class="sep">/</span>{% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="page-title-row">
+    <div>
+      <h1 class="mb-0">{{ title }}</h1>
+      {% if subtitle %}<p class="muted" style="margin:4px 0 0">{{ subtitle }}</p>{% endif %}
+    </div>
+    {% if caller %}<div class="page-actions">{{ caller() }}</div>{% endif %}
+  </div>
+</div>
+{% endmacro %}

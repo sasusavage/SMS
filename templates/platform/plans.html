@@ -1,11 +1,11 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Plans — Platform{% endblock %}
 {% block topbar_title %}Platform administration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('platform.index') }}">Platform</a> / Plans</div>
-  <h1>Pricing plans</h1>
-</div>
+{{ page_header("Pricing plans",
+   back=url_for('platform.index'), back_label="Platform",
+   crumbs=[("Platform", url_for('platform.index')), ("Plans", none)]) }}
 
 <div class="card">
   <h3>Add plan</h3>

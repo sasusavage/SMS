@@ -1,13 +1,13 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Assessment components{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Assessment components</div>
-  <h1>Assessment components</h1>
-  <p class="muted">How a final score is composed, e.g. Class Score 50% + Exam 50%.
+{{ page_header("Assessment components",
+   back=url_for('admin_config.index'), back_label="Configuration",
+   crumbs=[("Configuration", url_for('admin_config.index')), ("Assessment components", none)]) }}
+<p class="muted">How a final score is composed, e.g. Class Score 50% + Exam 50%.
      <strong>Weights in each bucket must total 100</strong> before results can be computed.</p>
-</div>
 
 <div class="card">
   <h3>Add component</h3>

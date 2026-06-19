@@ -1,11 +1,11 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Invoices{% endblock %}
 {% block topbar_title %}Fees{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('admin_fees.index') }}">Fees</a> / Invoices</div>
-  <h1>Invoices</h1>
-</div>
+{{ page_header("Invoices",
+   back=url_for('admin_fees.index'), back_label="Fees",
+   crumbs=[("Fees", url_for('admin_fees.index')), ("Invoices", none)]) }}
 
 <div class="card">
   <form method="get" class="form-inline">

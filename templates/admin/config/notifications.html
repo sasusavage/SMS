@@ -1,14 +1,14 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Notifications{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Notifications</div>
-    <h1>Notification settings</h1>
-    <p class="muted">Send results, attendance and account emails/SMS from your
+  {{ page_header("Notification settings",
+     back=url_for('admin_config.index'), back_label="Configuration",
+     crumbs=[("Configuration", url_for('admin_config.index')), ("Notifications", none)]) }}
+  <p class="muted">Send results, attendance and account emails/SMS from your
        own accounts. If you leave email off, the platform's email is used as a fallback.</p>
-  </div>
 
   <div class="card">
     <h3>Email (SMTP)</h3>

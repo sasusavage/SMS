@@ -1,14 +1,14 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Platform settings{% endblock %}
 {% block topbar_title %}Platform administration{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <div class="breadcrumb"><a href="{{ url_for('platform.index') }}">Platform</a> / Settings</div>
-    <h1>Platform settings</h1>
-    <p class="muted">Platform-wide email (used as the fallback for schools and
+  {{ page_header("Platform settings",
+     back=url_for('platform.index'), back_label="Platform",
+     crumbs=[("Platform", url_for('platform.index')), ("Settings", none)]) }}
+  <p class="muted">Platform-wide email (used as the fallback for schools and
        for signup/billing) and the shared Vynfy SMS connection.</p>
-  </div>
 
   <div class="card">
     <h3>Platform SMTP (email fallback)</h3>

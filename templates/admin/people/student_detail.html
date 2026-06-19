@@ -1,12 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}{{ student.first_name }} {{ student.last_name }}{% endblock %}
 {% block topbar_title %}People{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('admin_people.students') }}">Students</a> / {{ student.admission_no }}</div>
-  <h1>{{ student.first_name }} {{ student.last_name }} {{ student.other_names or '' }}</h1>
-  <p class="muted">Admission no. {{ student.admission_no }}</p>
-</div>
+{{ page_header(student.first_name ~ ' ' ~ student.last_name ~ ' ' ~ (student.other_names or ''),
+   back=url_for('admin_people.students'), back_label="Students",
+   crumbs=[("Students", url_for('admin_people.students')), (student.admission_no, none)],
+   subtitle='Admission no. ' ~ student.admission_no) }}
 
 {% if terms %}
 <div class="card">

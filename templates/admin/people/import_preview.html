@@ -1,11 +1,11 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Import preview{% endblock %}
 {% block topbar_title %}People{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('admin_people.students') }}">Students</a> / Import / Preview</div>
-  <h1>Import preview</h1>
-</div>
+{{ page_header("Import preview",
+   back=url_for('admin_people.students'), back_label="Students",
+   crumbs=[("Students", url_for('admin_people.students')), ("Import / Preview", none)]) }}
 
 {% if not preview.headers_ok %}
 <div class="card">

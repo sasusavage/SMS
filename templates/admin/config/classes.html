@@ -1,12 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Classes{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Classes</div>
-  <h1>Classes</h1>
-  <p class="muted">Actual class/stream, e.g. "Basic 4 Gold", "Year 7B".</p>
-</div>
+{{ page_header("Classes",
+   back=url_for('admin_config.index'), back_label="Configuration",
+   crumbs=[("Configuration", url_for('admin_config.index')), ("Classes", none)],
+   subtitle="Actual class/stream, e.g. \"Basic 4 Gold\", \"Year 7B\".") }}
 
 <div class="card">
   <h3>Add class</h3>

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Level groups{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Level groups</div>
-  <h1>Level groups</h1>
-  <p class="muted">Broad bands, e.g. "Primary", "JHS", "Lower Secondary".</p>
-</div>
+{{ page_header("Level groups",
+   back=url_for('admin_config.index'), back_label="Configuration",
+   crumbs=[("Configuration", url_for('admin_config.index')), ("Level groups", none)],
+   subtitle="Broad bands, e.g. \"Primary\", \"JHS\", \"Lower Secondary\".") }}
 
 <div class="card">
   <h3>Add level group</h3>

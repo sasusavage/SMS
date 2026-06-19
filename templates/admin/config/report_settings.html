@@ -1,12 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Report settings{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Report settings</div>
-    <h1>Report card settings</h1>
-  </div>
+  {{ page_header("Report card settings",
+     back=url_for('admin_config.index'), back_label="Configuration",
+     crumbs=[("Configuration", url_for('admin_config.index')), ("Report settings", none)]) }}
 
   <div class="card">
     <form method="post">

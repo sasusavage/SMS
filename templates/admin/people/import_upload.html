@@ -1,12 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Import students{% endblock %}
 {% block topbar_title %}People{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <div class="breadcrumb"><a href="{{ url_for('admin_people.students') }}">Students</a> / Import CSV</div>
-    <h1>Import students from CSV</h1>
-  </div>
+  {{ page_header("Import students from CSV",
+     back=url_for('admin_people.students'), back_label="Students",
+     crumbs=[("Students", url_for('admin_people.students')), ("Import CSV", none)]) }}
 
   <div class="card">
     <p>Upload a UTF-8 CSV. You'll see a preview to review before anything is

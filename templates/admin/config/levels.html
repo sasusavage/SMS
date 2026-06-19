@@ -1,12 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Levels{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Levels</div>
-  <h1>Levels</h1>
-  <p class="muted">Specific levels within a group, e.g. "Basic 4", "Year 7".</p>
-</div>
+{{ page_header("Levels",
+   back=url_for('admin_config.index'), back_label="Configuration",
+   crumbs=[("Configuration", url_for('admin_config.index')), ("Levels", none)],
+   subtitle="Specific levels within a group, e.g. \"Basic 4\", \"Year 7\".") }}
 
 <div class="card">
   <h3>Add level</h3>

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}School profile{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / School profile</div>
-    <h1>School profile</h1>
-  </div>
+  {{ page_header("School profile",
+     back=url_for('admin_config.index'), back_label="Configuration",
+     crumbs=[("Configuration", url_for('admin_config.index')), ("School profile", none)]) }}
 
   <div class="card">
     {% if school.logo_path %}

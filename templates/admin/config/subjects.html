@@ -1,11 +1,11 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Subjects{% endblock %}
 {% block topbar_title %}Configuration{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="breadcrumb"><a href="{{ url_for('admin_config.index') }}">Configuration</a> / Subjects</div>
-  <h1>Subjects</h1>
-</div>
+{{ page_header("Subjects",
+   back=url_for('admin_config.index'), back_label="Configuration",
+   crumbs=[("Configuration", url_for('admin_config.index')), ("Subjects", none)]) }}
 
 <div class="card">
   <h3>Add subject</h3>

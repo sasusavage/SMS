@@ -1,14 +1,13 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Invoice{% endblock %}
 {% block topbar_title %}Fees{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <div class="breadcrumb"><a href="{{ url_for('admin_fees.invoices') }}">Invoices</a> / #{{ invoice.id }}</div>
-    <h1>Invoice #{{ invoice.id }}</h1>
-    <p class="muted">{{ (student.last_name ~ ', ' ~ student.first_name) if student }}
-      ({{ student.admission_no if student }})</p>
-  </div>
+  {{ page_header('Invoice #' ~ invoice.id,
+     back=url_for('admin_fees.invoices'), back_label="Invoices",
+     crumbs=[("Invoices", url_for('admin_fees.invoices')), ('#' ~ invoice.id, none)],
+     subtitle=((student.last_name ~ ', ' ~ student.first_name ~ ' (' ~ student.admission_no ~ ')') if student else none)) }}
 
   <div class="stat-grid">
     <div class="stat"><div class="stat-label">Total</div><div class="stat-value">{{ invoice.total_amount }}</div></div>

@@ -1,15 +1,15 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Generate invoices{% endblock %}
 {% block topbar_title %}Fees{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <div class="breadcrumb"><a href="{{ url_for('admin_fees.index') }}">Fees</a> / Generate invoices</div>
-    <h1>Generate invoices</h1>
-    <p class="muted">Creates one invoice per student in the class for the term,
+  {{ page_header("Generate invoices",
+     back=url_for('admin_fees.index'), back_label="Fees",
+     crumbs=[("Fees", url_for('admin_fees.index')), ("Generate invoices", none)]) }}
+  <p class="muted">Creates one invoice per student in the class for the term,
        using the fees defined for that level. Re-running skips students who
        already have an invoice.</p>
-  </div>
   <div class="card">
     {% if classes and terms %}
     <form method="post" class="form-inline">

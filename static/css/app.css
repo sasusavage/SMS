@@ -140,8 +140,29 @@ small { font-size: .82rem; color: var(--color-text-muted); }
   overflow-y: auto;
 }
 .main .page-header { margin-bottom: var(--space-5); }
-.main .page-header .breadcrumb { margin-bottom: var(--space-2); font-size: .85rem; }
+.main .page-header .breadcrumb {
+  margin-bottom: var(--space-2); font-size: .82rem; color: var(--color-text-subtle);
+}
+.main .page-header .breadcrumb a { color: var(--color-text-muted); }
+.main .page-header .breadcrumb .sep { margin: 0 6px; color: var(--color-border-strong); }
 .content-narrow { max-width: 920px; }
+
+/* Back link (sits above the page title on sub-pages) */
+.back-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .85rem; color: var(--color-text-muted); margin-bottom: var(--space-3);
+  text-decoration: none;
+}
+.back-link:hover { color: var(--color-primary); text-decoration: none; }
+.back-link .arrow { font-size: 1.05rem; line-height: 1; }
+
+/* Page title row: title left, optional actions right */
+.page-title-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-4); flex-wrap: wrap;
+}
+.page-title-row h1 { margin-bottom: var(--space-1); }
+.page-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 
 /* ---- Centered layout (auth/signup, no sidebar) --------------------------- */
 .auth-wrap {

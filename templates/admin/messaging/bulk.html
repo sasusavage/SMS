@@ -1,13 +1,13 @@
 {% extends "base.html" %}
+{% from "_macros.html" import page_header %}
 {% block title %}Bulk SMS{% endblock %}
 {% block topbar_title %}Messaging{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  <div class="page-header">
-    <div class="breadcrumb"><a href="{{ url_for('admin_messaging.index') }}">Messaging</a> / Bulk SMS</div>
-    <h1>Bulk SMS</h1>
-    <p class="muted">Send an SMS to the guardians of a class, or all guardians.</p>
-  </div>
+  {{ page_header("Bulk SMS",
+     back=url_for('admin_messaging.index'), back_label="Messaging",
+     crumbs=[("Messaging", url_for('admin_messaging.index')), ("Bulk SMS", none)],
+     subtitle="Send an SMS to the guardians of a class, or all guardians.") }}
   <div class="card">
     <form method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

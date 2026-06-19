@@ -312,3 +312,15 @@ hr.divider { border: none; border-top: 1px solid var(--color-border); margin: va
   .sidebar { display: none; }
   .main { padding: var(--space-4); }
 }
+
+/* ---- Simple inline bar charts (no JS) ------------------------------------ */
+.bars { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
+.bar-row { display: grid; grid-template-columns: 120px 1fr 56px; align-items: center; gap: var(--space-3); font-size: .85rem; }
+.bar-row .bar-label { color: var(--color-text-muted); }
+.bar-track { background: #eef1f5; border-radius: 999px; height: 14px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; background: var(--color-primary); }
+.bar-fill.success { background: var(--color-success); }
+.bar-fill.danger { background: var(--color-danger); }
+.bar-fill.warning { background: var(--color-warning); }
+.bar-fill.info { background: var(--color-info); }
+.bar-row .bar-value { text-align: right; font-variant-numeric: tabular-nums; }

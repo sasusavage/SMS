@@ -103,6 +103,10 @@ that path. School logos and student photos are stored there.
 **5. Health check:** set the Coolify health-check path to **`/health`**
 (returns `{"status":"ok"}` 200, or 503 if the DB is unreachable). No auth needed.
 
+**Scheduled fee reminders (optional):** schedule a cron job (e.g. weekly) to run
+`flask --app app send-fee-reminders` — it SMSes guardians with outstanding fee
+balances for every active school.
+
 **6. First login:** use the seeded super admin (blank school code,
 `sasuisaac332@gmail.com`) or a demo school admin. **Change all seeded
 passwords immediately.**

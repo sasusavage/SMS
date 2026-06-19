@@ -16,6 +16,20 @@
   - subtitle: optional muted line under the title.
   - actions: pass a caller() block for right-aligned buttons (use page_header_actions).
 #}
+{#
+  bar(label, value, max, color, suffix) — one horizontal bar row.
+  color: '', 'success', 'danger', 'warning', 'info'. Width = value/max %.
+#}
+{% macro bar(label, value, max, color='', suffix='') %}
+{% set pct = (value / max * 100) if (max and max > 0) else 0 %}
+<div class="bar-row">
+  <span class="bar-label">{{ label }}</span>
+  <span class="bar-track"><span class="bar-fill {{ color }}" style="width: {{ '%.0f'|format(pct) }}%"></span></span>
+  <span class="bar-value">{{ value }}{{ suffix }}</span>
+</div>
+{% endmacro %}
+
+
 {% macro page_header(title, back=none, back_label='Back', crumbs=none, subtitle=none) %}
 <div class="page-header">
   {% if back %}

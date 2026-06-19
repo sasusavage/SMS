@@ -145,6 +145,36 @@ def invoice_detail(invoice_id):
                            student=student, paid=paid, balance=bal)
 
 
+@fees_bp.route('/invoices/<int:invoice_id>/receipt')
+def receipt(invoice_id):
+    """Printable invoice/receipt. ?pdf=1 renders a PDF via WeasyPrint (with a
+    graceful fallback to the printable HTML if WeasyPrint isn't available)."""
+    from flask import Response, request as _req
+    from models.platform import School
+    sid = _sid()
+    invoice = get_tenant_or_404(Invoice, invoice_id)
+    student = db.session.get(Student, invoice.student_id)
+    school = db.session.get(School, sid)
+    paid = feesvc.amount_paid(sid, invoice_id)
+    bal = Decimal(str(invoice.total_amount)) - paid
+    term = db.session.get(Term, invoice.term_id)
+    html = render_template('admin/fees/receipt.html', invoice=invoice,
+                           student=student, school=school, paid=paid,
+                           balance=bal, term=term, pdf=bool(_req.args.get('pdf')))
+    if _req.args.get('pdf'):
+        try:
+            from weasyprint import HTML
+            pdf = HTML(string=html, base_url=_req.url_root).write_pdf()
+            return Response(pdf, mimetype='application/pdf', headers={
+                'Content-Disposition':
+                    f'inline; filename="receipt-{invoice.id}.pdf"'})
+        except Exception:
+            flash('PDF export is not enabled on this server. Use your browser\'s '
+                  'Print → Save as PDF instead.', 'warning')
+            return redirect(url_for('admin_fees.receipt', invoice_id=invoice_id))
+    return html
+
+
 def _int(v):
     try:
         return int(v) if v not in (None, '') else None

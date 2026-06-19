@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import page_header %}
+{% from "_macros.html" import page_header, bar %}
 {% block title %}Dashboard — SchoolBrain{% endblock %}
 {% block topbar_title %}Dashboard{% endblock %}
 {% block content %}
@@ -19,13 +19,26 @@
 </div>
 
 <div class="card">
-  <h3>Fees</h3>
-  <div class="row-gap">
-    <span class="badge">Billed: GHS {{ fz.billed }}</span>
-    <span class="badge success">Collected: GHS {{ fz.collected }}</span>
-    <span class="badge danger">Outstanding: GHS {{ fz.outstanding }}</span>
-    <span class="muted">{{ fz.invoices }} invoice(s)</span>
+  <h3>Attendance breakdown</h3>
+  {% if at.total %}
+  <div class="bars">
+    {{ bar('Present', at.present, at.total, 'success') }}
+    {{ bar('Absent', at.absent, at.total, 'danger') }}
+    {{ bar('Late', at.late, at.total, 'warning') }}
+    {{ bar('Excused', at.excused, at.total, 'info') }}
   </div>
+  {% else %}<p class="muted mb-0">No attendance recorded yet.</p>{% endif %}
+</div>
+
+<div class="card">
+  <h3>Fees collection</h3>
+  {% if fz.billed and fz.billed > 0 %}
+  <div class="bars">
+    {{ bar('Collected', fz.collected, fz.billed, 'success', '') }}
+    {{ bar('Outstanding', fz.outstanding, fz.billed, 'danger', '') }}
+  </div>
+  <p class="muted mt-3 mb-0">Billed GHS {{ fz.billed }} across {{ fz.invoices }} invoice(s).</p>
+  {% else %}<p class="muted mb-0">No invoices generated yet.</p>{% endif %}
 </div>
 {% endif %}
 

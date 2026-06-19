@@ -4,10 +4,12 @@
 {% block topbar_title %}Fees{% endblock %}
 {% block content %}
 <div class="content-narrow">
-  {{ page_header('Invoice #' ~ invoice.id,
-     back=url_for('admin_fees.invoices'), back_label="Invoices",
-     crumbs=[("Invoices", url_for('admin_fees.invoices')), ('#' ~ invoice.id, none)],
-     subtitle=((student.last_name ~ ', ' ~ student.first_name ~ ' (' ~ student.admission_no ~ ')') if student else none)) }}
+  {% call page_header('Invoice #' ~ invoice.id,
+       back=url_for('admin_fees.invoices'), back_label="Invoices",
+       crumbs=[("Invoices", url_for('admin_fees.invoices')), ('#' ~ invoice.id, none)],
+       subtitle=((student.last_name ~ ', ' ~ student.first_name ~ ' (' ~ student.admission_no ~ ')') if student else none)) %}
+    <a class="btn secondary" href="{{ url_for('admin_fees.receipt', invoice_id=invoice.id) }}" target="_blank">Receipt / print</a>
+  {% endcall %}
 
   <div class="stat-grid">
     <div class="stat"><div class="stat-label">Total</div><div class="stat-value">{{ invoice.total_amount }}</div></div>

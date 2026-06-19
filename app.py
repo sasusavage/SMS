@@ -182,6 +182,25 @@ def _register_misc(app):
         except Exception:
             return {'status': 'degraded'}, 503
 
+    @app.cli.command('send-fee-reminders')
+    def send_fee_reminders_cmd():
+        """Send fee reminders to guardians with outstanding balances, for every
+        active school. Schedule via cron, e.g. weekly:
+            flask --app app send-fee-reminders
+        """
+        from services import notify
+        from models.platform import School
+        from models.enums import SchoolStatus
+        total = 0
+        for school in School.query.filter(
+                School.status != SchoolStatus.suspended).all():
+            n = notify.send_fee_reminders(school.id)
+            total += n
+            if n:
+                app.logger.info('fee reminders: %s -> %d', school.slug, n)
+        db.session.commit()
+        print(f'Sent {total} fee reminder(s) across all active schools.')
+
 
 # Module-level app for `flask` CLI (flask db ...) and gunicorn.
 app = create_app()

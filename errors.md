@@ -4,6 +4,23 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 3 — Polish: fee receipts, scheduled reminders, charts (2026-06-19)
+
++5 tests. No schema change.
+
+- Fee receipt: /admin/fees/invoices/<id>/receipt — printable HTML invoice/
+  receipt; ?pdf=1 renders via WeasyPrint with graceful fallback (same pattern as
+  report cards). "Receipt / print" button on the invoice detail page.
+- Scheduled fee reminders: `flask --app app send-fee-reminders` CLI command —
+  sends fee reminders to outstanding guardians for every ACTIVE school (skips
+  suspended). Schedule via cron (e.g. weekly). README documents it.
+- Dashboard charts: inline CSS bar charts (no JS) for attendance breakdown +
+  fees collection. New bar() macro in _macros.html + .bars CSS.
+
+AI features: DEFERRED per user (needs an API key + chosen use case).
+
+---
+
 ## Phase 3 — Timetabling (2026-06-19)
 
 Weekly class timetables with conflict detection. +15 tests (9 service + 6 route).

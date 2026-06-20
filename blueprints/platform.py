@@ -226,6 +226,122 @@ def delete_plan(plan_id):
 
 
 # ---------------------------------------------------------------------------
+# Platform admins
+# ---------------------------------------------------------------------------
+@platform_bp.route('/admins', methods=['GET', 'POST'])
+def admins():
+    if request.method == 'POST':
+        try:
+            pu = plat.create_platform_admin(
+                name=request.form.get('name'),
+                email=request.form.get('email'),
+                password=request.form.get('password') or '')
+            _audit('create', entity='platform_user', entity_id=pu.id)
+            db.session.commit()
+            flash('Platform admin created.', 'success')
+        except PlatformError as e:
+            db.session.rollback()
+            flash(e.message, 'danger')
+        return redirect(url_for('platform.admins'))
+    return render_template('platform/admins.html',
+                           admins=plat.list_platform_admins())
+
+
+@platform_bp.route('/admins/<int:admin_id>/toggle-active', methods=['POST'])
+def toggle_admin(admin_id):
+    from models.platform import PlatformUser
+    try:
+        target = db.session.get(PlatformUser, admin_id)
+        if target is None:
+            raise PlatformError('Platform admin not found.')
+        plat.set_platform_admin_active(admin_id, not target.is_active,
+                                       acting_id=current_user.id)
+        _audit('toggle_active', entity='platform_user', entity_id=admin_id)
+        db.session.commit()
+        flash('Platform admin updated.', 'info')
+    except PlatformError as e:
+        db.session.rollback()
+        flash(e.message, 'danger')
+    return redirect(url_for('platform.admins'))
+
+
+@platform_bp.route('/admins/<int:admin_id>/reset-password', methods=['POST'])
+def reset_admin_password(admin_id):
+    try:
+        new_pw = plat.reset_platform_admin_password(admin_id)
+        _audit('reset_password', entity='platform_user', entity_id=admin_id)
+        db.session.commit()
+        flash(f'Password reset. New password: {new_pw}', 'success')
+    except PlatformError as e:
+        db.session.rollback()
+        flash(e.message, 'danger')
+    return redirect(url_for('platform.admins'))
+
+
+# ---------------------------------------------------------------------------
+# Create a school directly
+# ---------------------------------------------------------------------------
+@platform_bp.route('/schools/new', methods=['GET', 'POST'])
+def new_school():
+    from services.template_loader import VALID_TEMPLATES
+    if request.method == 'POST':
+        try:
+            school = plat.create_school_with_admin(
+                name=request.form.get('name'),
+                slug=request.form.get('slug'),
+                country=request.form.get('country'),
+                template=request.form.get('template'),
+                admin_name=request.form.get('admin_name'),
+                admin_email=request.form.get('admin_email'),
+                admin_password=request.form.get('admin_password') or '')
+            _audit('create_school', entity='school', entity_id=school.id)
+            db.session.commit()
+            flash(f'School "{school.name}" created.', 'success')
+            return redirect(url_for('platform.school_detail', school_id=school.id))
+        except PlatformError as e:
+            db.session.rollback()
+            flash(e.message, 'danger')
+    return render_template('platform/new_school.html',
+                           templates=sorted(VALID_TEMPLATES),
+                           form=request.form)
+
+
+# ---------------------------------------------------------------------------
+# Broadcast
+# ---------------------------------------------------------------------------
+@platform_bp.route('/broadcast', methods=['GET', 'POST'])
+def broadcast():
+    if request.method == 'POST':
+        channel = request.form.get('channel') or 'email'
+        subject = (request.form.get('subject') or '').strip()
+        message = (request.form.get('message') or '').strip()
+        if not message:
+            flash('Enter a message.', 'danger')
+        else:
+            n = plat.broadcast(channel=channel, subject=subject, message=message)
+            _audit('broadcast', meta={'channel': channel, 'count': n})
+            db.session.commit()
+            flash(f'Broadcast queued to {n} recipient(s).', 'success')
+        return redirect(url_for('platform.broadcast'))
+    return render_template('platform/broadcast.html')
+
+
+# ---------------------------------------------------------------------------
+# Audit log viewer
+# ---------------------------------------------------------------------------
+@platform_bp.route('/audit')
+def audit():
+    school_id = _int(request.args.get('school_id'))
+    action = (request.args.get('action') or '').strip() or None
+    logs = plat.audit_logs(school_id=school_id, action=action, limit=300)
+    schools = School.query.order_by(School.name).all()
+    school_names = {s.id: s.name for s in schools}
+    return render_template('platform/audit.html', logs=logs, schools=schools,
+                           school_names=school_names, sel_school=school_id,
+                           sel_action=action or '')
+
+
+# ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
 def _int(v):

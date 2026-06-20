@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+{% block title %}Audit log{% endblock %}
+{% block topbar_title %}Platform administration{% endblock %}
+{% block content %}
+{{ page_header('Audit log',
+   back=url_for('platform.index'), back_label='Platform',
+   crumbs=[('Platform', url_for('platform.index')), ('Audit log', none)],
+   subtitle='Recent actions across the platform. Newest first (last 300).') }}
+
+<div class="card">
+  <form method="get" class="form-inline">
+    <div class="form-group"><label>School</label>
+      <select name="school_id" onchange="this.form.submit()">
+        <option value="">All schools</option>
+        {% for s in schools %}<option value="{{ s.id }}" {{ 'selected' if sel_school == s.id }}>{{ s.name }}</option>{% endfor %}
+      </select></div>
+    <div class="form-group"><label>Action contains</label>
+      <input name="action" value="{{ sel_action }}" placeholder="e.g. login, publish, suspend"></div>
+    <button class="btn secondary">Filter</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>When</th><th>School</th><th>User</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead>
+      <tbody>
+        {% for l in logs %}
+        <tr>
+          <td>{{ l.created_at.strftime('%m-%d %H:%M') if l.created_at else '—' }}</td>
+          <td>{{ school_names.get(l.school_id, '—') if l.school_id else 'platform' }}</td>
+          <td>{{ l.user_id or '—' }}</td>
+          <td><span class="badge">{{ l.action }}</span></td>
+          <td>{{ l.entity or '—' }}{% if l.entity_id %} #{{ l.entity_id }}{% endif %}</td>
+          <td><small class="muted">{% if l.meta %}{{ l.meta }}{% endif %}</small></td>
+        </tr>
+        {% else %}<tr><td colspan="6" class="empty">No audit entries.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

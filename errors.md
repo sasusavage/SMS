@@ -4,6 +4,22 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 4 — Super-admin expansion, batch 1 (2026-06-20)
+
++18 tests. No schema change (uses existing tables).
+
+- Platform admins: /platform/admins — add/deactivate/reset super-admin accounts.
+  Guards: can't deactivate yourself or the last active admin.
+- Audit log viewer: /platform/audit — searchable (by school + action) view of
+  audit_logs, newest first. Also closed the one audit gap (portal fee_checkout
+  now logged); all blueprints now audit their POST routes.
+- Create school directly: /platform/schools/new — super admin creates a School
+  + first school_admin + applies a curriculum template (no public signup).
+- Broadcast: /platform/broadcast — email/SMS announcement to every active
+  school's admins (skips suspended), via each school's notification settings.
+
+---
+
 ## Phase 3 — Polish: fee receipts, scheduled reminders, charts (2026-06-19)
 
 +5 tests. No schema change.

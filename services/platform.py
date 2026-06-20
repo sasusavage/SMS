@@ -160,6 +160,151 @@ def school_detail(school_id):
 
 
 # ---------------------------------------------------------------------------
+# Platform admins (super admins)
+# ---------------------------------------------------------------------------
+def list_platform_admins():
+    return PlatformUser.query.order_by(PlatformUser.name).all()
+
+
+def create_platform_admin(*, name, email, password):
+    from auth.security import hash_password
+    name = (name or '').strip()
+    email = (email or '').strip().lower()
+    if not name:
+        raise PlatformError('Name is required.')
+    if not email:
+        raise PlatformError('Email is required.')
+    if len(password or '') < 8:
+        raise PlatformError('Password must be at least 8 characters.')
+    if PlatformUser.query.filter(
+            db.func.lower(PlatformUser.email) == email).first():
+        raise PlatformError(f'A platform admin with email {email} already exists.')
+    pu = PlatformUser(name=name, email=email,
+                      password_hash=hash_password(password), is_active=True)
+    db.session.add(pu)
+    db.session.flush()
+    return pu
+
+
+def set_platform_admin_active(admin_id, active, *, acting_id=None):
+    pu = db.session.get(PlatformUser, admin_id)
+    if pu is None:
+        raise PlatformError('Platform admin not found.')
+    # Don't let an admin deactivate themselves (would lock themselves out).
+    if not active and acting_id is not None and pu.id == acting_id:
+        raise PlatformError('You cannot deactivate your own account.')
+    if not active:
+        active_count = PlatformUser.query.filter_by(is_active=True).count()
+        if active_count <= 1 and pu.is_active:
+            raise PlatformError('At least one active platform admin is required.')
+    pu.is_active = bool(active)
+    db.session.flush()
+    return pu
+
+
+def reset_platform_admin_password(admin_id, new_password=None):
+    import secrets as _secrets
+    from auth.security import hash_password
+    pu = db.session.get(PlatformUser, admin_id)
+    if pu is None:
+        raise PlatformError('Platform admin not found.')
+    if not new_password:
+        new_password = _secrets.token_urlsafe(8)
+    elif len(new_password) < 8:
+        raise PlatformError('Password must be at least 8 characters.')
+    pu.password_hash = hash_password(new_password)
+    db.session.flush()
+    return new_password
+
+
+# ---------------------------------------------------------------------------
+# Create a school directly (super admin; no public signup)
+# ---------------------------------------------------------------------------
+def create_school_with_admin(*, name, slug, country, template,
+                             admin_name, admin_email, admin_password):
+    """Create a School + first school_admin + apply a curriculum template."""
+    import re
+    from auth.security import hash_password
+    from services.template_loader import apply_template, VALID_TEMPLATES
+    from models.operational import User
+    from models.enums import UserRole
+
+    name = (name or '').strip()
+    admin_email = (admin_email or '').strip().lower()
+    if not name:
+        raise PlatformError('School name is required.')
+    if not admin_email:
+        raise PlatformError('Admin email is required.')
+    if len(admin_password or '') < 8:
+        raise PlatformError('Admin password must be at least 8 characters.')
+    if template not in VALID_TEMPLATES:
+        raise PlatformError('Pick a valid curriculum template.')
+
+    slug = re.sub(r'[^a-z0-9]+', '-', (slug or name).strip().lower()).strip('-')
+    if not slug:
+        slug = 'school'
+    if School.query.filter_by(slug=slug).first():
+        raise PlatformError(f'School code "{slug}" is taken — choose another.')
+
+    school = School(name=name, slug=slug, country=(country or '').strip() or None,
+                    curriculum_template_used=template, status=SchoolStatus.active)
+    db.session.add(school)
+    db.session.flush()
+    admin = User(school_id=school.id, email=admin_email, name=(admin_name or '').strip(),
+                 role=UserRole.school_admin,
+                 password_hash=hash_password(admin_password), is_active=True)
+    db.session.add(admin)
+    db.session.flush()
+    apply_template(school.id, template)
+    return school
+
+
+# ---------------------------------------------------------------------------
+# Platform broadcast (announcement to all schools)
+# ---------------------------------------------------------------------------
+def broadcast(*, channel, subject, message, only_active=True):
+    """
+    Send a platform-wide announcement to every school's admins.
+    channel: 'email' | 'sms'. Returns count of messages attempted.
+    """
+    from services import notify
+    from models.operational import User
+    from models.enums import UserRole
+    q = School.query
+    if only_active:
+        q = q.filter(School.status != SchoolStatus.suspended)
+    n = 0
+    for school in q.all():
+        admins = User.query.filter_by(
+            school_id=school.id, role=UserRole.school_admin,
+            is_active=True).all()
+        for a in admins:
+            if channel == 'sms':
+                if a.phone:
+                    notify.send_sms(school.id, a.phone, message)
+                    n += 1
+            else:
+                if a.email:
+                    notify.send_email(school.id, a.email,
+                                      subject or 'Announcement', message)
+                    n += 1
+    return n
+
+
+# ---------------------------------------------------------------------------
+# Audit log viewer
+# ---------------------------------------------------------------------------
+def audit_logs(*, school_id=None, action=None, limit=200):
+    from models.operational import AuditLog
+    q = AuditLog.query
+    if school_id is not None:
+        q = q.filter(AuditLog.school_id == school_id)
+    if action:
+        q = q.filter(AuditLog.action.ilike(f'%{action}%'))
+    return q.order_by(AuditLog.id.desc()).limit(limit).all()
+
+
+# ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
 def _coerce_status(status):

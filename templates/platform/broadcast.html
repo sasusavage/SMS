@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+{% block title %}Broadcast{% endblock %}
+{% block topbar_title %}Platform administration{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  {{ page_header('Broadcast announcement',
+     back=url_for('platform.index'), back_label='Platform',
+     crumbs=[('Platform', url_for('platform.index')), ('Broadcast', none)],
+     subtitle="Send an email or SMS to every active school's administrators.") }}
+
+  <div class="card">
+    <form method="post" onsubmit="return confirm('Send this announcement to all active schools?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label>Channel</label>
+        <select name="channel">
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+        </select></div>
+      <div class="form-group"><label>Subject (email only)</label>
+        <input name="subject" placeholder="Announcement from SchoolBrain"></div>
+      <div class="form-group"><label>Message</label>
+        <textarea name="message" rows="5" maxlength="600" required></textarea></div>
+      <button class="btn">Send broadcast</button>
+    </form>
+    <p class="muted mt-4 mb-0">Each message is sent using the recipient school's
+       own notification settings (with platform fallback).</p>
+  </div>
+</div>
+{% endblock %}

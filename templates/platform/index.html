@@ -19,7 +19,11 @@
 <div class="card">
   <div class="card-title">
     <h3 class="mb-0">Schools</h3>
-    <a class="btn secondary" href="{{ url_for('platform.plans') }}">Manage plans</a>
+    <div class="row-gap">
+      <a class="btn" href="{{ url_for('platform.new_school') }}">+ New school</a>
+      <a class="btn secondary" href="{{ url_for('platform.broadcast') }}">Broadcast</a>
+      <a class="btn secondary" href="{{ url_for('platform.plans') }}">Manage plans</a>
+    </div>
   </div>
   <div class="table-wrap mt-4">
     <table class="table">

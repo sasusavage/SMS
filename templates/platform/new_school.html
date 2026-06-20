@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+{% block title %}New school{% endblock %}
+{% block topbar_title %}Platform administration{% endblock %}
+{% block content %}
+<div class="content-narrow">
+  {{ page_header('Create a school',
+     back=url_for('platform.index'), back_label='Platform',
+     crumbs=[('Platform', url_for('platform.index')), ('New school', none)],
+     subtitle='Create a tenant school and its first administrator directly.') }}
+
+  <div class="card">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <h3>School</h3>
+      <div class="form-group"><label>School name</label>
+        <input name="name" value="{{ form.get('name','') }}" required></div>
+      <div class="form-group"><label>School code (login slug — derived if blank)</label>
+        <input name="slug" value="{{ form.get('slug','') }}" placeholder="e.g. demo-ges"></div>
+      <div class="form-group"><label>Country</label>
+        <input name="country" value="{{ form.get('country','') }}"></div>
+      <div class="form-group"><label>Curriculum template</label>
+        <select name="template" required>
+          {% for t in templates %}<option value="{{ t }}" {{ 'selected' if form.get('template')==t }}>{{ t }}</option>{% endfor %}
+        </select></div>
+
+      <h3 class="mt-4">First administrator</h3>
+      <div class="form-group"><label>Name</label>
+        <input name="admin_name" value="{{ form.get('admin_name','') }}" required></div>
+      <div class="form-group"><label>Email</label>
+        <input type="email" name="admin_email" value="{{ form.get('admin_email','') }}" required></div>
+      <div class="form-group"><label>Password (min 8)</label>
+        <input type="password" name="admin_password" required></div>
+
+      <button class="btn">Create school</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

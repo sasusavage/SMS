@@ -110,6 +110,11 @@ def pay_invoice(student_id, invoice_id):
     callback = url_for('billing.callback', _external=True)
     try:
         out = billing.start_fee_checkout(_sid(), invoice_id, email, callback)
+        from services.audit import log_action
+        from extensions import db
+        log_action('fee_checkout', entity='invoice', entity_id=invoice_id,
+                   meta={'reference': out.get('reference')})
+        db.session.commit()
         return redirect(out['url'])
     except BillingError as e:
         flash(e.message, 'danger')

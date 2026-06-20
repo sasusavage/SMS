@@ -218,6 +218,77 @@ def reset_platform_admin_password(admin_id, new_password=None):
 
 
 # ---------------------------------------------------------------------------
+# Revenue & growth analytics
+# ---------------------------------------------------------------------------
+def revenue_analytics(months=6):
+    """
+    Platform revenue + growth for the super-admin analytics page:
+      - revenue_by_month: [(YYYY-MM, ghs), ...] last `months`
+      - recent_payments: latest successful Payment rows
+      - signups_by_month: schools created per month
+      - expiring_soon: subscriptions ending within 14 days (active)
+      - students_per_school: [(school, count), ...] top by enrolment
+    """
+    from collections import OrderedDict
+    from datetime import date, timedelta
+    from decimal import Decimal
+    from models.platform import Payment, Subscription
+
+    def month_keys(n):
+        today = date.today().replace(day=1)
+        keys = []
+        y, m = today.year, today.month
+        for _ in range(n):
+            keys.append(f'{y:04d}-{m:02d}')
+            m -= 1
+            if m == 0:
+                m = 12
+                y -= 1
+        return list(reversed(keys))
+
+    keys = month_keys(months)
+    rev = OrderedDict((k, Decimal('0')) for k in keys)
+    for p in Payment.query.filter_by(status='success').all():
+        d = p.paid_at or p.created_at
+        if d is None:
+            continue
+        k = f'{d.year:04d}-{d.month:02d}'
+        if k in rev:
+            rev[k] += Decimal(str(p.amount_pesewas)) / 100
+
+    signups = OrderedDict((k, 0) for k in keys)
+    for s in School.query.all():
+        if s.created_at:
+            k = f'{s.created_at.year:04d}-{s.created_at.month:02d}'
+            if k in signups:
+                signups[k] += 1
+
+    recent_payments = (Payment.query.filter_by(status='success')
+                       .order_by(Payment.id.desc()).limit(15).all())
+
+    horizon = date.today() + timedelta(days=14)
+    expiring = (Subscription.query.filter(
+        Subscription.status == 'active',
+        Subscription.ends_on.isnot(None),
+        Subscription.ends_on <= horizon,
+        Subscription.ends_on >= date.today(),
+    ).order_by(Subscription.ends_on).all())
+
+    counts = []
+    for s in School.query.all():
+        counts.append((s, Student.query.filter_by(school_id=s.id).count()))
+    counts.sort(key=lambda t: t[1], reverse=True)
+
+    return {
+        'revenue_by_month': [(k, rev[k]) for k in keys],
+        'signups_by_month': [(k, signups[k]) for k in keys],
+        'recent_payments': recent_payments,
+        'expiring_soon': expiring,
+        'students_per_school': counts[:10],
+    }
+
+
+# ---------------------------------------------------------------------------
 # Create a school directly (super admin; no public signup)
 # ---------------------------------------------------------------------------
 def create_school_with_admin(*, name, slug, country, template,

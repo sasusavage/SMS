@@ -13,12 +13,15 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 @dashboard_bp.route('/')
 @login_required
 def index():
-    from flask import redirect, url_for
-    # Super admins belong in /platform, not the tenant dashboard.
-    if is_platform_user():
+    from flask import redirect, url_for, g
+    # Super admins belong in /platform — UNLESS impersonating a school, in which
+    # case they get that school's admin dashboard.
+    if is_platform_user() and g.get('impersonating_school_id') is None:
         return redirect(url_for('platform.index'))
     role = getattr(current_user, 'role', None)
     role = role.value if hasattr(role, 'value') else role
+    if g.get('impersonating_school_id') is not None:
+        role = 'school_admin'
     # Students and parents land in their portal, not the admin dashboard.
     if role == 'student':
         return redirect(url_for('portal.student_home'))
@@ -27,7 +30,6 @@ def index():
 
     analytics_data = None
     if role == 'school_admin':
-        from flask import g
         from services import analytics
         if g.get('current_school_id'):
             analytics_data = analytics.school_dashboard(g.current_school_id)

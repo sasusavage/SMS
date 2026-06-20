@@ -12,10 +12,12 @@
   <aside class="sidebar">
     <div class="brand"><span class="brand-mark">S</span> SchoolBrain</div>
 
-    {% if current_user.is_super_admin is defined and current_user.is_super_admin %}
+    {% if current_user.is_super_admin is defined and current_user.is_super_admin and not impersonating_school %}
       <div class="nav-section">Platform</div>
       <a class="nav-link {{ 'active' if request.endpoint == 'platform.index' or (request.endpoint or '').startswith('platform.school') }}"
          href="{{ url_for('platform.index') }}">Schools</a>
+      <a class="nav-link {{ 'active' if request.endpoint == 'platform.analytics' }}"
+         href="{{ url_for('platform.analytics') }}">Analytics</a>
       <a class="nav-link {{ 'active' if request.endpoint == 'platform.plans' }}"
          href="{{ url_for('platform.plans') }}">Plans</a>
       <a class="nav-link {{ 'active' if request.endpoint == 'platform.admins' }}"
@@ -99,6 +101,15 @@
   </header>
 
   <main class="main">
+    {% if impersonating_school %}
+    <div class="impersonation-banner">
+      <span>👁 Viewing as <strong>{{ impersonating_school.name }}</strong> (super admin)</span>
+      <form method="post" action="{{ url_for('platform.exit_impersonation') }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn sm" style="background:#fff;color:#92400e">Exit to platform</button>
+      </form>
+    </div>
+    {% endif %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
       <div class="flash-stack">

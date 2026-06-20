@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, bar %}
+{% block title %}Analytics{% endblock %}
+{% block topbar_title %}Platform administration{% endblock %}
+{% block content %}
+{{ page_header('Revenue & growth',
+   back=url_for('platform.index'), back_label='Platform',
+   crumbs=[('Platform', url_for('platform.index')), ('Analytics', none)],
+   subtitle='Subscription revenue and platform growth over the last 6 months.') }}
+
+{% set max_rev = (revenue_by_month | map(attribute=1) | max) or 1 %}
+{% set max_sign = (signups_by_month | map(attribute=1) | max) or 1 %}
+
+<div class="card">
+  <h3>Revenue by month (GHS)</h3>
+  {% if revenue_by_month %}
+  <div class="bars">
+    {% for k, v in revenue_by_month %}
+      {{ bar(k, v, max_rev, 'success', '') }}
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted mb-0">No revenue yet.</p>{% endif %}
+</div>
+
+<div class="card">
+  <h3>New schools by month</h3>
+  <div class="bars">
+    {% for k, v in signups_by_month %}
+      {{ bar(k, v, max_sign, 'info', '') }}
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h3>Students per school (top 10)</h3>
+  {% set max_st = (students_per_school | map(attribute=1) | max) or 1 %}
+  {% if students_per_school %}
+  <div class="bars">
+    {% for s, n in students_per_school %}
+      {{ bar(s.name, n, max_st, '', '') }}
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted mb-0">No schools yet.</p>{% endif %}
+</div>
+
+<div class="card">
+  <h3>Subscriptions expiring soon (next 14 days)</h3>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>School</th><th>Plan</th><th>Ends</th></tr></thead>
+      <tbody>
+        {% for sub in expiring_soon %}
+        <tr>
+          <td>{{ school_names.get(sub.school_id, sub.school_id) }}</td>
+          <td>{{ sub.plan.name if sub.plan else '—' }}</td>
+          <td>{{ sub.ends_on }}</td>
+        </tr>
+        {% else %}<tr><td colspan="3" class="empty">None expiring soon.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Recent payments</h3>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Reference</th><th>School</th><th>Amount (GHS)</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for p in recent_payments %}
+        <tr>
+          <td>{{ p.reference }}</td>
+          <td>{{ school_names.get(p.school_id, p.school_id) }}</td>
+          <td>{{ '%.2f'|format(p.amount_pesewas / 100) }}</td>
+          <td>{{ p.paid_at.strftime('%Y-%m-%d') if p.paid_at else '—' }}</td>
+        </tr>
+        {% else %}<tr><td colspan="4" class="empty">No payments yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

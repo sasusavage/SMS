@@ -30,6 +30,9 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button class="btn">Activate</button></form>
     {% endif %}
+    <form method="post" action="{{ url_for('platform.impersonate', school_id=school.id) }}" class="inline-form" onsubmit="return confirm('Enter this school as an administrator? Actions are audited.')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn secondary">View as school</button></form>
   </div>
 </div>
 

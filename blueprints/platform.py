@@ -279,6 +279,44 @@ def reset_admin_password(admin_id):
 
 
 # ---------------------------------------------------------------------------
+# Impersonation (view as school)
+# ---------------------------------------------------------------------------
+@platform_bp.route('/schools/<int:school_id>/impersonate', methods=['POST'])
+def impersonate(school_id):
+    from flask import session
+    school = db.session.get(School, school_id)
+    if school is None:
+        abort(404)
+    session['impersonating_school_id'] = school_id
+    _audit('impersonate_start', entity='school', entity_id=school_id)
+    db.session.commit()
+    flash(f'You are now viewing {school.name} as an administrator.', 'info')
+    return redirect(url_for('dashboard.index'))
+
+
+@platform_bp.route('/exit-impersonation', methods=['POST'])
+def exit_impersonation():
+    from flask import session
+    sid = session.pop('impersonating_school_id', None)
+    if sid is not None:
+        _audit('impersonate_end', entity='school', entity_id=sid)
+        db.session.commit()
+    flash('Returned to the platform.', 'info')
+    return redirect(url_for('platform.index'))
+
+
+# ---------------------------------------------------------------------------
+# Revenue & growth analytics
+# ---------------------------------------------------------------------------
+@platform_bp.route('/analytics')
+def analytics():
+    data = plat.revenue_analytics(months=6)
+    school_names = {s.id: s.name for s in School.query.all()}
+    return render_template('platform/analytics.html', school_names=school_names,
+                           **data)
+
+
+# ---------------------------------------------------------------------------
 # Create a school directly
 # ---------------------------------------------------------------------------
 @platform_bp.route('/schools/new', methods=['GET', 'POST'])

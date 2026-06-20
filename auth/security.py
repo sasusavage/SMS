@@ -115,6 +115,10 @@ def require_role(*roles):
                 abort(401)
             user_role = getattr(current_user, 'role', None)
             user_role = user_role.value if hasattr(user_role, 'value') else user_role
+            # A super admin impersonating a school acts as that school's admin.
+            if (getattr(g, 'impersonating_school_id', None) is not None
+                    and 'school_admin' in roles):
+                return view(*args, **kwargs)
             if user_role not in roles:
                 abort(403)
             return view(*args, **kwargs)

@@ -3,9 +3,11 @@
 {% block title %}Invoices{% endblock %}
 {% block topbar_title %}Fees{% endblock %}
 {% block content %}
-{{ page_header("Invoices",
+{% call page_header("Invoices",
    back=url_for('admin_fees.index'), back_label="Fees",
-   crumbs=[("Fees", url_for('admin_fees.index')), ("Invoices", none)]) }}
+   crumbs=[("Fees", url_for('admin_fees.index')), ("Invoices", none)]) %}
+  <a class="btn secondary" href="{{ url_for('export.fees') }}">Export CSV</a>
+{% endcall %}
 
 <div class="card">
   <form method="get" class="form-inline">

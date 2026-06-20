@@ -54,21 +54,40 @@ def _register_request_hooks(app):
         if current_user.is_authenticated:
             r = getattr(current_user, 'role', None)
             role = r.value if hasattr(r, 'value') else r
-        return {'current_role': role}
+        # While a super admin is impersonating a school, present as school_admin.
+        if getattr(g, 'impersonating_school_id', None) is not None:
+            role = 'school_admin'
+        return {'current_role': role,
+                'impersonating_school': getattr(g, 'impersonating_school', None)}
 
     @app.before_request
     def resolve_tenant():
         """
         Resolve the active tenant for this request from the logged-in user —
         NEVER from URL params. Super admins have no tenant (school_id None);
-        they operate via the /platform blueprint.
+        they operate via the /platform blueprint, UNLESS they are impersonating
+        a school (session flag set via /platform/schools/<id>/impersonate), in
+        which case they act as that school's admin for the request.
         """
+        from flask import session
         g.current_school_id = None
         g.current_user_id = None
+        g.impersonating_school_id = None
+        g.impersonating_school = None
         if current_user.is_authenticated:
             g.current_user_id = getattr(current_user, 'id', None)
             # PlatformIdentity.school_id is None by design.
             g.current_school_id = getattr(current_user, 'school_id', None)
+            # Impersonation: only a super admin can hold this session flag.
+            if getattr(current_user, 'is_super_admin', False):
+                imp = session.get('impersonating_school_id')
+                if imp is not None:
+                    from models.platform import School
+                    school = db.session.get(School, imp)
+                    if school is not None:
+                        g.impersonating_school_id = imp
+                        g.impersonating_school = school
+                        g.current_school_id = imp
             # If an in-school user's tenant gets suspended mid-session, log them
             # out on their next request. Super admins (no school_id) are exempt.
             redirect_resp = _enforce_school_active()
@@ -115,6 +134,7 @@ def _register_blueprints(app):
     from blueprints.admin_fees import fees_bp
     from blueprints.admin_messaging import messaging_bp
     from blueprints.timetable import timetable_bp
+    from blueprints.export import export_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -131,6 +151,7 @@ def _register_blueprints(app):
     app.register_blueprint(fees_bp)
     app.register_blueprint(messaging_bp)
     app.register_blueprint(timetable_bp)
+    app.register_blueprint(export_bp)
 
 
 def _register_error_handlers(app):

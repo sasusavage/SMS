@@ -3,8 +3,10 @@
 {% block title %}Results{% endblock %}
 {% block topbar_title %}Results{% endblock %}
 {% block content %}
-{{ page_header('Results',
-   subtitle='Compute weighted results from entered scores, review, then publish. Students and parents only see published results.') }}
+{% call page_header('Results',
+   subtitle='Compute weighted results from entered scores, review, then publish. Students and parents only see published results.') %}
+  <a class="btn secondary" href="{{ url_for('export.results') }}">Export CSV</a>
+{% endcall %}
 
 <div class="card">
   <form method="get" class="form-inline">

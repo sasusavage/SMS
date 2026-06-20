@@ -32,6 +32,10 @@ def log_action(action, entity=None, entity_id=None, meta=None,
     if has_request_context():
         meta.setdefault('ip', request.remote_addr)
         meta.setdefault('path', request.path)
+        # If a super admin is impersonating this school, tag the entry so the
+        # action is never mistaken for a real in-school user's.
+        if getattr(g, 'impersonating_school_id', None) is not None:
+            meta.setdefault('impersonated_by_super_admin', True)
 
     entry = AuditLog(
         school_id=school_id,

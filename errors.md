@@ -4,6 +4,45 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 4 — Super-admin batch 2 + bug sweep (2026-06-20)
+
+Built analytics, impersonation, CSV export (12 tests), then ran a high-effort
+code review on the diff. It surfaced 3 real issues in the new impersonation
+feature — all fixed + regression-tested (+3 tests).
+
+### BUG-010 — impersonating a SUSPENDED school logged the super admin out
+- **Severity:** HIGH. impersonate() didn't check status; resolve_tenant set
+  g.current_school_id = suspended school; _enforce_school_active() then
+  force-logged-out the super admin AND blocked /exit-impersonation — trapping
+  them out of the very school they suspended.
+- **Fix:** _enforce_school_active exempts super admins entirely (they're never
+  locked out by tenant suspension). Regression test added.
+
+### BUG-011 — logout didn't clear impersonation flag
+- **Severity:** MEDIUM. Flask-Login logout_user() doesn't pop custom session
+  keys, so impersonating_school_id survived logout and silently resumed on the
+  next super-admin login (landing them in a tenant instead of /platform).
+- **Fix:** logout() now session.pop('impersonating_school_id'). Regression test.
+
+### BUG-012 — impersonated actions mis-attributed in audit log
+- **Severity:** MEDIUM (audit integrity). Actions during impersonation logged
+  with school_id = impersonated school + user_id = super admin id (shared id
+  space) — indistinguishable from a real school admin.
+- **Fix:** audit.log_action tags meta.impersonated_by_super_admin=True whenever
+  g.impersonating_school_id is set. Regression test.
+
+### Reviewed but not changed
+- require_role impersonation bypass keyed on 'school_admin' in roles: confirmed
+  it does NOT weaken checks for normal users (gated on g.impersonating_school_id,
+  only ever set for super admins). Teacher-only routes 403 while impersonating —
+  acceptable (admin isn't a teacher).
+- reset_admin_password flashes plaintext: same intentional pattern as user
+  password reset; admin sees it once to hand over. Left as-is.
+- audit_logs ilike wildcard: minor over-broad match on %/_ in the filter; not
+  user-facing risk. Left for now.
+
+---
+
 ## Phase 4 — Super-admin expansion, batch 1 (2026-06-20)
 
 +18 tests. No schema change (uses existing tables).

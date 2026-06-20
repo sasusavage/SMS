@@ -6,7 +6,7 @@ user within that school. Super admins log in via the same form with no school
 slug (or a reserved sentinel) and are routed to the platform area.
 """
 from flask import (
-    Blueprint, render_template, request, redirect, url_for, flash, g,
+    Blueprint, render_template, request, redirect, url_for, flash, g, session,
 )
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -85,6 +85,8 @@ def logout():
         log_action('logout', entity='user', entity_id=current_user.id,
                    commit=True)
     logout_user()
+    # Clear any impersonation flag so it can't silently resume on next login.
+    session.pop('impersonating_school_id', None)
     flash('You have been logged out.', 'info')
     return redirect(url_for('auth.login'))
 

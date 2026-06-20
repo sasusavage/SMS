@@ -103,6 +103,11 @@ def _register_request_hooks(app):
         sid = g.current_school_id
         if sid is None:
             return None
+        # Super admins are never locked out by tenant suspension — including
+        # while impersonating a suspended school (that's exactly when they need
+        # to inspect it). The suspension guard is only for in-school users.
+        if getattr(current_user, 'is_super_admin', False):
+            return None
         # Allow auth endpoints so the logout/login redirect itself works.
         if (request.endpoint or '').startswith('auth.') or \
                 (request.endpoint or '') == 'static':

@@ -54,6 +54,47 @@ def test_exit_impersonation_restores_platform(app, db, client):
     assert client.get('/platform/').status_code == 200
 
 
+def test_can_impersonate_suspended_school(app, db, client):
+    """Regression: impersonating a SUSPENDED school must NOT log the super
+    admin out (they need to inspect the school they suspended)."""
+    from models.enums import SchoolStatus
+    s = make_school(db, slug='s')
+    s.status = SchoolStatus.suspended
+    make_student(db, s, admission_no='A1')
+    db.session.commit()
+    _login_super(client, db)
+    client.post(f'/platform/schools/{s.id}/impersonate', follow_redirects=True)
+    r = client.get('/admin/students')           # must work, not bounce to login
+    assert r.status_code == 200
+    assert b'A1' in r.data
+
+
+def test_logout_clears_impersonation(app, db, client):
+    """Regression: logging out must clear the impersonation flag so it doesn't
+    silently resume on next login."""
+    s = make_school(db, slug='s')
+    _login_super(client, db)
+    client.post(f'/platform/schools/{s.id}/impersonate')
+    client.post('/auth/logout')
+    # log back in -> should land on platform, NOT still impersonating
+    client.post('/auth/login', data={'school_slug': '', 'email': 'super@x.test',
+                                     'password': 'pw'})
+    r = client.get('/admin/students')
+    assert r.status_code == 403   # no longer impersonating
+
+
+def test_impersonated_actions_tagged_in_audit(app, db, client):
+    from models.operational import AuditLog
+    s = make_school(db, slug='s')
+    make_student(db, s, admission_no='A1')
+    _login_super(client, db)
+    client.post(f'/platform/schools/{s.id}/impersonate')
+    client.get('/admin/export/students.csv')   # an audited action while impersonating
+    log = (AuditLog.query.filter_by(action='export', school_id=s.id)
+           .order_by(AuditLog.id.desc()).first())
+    assert log is not None and log.meta.get('impersonated_by_super_admin') is True
+
+
 def test_impersonation_scoped_to_one_school(app, db, client):
     a = make_school(db, slug='a')
     b = make_school(db, slug='b')

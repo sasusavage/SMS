@@ -20,9 +20,25 @@ os.environ['TEST_DATABASE_URL'] = f'sqlite+pysqlite:///{_DB_PATH}'
 os.environ['DATABASE_URL'] = f'sqlite+pysqlite:///{_DB_PATH}'
 
 import pytest  # noqa: E402
+from sqlalchemy import event  # noqa: E402
+from sqlalchemy.engine import Engine  # noqa: E402
 
 from app import create_app  # noqa: E402
 from extensions import db as _db  # noqa: E402
+
+
+# On Windows the suite shares one temp SQLite file across many connections.
+# A connection that briefly holds a write lock used to make the next test's
+# drop_all()/create_all() error out (the phantom "12 errors" full-suite flake).
+# A busy_timeout makes such waits block-and-retry instead of failing.
+@event.listens_for(Engine, 'connect')
+def _set_sqlite_pragmas(dbapi_conn, _rec):
+    try:
+        cur = dbapi_conn.cursor()
+        cur.execute('PRAGMA busy_timeout=10000')
+        cur.close()
+    except Exception:
+        pass
 
 
 @pytest.fixture()
@@ -40,6 +56,9 @@ def app():
         yield app
         _db.session.remove()
         _db.drop_all()
+        # Dispose the pool so no connection lingers holding the temp DB file's
+        # lock into the next test's setup (Windows file-lock contention).
+        _db.engine.dispose()
     import shutil
     shutil.rmtree(upload_dir, ignore_errors=True)
 

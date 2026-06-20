@@ -4,6 +4,23 @@ Issues found during testing, with status. Newest first.
 
 ---
 
+## Phase 4 — full-suite flake: phantom "12 errors" (2026-06-20)
+
+A full run reported "321 passed, 12 errors in 832s" with SQLAlchemy errors in
+test SETUP (test_change_password_success, test_short_password_rejected,
+test_admission_no_unique_per_school_not_global, +9). Each passed in isolation
+and in small groups.
+
+- **Cause:** test-isolation, not a product bug. The suite shares ONE temp
+  SQLite file across all connections. A connection left holding the file's
+  write lock (leftover from a prior interrupted/background pytest run) made the
+  next test's drop_all()/create_all() in the `app` fixture error out — and the
+  long busy-wait explains the 832s vs ~500s runtime.
+- **Confirmed:** a clean full run = 330 passed, 0 errors.
+- **Hardened conftest.py so it can't recur:** PRAGMA busy_timeout=10000 (lock
+  waits block-and-retry instead of erroring) + db.engine.dispose() on fixture
+  teardown (no lingering connection holds the file into the next test's setup).
+
 ## Phase 4 — Super-admin batch 2 + bug sweep (2026-06-20)
 
 Built analytics, impersonation, CSV export (12 tests), then ran a high-effort
